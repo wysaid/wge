@@ -2,7 +2,7 @@
 <meta charset="utf-8">
 </head>
 
-<body onload="main()">
+<body>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeVector.js"></script>
 <script type="text/javascript" src="../wgeSprite.js"></script>
@@ -13,14 +13,15 @@
 <canvas id="photoFrames" width='800' height='600' style="border:groove;background-color:#000">你的浏览器不支持html5，换一个再来！(推荐：Chrome, Firefox, Safari)</canvas><br>
 <input type="button" value="MUTE or not" onclick="var snd = WGE.ID('bgSound'); snd.muted=!snd.muted">
 <input type="button" value="点击查看另一个版本" onclick="window.location='index.html'">
-<p>本页面使用html5编写，如果您使用的是IE，请保证IE版本>=9</p>
+<br>
+<p>本页面使用html5编写，如果您使用的是IE，请保证IE版本>=9。如果图片过多导致加载失败，请刷新界面</p>
 
 <script type="text/javascript">
 "use strict";
 var timeline = new WGE.TimeLine(60000);
 var cvs = WGE.ID('photoFrames');
 var ctx = cvs.getContext('2d');
-var totalImages = 11;
+var totalImages = 12;
 var loadedImages = 0;
 var lastTime = 0;
 
@@ -126,6 +127,7 @@ function loadingDone()
 	{
 		ctx.clearRect(0,0, 800, 600);
 		ctx.fillText("初始化场景......", 10, cvs.height / 2);
+		setTimeout("main()", 100);
 		return ;
 	}
 
