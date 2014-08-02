@@ -1,3 +1,7 @@
+<head>
+<meta charset="utf-8">;
+</head>
+
 <body onload="main()">
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeVector.js"></script>
@@ -21,6 +25,20 @@ ctx.font = "50px Aria";
 
 ctx.fillStyle = "#0f0";
 
+function scaleImage(img)
+{
+	var c = WGE.CE('canvas');
+	c.width = img.width * (720 / img.height);
+	c.height = 720;
+	var t = c.getContext('2d');
+	t.save();
+	t.scale(c.width / img.width, c.height / img.height);
+	t.drawImage(img, 0, 0);
+	t.restore();
+	ctx.drawImage(c, 0, 0);
+	return c;
+}
+
 function main()
 {
 	ctx.fillStyle = "#000";
@@ -30,7 +48,8 @@ function main()
 	var imgArray = [];
 	for(var i = 0; i != 11; ++i)
 	{
-		imgArray.push(WGE.ID("test" + i));
+		var img = scaleImage(WGE.ID("test" + i));
+		imgArray.push(img);
 	}
 
 	var timeStamp = 0, stillTime = 17000, globalZ = 0;
