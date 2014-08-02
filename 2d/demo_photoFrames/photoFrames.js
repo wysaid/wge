@@ -622,8 +622,10 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 
 		scene.push(actionManager, frame2);
 
-		var frame3 = S(11000, 15000, WGE.rotateArray(imageArray), -1);
-		var frame4 = S(11000, 15000, WGE.rotateArray(imageArray), -1);
+		var img4 = WGE.rotateArray(imageArray);
+
+		var frame3 = S(11000, 15000, img4, -1);
+		var frame4 = S(11000, 15000, img4, -1);
 		frame3.setHotspot2Center();
 		frame3.moveTo(w / 2, h / 2);
 		frame3.zIndex = globalZ + 1;
