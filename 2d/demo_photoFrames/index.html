@@ -1,5 +1,5 @@
 <head>
-<meta charset="utf-8">;
+<meta charset="utf-8">
 </head>
 
 <body onload="main()">
@@ -104,7 +104,15 @@ function mainloop()
 function loadingDone()
 {
 	++loadedImages;
+	if(loadedImages == totalImages)
+	{
+		ctx.clearRect(0,0, 800, 600);
+		ctx.fillText("初始化场景......", 10, cvs.height / 2);
+		return ;
+	}
+
 	var loadedRate = loadedImages / totalImages * 100;
+
 	ctx.clearRect(0,0, 800, 600);
 	ctx.fillText("LoadingImages: " + loadedRate.toFixed(2) + "%", 10, cvs.height / 2);
 }

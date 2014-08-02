@@ -25,43 +25,51 @@ WGE.FilterInterface = WGE.Class(
 
 	bind : function(img)
 	{
-		if(img.getImageData)
+		if(!img)
+			return null;
+
+		if(img.getContext)
 		{
 			this.canvasObject = img;
-			this.imageData = img.getImageData(0, 0, img.width, img.height);
+			this.imageData = img.getContext("2d").getImageData(0, 0, img.width, img.height);
 		}
 		else
 		{
 			this.canvasObject = WGE.CE('canvas');
 			this.canvasObject.width = img.width;
 			this.canvasObject.height = img.height;
-			this.canvasObject.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
-			this.imageData = this.canvasObject.getImageData(0, 0, img.width, img.height);
+			var ctx = this.canvasObject.getContext('2d');
+			ctx.drawImage(img, 0, 0, img.width, img.height);
+			this.imageData = ctx.getImageData(0, 0, img.width, img.height);
 		}
+		return this;
 	},
 
 	//noCopy sets "the src and dst are the same canvas".
 	run : function(noCopy)
 	{
-		var ret = null;
 		var dst = null;
-		if(canvasObject && imageData)
+		if(this.canvasObject && this.imageData)
 		{
 			if(noCopy)
 			{
-				ret = this._run(imageData, imageData, dst.width, dst.height)
+				this._run(this.imageData.data, this.imageData.data, this.canvasObject.width, this.canvasObject.height)
+				this.canvasObject.getContext("2d").putImageData(this.imageData, 0, 0);
 			}
 			else
 			{
 				dst = WGE.CE('canvas');
-				dst.width = canvasObject.width;
-				dst.height = canvasObject.height;
-				ret = this._run(dst.getImageData(0, 0, dst.width, dst.height), imageData, dst.width, dst.height);
+				dst.width = this.canvasObject.width;
+				dst.height = this.canvasObject.height;
+				var ctx = dst.getContext('2d');
+				var dstImageData = ctx.getImageData(0, 0, dst.width, dst.height);
+				this._run(dstImageData.data, this.imageData.data, dst.width, dst.height);
+				ctx.putImageData(dstImageData, 0, 0);
 			}
 		}
 
 		if(noCopy)
-			return canvasObject;
+			return this.canvasObject;
 		return dst;
 	},
 
@@ -76,7 +84,7 @@ WGE.FilterBW = WGE.Class(WGE.FilterInterface,
 {
 	_run : function(dst, src, w, h)
 	{
-		var len = src.length;
+		var len = w * h * 4;
 		for(var i = 0; i < len; i += 4)
 		{
 			var gray = (src[i] * 4899 + src[i + 1] * 9617 + src[i + 2] * 1868 + 8192) >> 14;
@@ -90,17 +98,17 @@ WGE.FilterEdge = WGE.Class(WGE.FilterInterface,
 {
 	_run : function(dst, src, w, h)
 	{
-		var lw = w - 1, lh = h - 1;
+		var lw = w - 2, lh = h - 2;
 		for(var i = 0; i < lh; ++i)
 		{
 			var line = i * w * 4;
-			for(var j = 1; j < lw; ++j)
+			for(var j = 0; j < lw; ++j)
 			{
 				var index1 = line + j * 4;
-				var index2 = index1 + w * 4 + 4;
-				var gray1 = src[index1] * 4899 + src[index1 + 1] * 9617 + src[index1 + 2] * 1868;
-				var gray2 = src[index2] * 4899 + src[index2 + 1] * 9617 + src[index2 + 2] * 1868;
-				dst[index1] = dst[index1 + 1] = dst[index1 + 2] = (gray2 - gray1) >> 14 + 127;
+				var index2 = index1 + w * 8 + 8;
+				dst[index1] = Math.abs(src[index1] - src[index2]) * 2;
+				dst[index1 + 1] = Math.abs(src[index1 + 1] - src[index2 + 2]) * 2;
+				dst[index1 + 2] = Math.abs(src[index1 + 1] - src[index2 + 2]) * 2;
 				dst[index1 + 3] = src[index1 + 3];
 			}
 		}
