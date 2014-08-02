@@ -5,13 +5,20 @@
 <script type="text/javascript" src="../wgeAnimation.js"></script>
 <script type="text/javascript" src="photoFrames.js"></script>
 
-<canvas id="test" width='800' height='600' style="border:groove;background-color:#000"></canvas>
+<canvas id="photoFrames" width='800' height='600' style="border:groove;background-color:#000"></canvas>
 
 <script type="text/javascript">
 "use strict";
 var timeline = new WGE.TimeLine(60000);
-var cvs = WGE.ID('test');
+var cvs = WGE.ID('photoFrames');
 var ctx = cvs.getContext('2d');
+var totalImages = 9;
+var loadedImages = 0;
+var lastTime = 0;
+
+ctx.font = "50px Aria";
+
+ctx.fillStyle = "#0f0";
 
 function main()
 {
@@ -20,52 +27,82 @@ function main()
 	ctx.lineWidth = 6;
 
 	var imgArray = [];
-	for(var i = 1; i != 9; ++i)
+	for(var i = 0; i != 9; ++i)
 	{
 		imgArray.push(WGE.ID("test" + i));
 	}
 
-	var scene = FTPhotoFrame.initScene(imgArray, 800, 600);
+	var timeStamp = 0, stillTime = 17000, globalZ = 0;
+	for(var j = 0; j != 4; ++j)
+	{
+		var scene = FTPhotoFrame.initScene(imgArray, 800, 600, globalZ, timeStamp, stillTime);
+		timeline.pushArr(scene);
+		globalZ += 10000;
+		timeStamp += 15000;
+	}
 
-	timeline.pushArr(scene);
-
-	timeline.start();
+	timeline.start(0);
+	lastTime = Date.now();
 	mainloop();
 }
 
-var tm = 0;
-
-function mainloop(test)
+function endloop()
 {
-    if (!test)
-    {
-        test = tm = 0.0;
-    }
-	if(!timeline.update(test - tm))
+	ctx.fillRect(0,0, 800, 600);
+	ctx.globalAlpha += 0.01;
+	if(ctx.globalAlpha >= 0.99)
 	{
-	    console.log('PhotoFrames End');
-	    timeline.render(ctx);
+		ctx.fillStyle = "#fff";
+		ctx.fillText("The End.", 200, cvs.height / 2);
+		ctx.font = "30px Aria";
+		ctx.fillText("By wysaid", 400, 400);
 		return ;
 	}
-	tm = test;
+	requestAnimationFrame(endloop);
+}
+
+function mainloop()
+{
+	var timeNow = Date.now();
+    
+	if(!timeline.update(timeNow - lastTime))
+	{
+	    console.log('PhotoFrames End');
+	    ctx.globalAlpha = 0.001;
+	    ctx.fillStyle = "#000";
+	    requestAnimationFrame(endloop);
+		return ;
+	}
+	lastTime = timeNow;
 	ctx.clearRect(0,0, 800, 600);
 	timeline.render(ctx);
 	requestAnimationFrame(mainloop);
+}
+
+function loadingDone()
+{
+	++loadedImages;
+	var loadedRate = loadedImages / totalImages * 100;
+	ctx.clearRect(0,0, 800, 600);
+	ctx.fillText("LoadingImages: " + loadedRate.toFixed(2) + "%", 10, cvs.height / 2);
 }
 
 </script>
 
 
 <div style="display:none">
-<img src="test.jpg" id="test">
-<img src="test1.jpg" id="test1">
-<img src="test2.jpg" id="test2">
-<img src="test3.jpg" id="test3">
-<img src="test4.jpg" id="test4">
-<img src="test5.jpg" id="test5">
-<img src="test6.jpg" id="test6">
-<img src="test7.jpg" id="test7">
-<img src="test8.jpg" id="test8">
+<img src="../../res/0.jpg" id="test0" onload="loadingDone()">
+<img src="../../res/1.jpg" id="test1" onload="loadingDone()">
+<img src="../../res/2.jpg" id="test2" onload="loadingDone()">
+<img src="../../res/3.jpg" id="test3" onload="loadingDone()">
+<img src="../../res/4.jpg" id="test4" onload="loadingDone()">
+<img src="../../res/5.jpg" id="test5" onload="loadingDone()">
+<img src="../../res/6.jpg" id="test6" onload="loadingDone()">
+<img src="../../res/7.jpg" id="test7" onload="loadingDone()">
+<img src="../../res/8.jpg" id="test8" onload="loadingDone()">
+<img src="../../res/9.jpg" id="test8" onload="loadingDone()">
+<img src="../../res/10.jpg" id="test8" onload="loadingDone()">
+<audio src="../../res/snd1.mp3" id="bgSound" autoplay="true"></audio>
 </div>
 
 </body>
