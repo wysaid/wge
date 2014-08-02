@@ -1,0 +1,71 @@
+<body onload="main()">
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeVector.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
+<script type="text/javascript" src="../wgeAnimation.js"></script>
+<script type="text/javascript" src="photoFrames.js"></script>
+
+<canvas id="test" width='800' height='600' style="border:groove;background-color:#000"></canvas>
+
+<script type="text/javascript">
+"use strict";
+var timeline = new WGE.TimeLine(60000);
+var cvs = WGE.ID('test');
+var ctx = cvs.getContext('2d');
+
+function main()
+{
+	ctx.fillStyle = "#000";
+	ctx.strokeStyle = "#fff";
+	ctx.lineWidth = 6;
+
+	var imgArray = [];
+	for(var i = 1; i != 9; ++i)
+	{
+		imgArray.push(WGE.ID("test" + i));
+	}
+
+	var scene = FTPhotoFrame.initScene(imgArray, 800, 600);
+
+	timeline.pushArr(scene);
+
+	timeline.start();
+	mainloop();
+}
+
+var tm = 0;
+
+function mainloop(test)
+{
+    if (!test)
+    {
+        test = tm = 0.0;
+    }
+	if(!timeline.update(test - tm))
+	{
+	    console.log('PhotoFrames End');
+	    timeline.render(ctx);
+		return ;
+	}
+	tm = test;
+	ctx.clearRect(0,0, 800, 600);
+	timeline.render(ctx);
+	requestAnimationFrame(mainloop);
+}
+
+</script>
+
+
+<div style="display:none">
+<img src="test.jpg" id="test">
+<img src="test1.jpg" id="test1">
+<img src="test2.jpg" id="test2">
+<img src="test3.jpg" id="test3">
+<img src="test4.jpg" id="test4">
+<img src="test5.jpg" id="test5">
+<img src="test6.jpg" id="test6">
+<img src="test7.jpg" id="test7">
+<img src="test8.jpg" id="test8">
+</div>
+
+</body>
