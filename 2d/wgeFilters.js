@@ -107,8 +107,7 @@ WGE.FilterEdge = WGE.Class(WGE.FilterInterface,
 				var index1 = line + j * 4;
 				var index2 = index1 + w * 8 + 8;
 				dst[index1] = Math.abs(src[index1] - src[index2]) * 2;
-				dst[index1 + 1] = Math.abs(src[index1 + 1] - src[index2 + 2]) * 2;
-				dst[index1 + 2] = Math.abs(src[index1 + 1] - src[index2 + 2]) * 2;
+				dst[index1 + 1] = Math.abs(src[index1 + 1] - src[index2 + 2]);
 				dst[index1 + 3] = src[index1 + 3];
 			}
 		}
