@@ -7,9 +7,10 @@
 <script type="text/javascript" src="../../wgeVector.js"></script>
 <script type="text/javascript" src="../wgeSprite.js"></script>
 <script type="text/javascript" src="../wgeAnimation.js"></script>
+<script type="text/javascript" src="../wgeFilters.js"></script>
 <script type="text/javascript" src="photoFrames.js"></script>
 
-<canvas id="photoFrames" width='800' height='600' style="border:groove;background-color:#000"></canvas><br>
+<canvas id="photoFrames" width='800' height='600' style="border:groove;background-color:#000">你的浏览器不支持html5，换一个再来！(推荐：Chrome, Firefox, Safari)</canvas><br>
 <input type="button" value="MUTE or not" onclick="var snd = WGE.ID('bgSound'); snd.muted=!snd.muted">
 
 <script type="text/javascript">
@@ -17,7 +18,7 @@
 var timeline = new WGE.TimeLine(60000);
 var cvs = WGE.ID('photoFrames');
 var ctx = cvs.getContext('2d');
-var totalImages = 11;
+var totalImages = 17;
 var loadedImages = 0;
 var lastTime = 0;
 
@@ -112,17 +113,23 @@ function loadingDone()
 
 
 <div style="display:none">
-<img src="../../res/0.jpg" id="test0" onload="loadingDone()">
-<img src="../../res/1.jpg" id="test1" onload="loadingDone()">
-<img src="../../res/2.jpg" id="test2" onload="loadingDone()">
-<img src="../../res/3.jpg" id="test3" onload="loadingDone()">
-<img src="../../res/4.jpg" id="test4" onload="loadingDone()">
-<img src="../../res/5.jpg" id="test5" onload="loadingDone()">
-<img src="../../res/6.jpg" id="test6" onload="loadingDone()">
-<img src="../../res/7.jpg" id="test7" onload="loadingDone()">
-<img src="../../res/8.jpg" id="test8" onload="loadingDone()">
-<img src="../../res/9.jpg" id="test9" onload="loadingDone()">
-<img src="../../res/10.jpg" id="test10" onload="loadingDone()">
+<img src="../../res/comic0.jpg" id="test0" onload="loadingDone()">
+<img src="../../res/comic1.jpg" id="test1" onload="loadingDone()">
+<img src="../../res/comic2.jpg" id="test2" onload="loadingDone()">
+<img src="../../res/comic3.jpg" id="test3" onload="loadingDone()">
+<img src="../../res/comic4.jpg" id="test4" onload="loadingDone()">
+<img src="../../res/comic5.jpg" id="test5" onload="loadingDone()">
+<img src="../../res/comic6.jpg" id="test6" onload="loadingDone()">
+<img src="../../res/comic7.jpg" id="test7" onload="loadingDone()">
+<img src="../../res/comic8.jpg" id="test8" onload="loadingDone()">
+<img src="../../res/comic9.jpg" id="test9" onload="loadingDone()">
+<img src="../../res/comic10.jpg" id="test10" onload="loadingDone()">
+<img src="../../res/comic11.jpg" id="test11" onload="loadingDone()">
+<img src="../../res/comic12.jpg" id="test12" onload="loadingDone()">
+<img src="../../res/comic13.jpg" id="test13" onload="loadingDone()">
+<img src="../../res/comic14.jpg" id="test14" onload="loadingDone()">
+<img src="../../res/comic15.jpg" id="test15" onload="loadingDone()">
+<img src="../../res/comic16.jpg" id="test16" onload="loadingDone()">
 <audio src="../../res/snd1.mp3" id="bgSound"></audio>
 </div>
 
