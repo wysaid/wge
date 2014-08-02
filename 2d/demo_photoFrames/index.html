@@ -43,6 +43,7 @@ function main()
 
 	timeline.start(0);
 	lastTime = Date.now();
+	WGE.ID('bgSound').play();
 	mainloop();
 }
 
@@ -102,7 +103,7 @@ function loadingDone()
 <img src="../../res/8.jpg" id="test8" onload="loadingDone()">
 <img src="../../res/9.jpg" id="test9" onload="loadingDone()">
 <img src="../../res/10.jpg" id="test10" onload="loadingDone()">
-<audio src="../../res/snd1.mp3" id="bgSound" autoplay="true"></audio>
+<audio src="../../res/snd1.mp3" id="bgSound"></audio>
 </div>
 
 </body>
