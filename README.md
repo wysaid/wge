@@ -1,2 +1,2 @@
-# WGE (WYSAID's (Web) Graphics Engine) #
-ÕýÔÚ±àÐ´ÖÐ
+# WGE #
+"WYSAID's (Web) Graphics Engine" æ­£åœ¨ç¼–å†™ä¸­
