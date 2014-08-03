@@ -98,6 +98,12 @@ WGE.FilterEdge = WGE.Class(WGE.FilterInterface,
 {
 	_run : function(dst, src, w, h)
 	{
+
+		var func = function(v)
+		{
+			return Math.max(Math.min(v * 2.0, 255), 0);
+		}
+
 		var lw = w - 2, lh = h - 2;
 		for(var i = 0; i < lh; ++i)
 		{
@@ -106,8 +112,9 @@ WGE.FilterEdge = WGE.Class(WGE.FilterInterface,
 			{
 				var index1 = line + j * 4;
 				var index2 = index1 + w * 8 + 8;
-				dst[index1] = Math.abs(src[index1] - src[index2]) * 2;
-				dst[index1 + 1] = Math.abs(src[index1 + 1] - src[index2 + 2]);
+				dst[index1] = func(src[index1] - src[index2]);
+				dst[index1 + 1] = func(src[index1 + 1] - src[index2 + 1]);
+				dst[index1 + 2] = func(src[index1 + 2] - src[index2 + 2]);
 				dst[index1 + 3] = src[index1 + 3];
 			}
 		}
