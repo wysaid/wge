@@ -98,6 +98,7 @@ function endloop()
 		ctx.fillText("The End.", 200, cvs.height / 2);
 		ctx.font = "30px Aria";
 		ctx.fillText("By wysaid", 400, 400);
+		WGE.ID('bgSound').pause();
 		return ;
 	}
 	requestAnimationFrame(endloop);

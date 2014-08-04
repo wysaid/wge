@@ -380,7 +380,6 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		globalZ = 0;
 
 	var filterBW = new WGE.FilterBW();
-	var filterEdge = new WGE.FilterEdge();
 
 	//时间按每秒30帧计算
 	//0:5:25~0:8:20 [0, 2800]
@@ -669,7 +668,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		else if(stillTime < 15000)
 			stillTime = 15000;
 
-		var frame5 = S(14000, stillTime, filterEdge.bind(img4).run(), -1);
+		var frame5 = S(14000, stillTime, filterBW.bind(img4).run(), -1);
 		frame5.setHotspot2Center();
 		frame5.moveTo(w / 2, h / 2);
 		frame5.zIndex = frame3.zIndex - 0.5;
