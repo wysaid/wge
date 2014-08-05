@@ -1,3 +1,4 @@
+"use strict";
 /*
 	Author: wysaid
 	Blog: blog.wysaid.org
