@@ -280,6 +280,7 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 		ctx.clearRect(0, 0, cvs.width, cvs.height);
 		this.context.fillStyle = "#f00";
 		ctx.fillRect(this.x, this.y, 100, 100);
+		ctx.fillText("click me!", 10, 10);
 	},
 
 	mouseDownEvent : function(e)
@@ -298,8 +299,8 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 	{
 		if(this.isMouseDown)
 		{
-			this.x = e.offsetX || e.x;
-			this.y = e.offsetY || e.y;
+			this.x = e.offsetX || e.layerX;
+			this.y = e.offsetY || e.layerY;
 		}
 	}
 });
