@@ -64,8 +64,8 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 	{
 		if(this.isMouseDown)
 		{
-			this.x = e.offsetX || e.x;
-			this.y = e.offsetY || e.y;
+			this.x = e.offsetX || e.layerX;
+			this.y = e.offsetY || e.layerY;
 		}
 	}
 });
