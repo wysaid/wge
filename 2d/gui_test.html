@@ -72,9 +72,9 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 
 var gui = new myGUI(document.body);
 
-//ÏÂÃæÁ½¾ä¶¼ÊÇÊ¹Õû¸öui´óĞ¡¸úËæ¸¸ÔªËØ±ä»¯£¬ÍÆ¼öÇ°Õß¡£ÏÓÂé·³»òÕß¸úÒÑÓĞ´úÂëÓĞ³åÍ»£¨±ÈÈçbodyµÄonresizeÓĞ±ğµÄ´úÂë»áËæÊ±¸ü¸Ä£©Ğ´³ÉºóÕßÒ²Ã»¹ØÏµ¡£
-document.body.setAttribute("onresize", "gui.onresize(event);"); //½ÏºÃ
-//gui.forceAutoResize(true); //ÕâÒ»¾äºÍÉÏÒ»¾ä¹¦ÄÜÀàËÆ£¬ÕâÖÖ·½·¨¿É±£Ö¤ÕıÈ·ĞÔ
+//ä¸‹é¢ä¸¤å¥éƒ½æ˜¯ä½¿æ•´ä¸ªuiå¤§å°è·Ÿéšçˆ¶å…ƒç´ å˜åŒ–ï¼Œæ¨èå‰è€…ã€‚å«Œéº»çƒ¦æˆ–è€…è·Ÿå·²æœ‰ä»£ç æœ‰å†²çªï¼ˆæ¯”å¦‚bodyçš„onresizeæœ‰åˆ«çš„ä»£ç ä¼šéšæ—¶æ›´æ”¹ï¼‰å†™æˆåè€…ä¹Ÿæ²¡å…³ç³»ã€‚
+document.body.setAttribute("onresize", "gui.onresize(event);"); //è¾ƒå¥½
+//gui.forceAutoResize(true); //è¿™ä¸€å¥å’Œä¸Šä¸€å¥åŠŸèƒ½ç±»ä¼¼ï¼Œè¿™ç§æ–¹æ³•å¯ä¿è¯æ­£ç¡®æ€§
 
 gui.start();
 </script>
