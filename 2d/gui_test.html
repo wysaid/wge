@@ -51,8 +51,8 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 	mouseDownEvent : function(e)
 	{
 		this.isMouseDown = true;
-		this.x = e.x || e.offsetX;
-		this.y = e.y || e.offsetY;
+		this.x = e.offsetX || e.layerX;
+		this.y = e.offsetY || e.layerY;
 	},
 
 	mouseUpEvent : function(e)
