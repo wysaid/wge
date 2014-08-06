@@ -118,16 +118,16 @@ WGE.getContentByID = function(tagID)
 	var content = document.getElementById(scriptID);
 	if (!content) return "";
 	return content.textContent || content.text || content.innerText || content.innerHTML;
-}
+};
 
 WGE.getHTMLByID = function(tagID)
 {
 	var content = document.getElementById(scriptID);
 	if (!content) return "";
 	return content.innerHTML;
-}
+};
 
-WGE.requestTextByURL(url, callback)
+WGE.requestTextByURL = function(url, callback)
 {
 	var async = callback ? true : false;
 	var xmlHttp = new XMLHttpRequest();
@@ -143,7 +143,7 @@ WGE.requestTextByURL(url, callback)
 	}
 	xmlHttp.send();
 	return xmlHttp.responseText;
-}
+};
 
 WGE.CE = function(name)
 {
