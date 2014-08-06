@@ -7,6 +7,11 @@
  *        blog: http://blog.wysaid.org
  */
 
+ /*
+	本文件提供了对webgl的简单封装。
+
+ */
+
 WGE.webgl = null;
 
 //绑定WGE当前的webgl 上下文。

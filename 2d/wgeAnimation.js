@@ -49,8 +49,8 @@ WGE.UniformAlphaAction = WGE.Class(WGE.TimeActionInterface,
 		}
 		else if(time instanceof WGE.Vec2)
 		{
-			this.tStart = time.x;
-			this.tEnd = time.y;
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];
 		}
 		this.fromAlpha = from;
 		this.toAlpha = to;
@@ -140,25 +140,38 @@ WGE.UniformLinearMoveAction = WGE.Class(WGE.TimeActionInterface,
 		{
 			this.tStart = time[0];
 			this.tEnd = time[1];
+		}
+		else
+		{
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];
+		}
+
+		if(from instanceof Array)
+		{
 			this.fromX = from[0];
 			this.fromY = from[1];
+		}
+		else
+		{
+			this.fromX = from.data[0];
+			this.fromY = from.data[1];
+		}
+
+		if(to instanceof Array)
+		{
 			this.toX = to[0];
 			this.toY = to[1];
-			this.disX = to[0] - from[0];
-			this.disY = to[1] - from[1];
 		}
-		else if(time instanceof WGE.Vec2)
+		else
 		{
-			this.tStart = time.x;
-			this.tEnd = time.y;
-			this.fromX = from.x;
-			this.fromY = from.y;
-			this.toX = to.x;
-			this.toY = to.y;
-			this.disX = to.x - from.x;
-			this.disY = to.y - from.y;
+			this.toX = to.data[0];
+			this.toY = to.data[1];
 		}		
-		
+
+		this.disX = this.toX - this.fromX;
+		this.disY = this.toY - this.fromY;
+
 		this.repeatTimes = repeatTimes ? repeatTimes : 1;
 	},
 

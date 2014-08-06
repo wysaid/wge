@@ -11,9 +11,9 @@ window.FTPhotoFrame = {};
 
 FTPhotoFrame.intersection = function(p0, p1, p2, p3)
 {
-	var D = (p0.y - p1.y) * (p3.x - p2.x) + (p0.x - p1.x) * (p2.y - p3.y);
-    var Dx = (p1.x * p0.y - p0.x * p1.y) * (p3.x - p2.x) + (p0.x - p1.x) * (p3.x * p2.y - p2.x * p3.y);
-    var Dy = (p0.y - p1.y) * (p3.x * p2.y - p2.x * p3.y) + (p3.y - p2.y) * (p1.x * p0.y - p0.x * p1.y);
+	var D = (p0.data[1] - p1.data[1]) * (p3.data[0] - p2.data[0]) + (p0.data[0] - p1.data[0]) * (p2.data[1] - p3.data[1]);
+    var Dx = (p1.data[0] * p0.data[1] - p0.data[0] * p1.data[1]) * (p3.data[0] - p2.data[0]) + (p0.data[0] - p1.data[0]) * (p3.data[0] * p2.data[1] - p2.data[0] * p3.data[1]);
+    var Dy = (p0.data[1] - p1.data[1]) * (p3.data[0] * p2.data[1] - p2.data[0] * p3.data[1]) + (p3.data[1] - p2.data[1]) * (p1.data[0] * p0.data[1] - p0.data[0] * p1.data[1]);
     return new WGE.Vec2(Dx / D, Dy / D);
 };
 
@@ -47,10 +47,10 @@ FTPhotoFrame.Zone = WGE.Class(
 			ctx.lineWidth = lineWidth;
 
 		ctx.beginPath();
-		ctx.moveTo(this.clipArray[0].x, this.clipArray[0].y);
+		ctx.moveTo(this.clipArray[0].data[0], this.clipArray[0].data[1]);
 		for(var i in this.clipArray)
 		{
-			ctx.lineTo(this.clipArray[i].x, this.clipArray[i].y);
+			ctx.lineTo(this.clipArray[i].data[0], this.clipArray[i].data[1]);
 		}
 		ctx.closePath();
 		if(stroke)
@@ -68,10 +68,10 @@ FTPhotoFrame.Zone = WGE.Class(
 		if(lineWidth)
 			ctx.lineWidth = lineWidth;
 		ctx.beginPath();
-		ctx.moveTo(clipArray[0].x, clipArray[0].y);
+		ctx.moveTo(clipArray[0].data[0], clipArray[0].data[1]);
 		for(var i in clipArray)
 		{
-			ctx.lineTo(clipArray[i].x, clipArray[i].y);
+			ctx.lineTo(clipArray[i].data[0], clipArray[i].data[1]);
 		}
 		ctx.closePath();
 		ctx.stroke();
@@ -93,8 +93,8 @@ FTPhotoFrame.ZoneSwitchAction = WGE.Class(WGE.TimeActionInterface,
 		}
 		else if(time instanceof WGE.Vec2)
 		{
-			this.tStart = time.x;
-			this.tEnd = time.y;			
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];			
 		}
 		this.zone = zone;
 		this.bindObj = bindObj;
@@ -124,8 +124,8 @@ FTPhotoFrame.PointIntersectionAction = WGE.Class(WGE.TimeActionInterface,
 		}
 		else if(time instanceof WGE.Vec2)
 		{
-			this.tStart = time.x;
-			this.tEnd = time.y;			
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];			
 		}
 
 		this.bindObj = bindObj;
@@ -135,15 +135,15 @@ FTPhotoFrame.PointIntersectionAction = WGE.Class(WGE.TimeActionInterface,
 	act : function(percent)
 	{
 		var pnt = FTPhotoFrame.intersection(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
-		this.bindObj.x = pnt.x;
-		this.bindObj.y = pnt.y;
+		this.bindObj.data[0] = pnt.data[0];
+		this.bindObj.data[1] = pnt.data[1];
 	},
 
 	actionStop : function()
 	{
 		var pnt = FTPhotoFrame.intersection(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
-		this.bindObj.x = pnt.x;
-		this.bindObj.y = pnt.y;
+		this.bindObj.data[0] = pnt.data[0];
+		this.bindObj.data[1] = pnt.data[1];
 	}
 
 });
@@ -166,8 +166,8 @@ FTPhotoFrame.PointMoveAction = WGE.Class(WGE.TimeActionInterface,
 		}
 		else if(time instanceof WGE.Vec2)
 		{
-			this.tStart = time.x;
-			this.tEnd = time.y;			
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];			
 		}
 
 		if(from instanceof Array)
@@ -177,8 +177,8 @@ FTPhotoFrame.PointMoveAction = WGE.Class(WGE.TimeActionInterface,
 		}
 		else
 		{
-			this.fromX = from.x;
-			this.fromY = from.y;
+			this.fromX = from.data[0];
+			this.fromY = from.data[1];
 			
 		}
 
@@ -189,8 +189,8 @@ FTPhotoFrame.PointMoveAction = WGE.Class(WGE.TimeActionInterface,
 		}
 		else
 		{
-			this.toX = to.x;
-			this.toY = to.y;
+			this.toX = to.data[0];
+			this.toY = to.data[1];
 		}
 
 		this.disX = this.toX - this.fromX;
@@ -203,8 +203,8 @@ FTPhotoFrame.PointMoveAction = WGE.Class(WGE.TimeActionInterface,
 		var t = percent;
 		try
 		{
-			this.bindObj.x = this.fromX + this.disX * t;
-			this.bindObj.y = this.fromY + this.disY * t;
+			this.bindObj.data[0] = this.fromX + this.disX * t;
+			this.bindObj.data[1] = this.fromY + this.disY * t;
 		}catch(e)
 		{
 			WGE.ERR("Invalid Binding Object!");
@@ -213,23 +213,23 @@ FTPhotoFrame.PointMoveAction = WGE.Class(WGE.TimeActionInterface,
 		this.act = function(percent)
 		{
 			var t = percent;
-			this.bindObj.x = this.fromX + this.disX * t;
-			this.bindObj.y = this.fromY + this.disY * t;
+			this.bindObj.data[0] = this.fromX + this.disX * t;
+			this.bindObj.data[1] = this.fromY + this.disY * t;
 		};
 	},
 
 	// 为Action开始做准备工作，比如对一些属性进行复位。
 	actionStart : function()
 	{
-		// this.bindObj.x = this.fromX;
-		// this.bindObj.y = this.fromY;
+		// this.bindObj.data[0] = this.fromX;
+		// this.bindObj.data[1] = this.fromY;
 	},
 
 	// Action结束之后的扫尾工作，比如将某物体设置运动结束之后的状态。
 	actionStop : function()
 	{
-		this.bindObj.x = this.toX;
-		this.bindObj.y = this.toY;
+		this.bindObj.data[0] = this.toX;
+		this.bindObj.data[1] = this.toY;
 	}
 });
 
@@ -239,8 +239,8 @@ FTPhotoFrame.PointMoveSlowDown2X = WGE.Class(FTPhotoFrame.PointMoveAction,
 	{
 		var mp = 1.0 - percent;
 		var t = 1.0 - mp * mp;
-		this.bindObj.x = this.fromX + this.disX * t;
-		this.bindObj.y = this.fromY + this.disY * t;
+		this.bindObj.data[0] = this.fromX + this.disX * t;
+		this.bindObj.data[1] = this.fromY + this.disY * t;
 	}
 });
 
@@ -249,8 +249,8 @@ FTPhotoFrame.PointMoveSlowDown3X = WGE.Class(FTPhotoFrame.PointMoveAction,
 	act : function(percent)
 	{
 		var t = percent * percent * (3 - 2 * percent);
-		this.bindObj.x = this.fromX + this.disX * t;
-		this.bindObj.y = this.fromY + this.disY * t;
+		this.bindObj.data[0] = this.fromX + this.disX * t;
+		this.bindObj.data[1] = this.fromY + this.disY * t;
 	}
 });
 
@@ -261,8 +261,8 @@ FTPhotoFrame.PointMoveSlowDown4X = WGE.Class(FTPhotoFrame.PointMoveAction,
 		var mp = 1.0 - percent;
 		mp *= mp;
 		var t = 1.0 - mp * mp;
-		this.bindObj.x = this.fromX + this.disX * t;
-		this.bindObj.y = this.fromY + this.disY * t;
+		this.bindObj.data[0] = this.fromX + this.disX * t;
+		this.bindObj.data[1] = this.fromY + this.disY * t;
 	}
 });
 
@@ -274,8 +274,8 @@ FTPhotoFrame.PointMoveSpeedupAndSlowdown = WGE.Class(FTPhotoFrame.PointMoveActio
 		var mp = 1.0 - percent;
 		mp *= mp;
 		var t = 1.0 - mp * mp;
-		this.bindObj.x = this.fromX + this.disX * t;
-		this.bindObj.y = this.fromY + this.disY * t;
+		this.bindObj.data[0] = this.fromX + this.disX * t;
+		this.bindObj.data[1] = this.fromY + this.disY * t;
 	}
 });
 
@@ -326,15 +326,15 @@ FTPhotoFrame.PhotoFrameSprite = WGE.Class(WGE.AnimationSprite,
 		if(this.zone)
 			this.zone.clipZone(ctx, true);//, '#fff', 10);
 
-		ctx.translate(this.pos.x, this.pos.y);
+		ctx.translate(this.pos.data[0], this.pos.data[1]);
 		if(this.rotation)
 			ctx.rotate(this.rotation);		
 		if(this.scaling)
-			ctx.scale(this.scaling.x, this.scaling.y);
+			ctx.scale(this.scaling.data[0], this.scaling.data[1]);
 		
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
-		ctx.drawImage(this.img, -this.hotspot.x, -this.hotspot.y);
+		ctx.drawImage(this.img, -this.hotspot.data[0], -this.hotspot.data[1]);
 		ctx.restore();
 	}
 });
@@ -394,7 +394,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frames.frame1 = frame1;
 		frames.frame2 = frame2;
 
-		frame1.setHotspot(frame1.size.x / 2.0, 0);
+		frame1.setHotspot(frame1.size.data[0] / 2.0, 0);
 		frame1.moveTo(w / 2, 0);
 		frame2.setHotspot2Center();
 		frame2.moveTo(w / 2, h / 2);

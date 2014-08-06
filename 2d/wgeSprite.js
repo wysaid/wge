@@ -40,8 +40,8 @@ WGE.Sprite = WGE.Class(
 		else if(w < 0 && typeof img == 'object')
 		{
 			this.img = img;
-			this.size.x = img.width;
-			this.size.y = img.height;
+			this.size.data[0] = img.width;
+			this.size.data[1] = img.height;
 			return;
 		}
 
@@ -50,15 +50,15 @@ WGE.Sprite = WGE.Class(
 		{
 			if(w && h)
 			{
-				this.size.x = w;
-				this.size.y = h;
+				this.size.data[0] = w;
+				this.size.data[1] = h;
 				this.img.width = w;
 				this.img.height = h;
 			}
 			else
 			{
-				this.size.x = img.width;
-				this.size.y = img.height;
+				this.size.data[0] = img.width;
+				this.size.data[1] = img.height;
 				this.img.width = img.width;
 				this.img.height = img.height;
 			}
@@ -70,44 +70,44 @@ WGE.Sprite = WGE.Class(
 
 	setHotspot : function(hx, hy)
 	{
-		this.hotspot.x = hx;
-		this.hotspot.y = hy;
+		this.hotspot.data[0] = hx;
+		this.hotspot.data[1] = hy;
 	},
 
 	setHotspot2Center : function()
 	{
-		this.hotspot.x = this.size.x / 2.0;
-		this.hotspot.y = this.size.y / 2.0;
+		this.hotspot.data[0] = this.size.data[0] / 2.0;
+		this.hotspot.data[1] = this.size.data[1] / 2.0;
 	},
 
 	setHotspotWithRatio : function(rx, ry)
 	{
-		this.hotspot.x = this.size.x * rx;
-		this.hotspot.y = this.size.y * ry;
+		this.hotspot.data[0] = this.size.data[0] * rx;
+		this.hotspot.data[1] = this.size.data[1] * ry;
 	},
 
 	move : function(dx, dy)
 	{
-		this.pos.x += dx;
-		this.pos.y += dy;
+		this.pos.data[0] += dx;
+		this.pos.data[1] += dy;
 	},
 
 	moveTo : function(x, y)
 	{
-		this.pos.x = x;
-		this.pos.y = y;
+		this.pos.data[0] = x;
+		this.pos.data[1] = y;
 	},
 
 	scale : function(ds, dy)
 	{
-		this.scaling.x *= ds;
-		this.scaling.y *= dy;
+		this.scaling.data[0] *= ds;
+		this.scaling.data[1] *= dy;
 	},
 
 	scaleTo : function(sx, sy)
 	{
-		this.scaling.x = sx;
-		this.scaling.y = sy;
+		this.scaling.data[0] = sx;
+		this.scaling.data[1] = sy;
 	},
 
 	rotate : function(dRot)
@@ -126,22 +126,22 @@ WGE.Sprite = WGE.Class(
 		//以后实现
 		// var cosRot = Math.cos(rotation), sinRot = Math.sin(rotation);
 
-		// ctx.setTransform(this.scaling.x * cosRot, sinRot, 0, -sinRot, scaling.y * cosRot, 0, realPos.x, realPos.y)
+		// ctx.setTransform(this.scaling.data[0] * cosRot, sinRot, 0, -sinRot, scaling.data[1] * cosRot, 0, realPos.data[0], realPos.data[1])
 
-		//ctx.setTransform(1, 0, -this.hotspot.x, 1, 0, -this.hotspot.y);
-//		ctx.translate(this.hotspot.x, this.hotspot.y);
+		//ctx.setTransform(1, 0, -this.hotspot.data[0], 1, 0, -this.hotspot.data[1]);
+//		ctx.translate(this.hotspot.data[0], this.hotspot.data[1]);
 
 		ctx.save();
-		ctx.translate(this.pos.x, this.pos.y);
+		ctx.translate(this.pos.data[0], this.pos.data[1]);
 		if(this.rotation)
 			ctx.rotate(this.rotation);		
 		if(this.scaling)
-			ctx.scale(this.scaling.x, this.scaling.y);
+			ctx.scale(this.scaling.data[0], this.scaling.data[1]);
 		if(this.alpha != undefined)
 			ctx.globalAlpha = this.alpha;		
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
-		ctx.drawImage(this.img, -this.hotspot.x, -this.hotspot.y);
+		ctx.drawImage(this.img, -this.hotspot.data[0], -this.hotspot.data[1]);
 
 		ctx.restore();
 	},
@@ -149,16 +149,16 @@ WGE.Sprite = WGE.Class(
 	renderTo : function(ctx, pos, rot, scaling, alpha, blendmode)
 	{		
 		ctx.save();
-		ctx.translate(pos.x, pos.y);
+		ctx.translate(pos.data[0], pos.data[1]);
 		if(rot)
 			ctx.rotate(rot);		
 		if(scaling)
-			ctx.scale(scaling.x, scaling.y);
+			ctx.scale(scaling.data[0], scaling.data[1]);
 		if(this.alpha != undefined)
 			ctx.globalAlpha = alpha;
 		if(blendmode)
 			ctx.globalCompositeOperation = blendmode;
-		ctx.drawImage(this.img, pos.x - this.hotspot.x, pos.y - this.hotspot.y);
+		ctx.drawImage(this.img, pos.data[0] - this.hotspot.data[0], pos.data[1] - this.hotspot.data[1]);
 		ctx.restore();
 	}
 

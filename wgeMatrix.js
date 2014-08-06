@@ -8,113 +8,117 @@
 //本文件部分算法参考自: http://opengl.org/
 
 
-//定义向量与矩阵的数据类型.
-if(typeof Float32Array != 'undefined')
-	window.WGEMatrixArray = Float32Array;
-else
-	window.WGEMatrixArray = Array;
-
-
-WGE.Vec3 = function(x, y, z)
+WGE.Vec2 = WGE.Class(
 {
-	if(x && y && z)
-		this.data = new WGEMatrixArray([x, y, z])
-	else
-		this.data = new WGEMatrixArray(3);
+	data : null,
 
-	this.dot = function(v3)
+	initialize : function(x, y)
+	{
+		this.data = new Float32Array([x, y]);
+	}
+});
+
+WGE.Vec3 = WGE.Class(
+{
+	data : null,
+
+	initialize : function(x, y, z)
+	{
+		this.data = new Float32Array([x, y, z])
+	},
+
+	dot : function(v3)
 	{
 		return this.data[0] * v3.data[0] + this.data[1] * v3.data[1] + this.data[2] * v3.data[2];
-	};
+	},
 
-	this.dotSelf = function()
+	dotSelf : function()
 	{
 		return this.data[0] * this.data[0] + this.data[1] * this.data[1] + this.data[2] * this.data[2];
-	};
+	},
 
-	this.add = function(v3)
+	add : function(v3)
 	{
 		this.data[0] += v3.data[0];
 		this.data[1] += v3.data[1];
 		this.data[2] += v3.data[2];
 		return this;
-	};
+	},
 
-	this.sub = function(v3)
+	sub : function(v3)
 	{
 		this.data[0] -= v3.data[0];
 		this.data[1] -= v3.data[1];
 		this.data[2] -= v3.data[2];
 		return this;
-	};
+	},
 
-	this.mul = function(v3)
+	mul : function(v3)
 	{
 		this.data[0] *= v3.data[0];
 		this.data[1] *= v3.data[1];
 		this.data[2] *= v3.data[2];
 		return this;
-	};
+	},
 
-	this.div = function(v3)
+	div : function(v3)
 	{
 		this.data[0] /= v3.data[0];
 		this.data[1] /= v3.data[1];
 		this.data[2] /= v3.data[2];
 		return this;
-	};
+	},
 
-	this.normalize = function()
+	normalize : function()
 	{
 		var scale = 1.0 / Math.sqrt(this.data[0]*this.data[0] + this.data[1]*this.data[1] + this.data[2]*this.data[2]);
 		this.data[0] *= scale;
 		this.data[1] *= scale;
 		this.data[2] *= scale;
 		return this;
-	};
+	},
 
 	//////////////////////////////////////////////////
 
-	this.subFloat = function(fValue)
+	subFloat : function(fValue)
 	{
 		this.data[0] -= fValue;
 		this.data[1] -= fValue;
 		this.data[2] -= fValue;
-	};
+	},
 
-	this.addFloat = function(fValue)
+	addFloat : function(fValue)
 	{
 		this.data[0] += fValue;
 		this.data[1] += fValue;
 		this.data[2] += fValue;
-	};
+	},
 
-	this.mulFloat = function(fValue)
+	mulFloat : function(fValue)
 	{
 		this.data[0] *= fValue;
         this.data[1] *= fValue;
         this.data[2] *= fValue;
-	};
+	},
 
-	this.divFloat = function(fValue)
+	divFloat : function(fValue)
 	{
         this.data[0] /= fValue;
         this.data[1] /= fValue;
         this.data[2] /= fValue;
-	};
+	},
 
 	//////////////////////////////////////////////////
 
-	this.cross = function(v3)
+	cross : function(v3)
 	{
 		var x = this.data[1] * v3.data[2] - this.data[2] * v3.data[1];
         var y = this.data[2] * v3.data[0] - this.data[0] * v3.data[2];
         this.data[2] = this.data[0] * v3.data[1] - this.data[1] * v3.data[0];
         this.data[0] = x;
         this.data[1] = y;
-	};
-		
-};
+	}		
+});
 
 WGE.makeVec3 = function(x, y, z)
 {
@@ -193,17 +197,22 @@ WGE.vec3Cross = function(v3Left, v3Right)
 WGE.vec3Project = function(v3ToProj, projVec)
 {
 	var d = projVec.dot(v3ToProj) / projVec.dotSelf();
-	return WYVec3.vec3MulFloat(projVec, d);
+	return WGE.vec3MulFloat(projVec, d);
 };
 
 //////////////////////////////////////////////////////
 
 
 // vector 4 没怎么用到，暂时不写太多。
-function WYVec4(x, y, z, w)
+WGE.Vec4 = WGE.Class(
 {
-	this.data = new WGEMatrixArray([x, y, z, w]);
-};
+	data : null,
+
+	initialize : function(x, y, z, w)
+	{
+		this.data = new Float32Array([x, y, z, w]);
+	}
+});
 
 
 
@@ -214,93 +223,86 @@ function WYVec4(x, y, z, w)
 //
 //////////////////////////////////////////////////////
 
-WGE.Mat4 = function(m00, m01, m02, m03, 
-				m10, m11, m12, m13,
-				m20, m21, m22, m23,
-				m30, m31, m32, m33)
+WGE.Mat4 = WGE.Class(
 {
-	this.data = [m00, m01, m02, m03, 
-				m10, m11, m12, m13,
-				m20, m21, m22, m23,
-				m30, m31, m32, m33];
+	data : null,
 
-	this.transpose = function()
+	initialize : function(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)
 	{
-		this.data = new WGEMatrixArray([this.data[0],  this.data[4],  this.data[8],  this.data[12],
+		this.data = new Float32Array([m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]);
+	},
+
+	transpose : function()
+	{
+		this.data = new Float32Array([this.data[0],  this.data[4],  this.data[8],  this.data[12],
 			this.data[1],  this.data[5],  this.data[9],  this.data[13],
 			this.data[2],  this.data[6],  this.data[10],  this.data[14],
 			this.data[3],  this.data[7],  this.data[11],  this.data[15]]);
-	};
+	},
 
-	this.translateX = function(x)
+	translateX : function(x)
 	{
 		this.data[12] += this.data[0] * x;
 		this.data[13] += this.data[1] * x;
 		this.data[14] += this.data[2] * x;
-	};
+	},
 
-	this.translateY = function(y)
+	translateY : function(y)
 	{
 		this.data[12] += this.data[4] * y;
 		this.data[13] += this.data[5] * y;
 		this.data[14] += this.data[6] * y;
-	};
+	},
 
-	this.translateZ = function(z)
+	translateZ : function(z)
 	{
 		this.data[12] += this.data[8] * z;
 		this.data[13] += this.data[9] * z;
 		this.data[14] += this.data[10] * z;
-	};
+	},
 
-	this.scaleX = function(x)
+	scaleX : function(x)
 	{
 		data[0] *= x;
 		data[1] *= x;
 		data[2] *= x;
 		data[3] *= x;
-	};
+	},
 
-	this.scaleY = function(y)
+	scaleY : function(y)
 	{
 		data[4] *= y;
 		data[5] *= y;
 		data[6] *= y;
 		data[7] *= y;
-	};
+	},
 
-	this.scaleZ = function(z)
+	scaleZ : function(z)
 	{
 		data[8] *= z;
 		data[9] *= z;
 		data[10] *= z;
 		data[11] *= z;
-	};
+	},
 
-	this.scale = function(x, y, z)
+	scale : function(x, y, z)
 	{
 		this.scaleX(x);
 		this.scaleY(y);
 		this.scaleZ(z);
-	};
-};
+	}
+});
 
 /////////////////////////////////////////////////////////////
 
-WGE.makeMat4 = function(m00, m01, m02, m03, 
-					m10, m11, m12, m13,
-					m20, m21, m22, m23,
-					m30, m31, m32, m33)
+WGE.makeMat4 = function(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)
 {
-	return new WGE.mat4(m00, m01, m02, m03, 
-					m10, m11, m12, m13,
-					m20, m21, m22, m23,
-					m30, m31, m32, m33);
+	return new WGE.Mat4(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33);
 };
 
 WGE.mat4Identity = function()
 {
-	return new WGE.mat4(1.0, 0.0, 0.0, 0.0,
+	return new WGE.Mat4(1.0, 0.0, 0.0, 0.0,
 					0.0, 1.0, 0.0, 0.0,
 					0.0, 0.0, 1.0, 0.0,
 					0.0, 0.0, 0.0, 1.0);
@@ -308,7 +310,7 @@ WGE.mat4Identity = function()
 
 WGE.mat4Translation = function(x, y, z)
 {
-	return new WGE.mat4(1.0, 0.0, 0.0, 0.0,
+	return new WGE.Mat4(1.0, 0.0, 0.0, 0.0,
 		0.0, 1.0, 0.0, 0.0,
 		0.0, 0.0, 1.0, 0.0,
 		x, y, z, 1.0);
@@ -316,7 +318,7 @@ WGE.mat4Translation = function(x, y, z)
 
 WGE.mat4Scale = function(x, y, z)
 {
-	return new WGE.mat4(x, 0.0, 0.0, 0.0,
+	return new WGE.Mat4(x, 0.0, 0.0, 0.0,
 		0.0, y, 0.0, 0.0,
 		0.0, 0.0, z, 0.0,
 		0.0, 0.0, 0.0, 1.0);
@@ -331,7 +333,7 @@ WGE.mat4Rotation = function(rad, x, y, z)
 	var cosRad = Math.cos(rad);
 	var cosp = 1.0 - cosRad;
 	var sinRad = Math.sin(rad);
-	return new WGE.mat4(cosRad + cosp * x * x,
+	return new WGE.Mat4(cosRad + cosp * x * x,
 		cosp * x * y + z * sinRad,
 		cosp * x * z - y * sinRad,
 		0.0,
@@ -353,7 +355,7 @@ WGE.mat4XRotation = function(rad)
 {
 	var cosRad = Math.cos(rad);
 	var sinRad = Math.sin(rad);
-	return new WGE.mat4(1.0, 0.0, 0.0, 0.0,
+	return new WGE.Mat4(1.0, 0.0, 0.0, 0.0,
 		0.0, cosRad, sinRad, 0.0,
 		0.0, -sinRad, cosRad, 0.0,
 		0.0, 0.0, 0.0, 1.0);
@@ -363,7 +365,7 @@ WGE.mat4YRotation = function(rad)
 {
 	var cosRad = Math.cos(rad);
 	var sinRad = Math.sin(rad);
-	return new WGE.mat4(cosRad, 0.0, -sinRad, 0.0,
+	return new WGE.Mat4(cosRad, 0.0, -sinRad, 0.0,
 		0.0, 1.0, 0.0, 0.0,
 		sinRad, 0.0, cosRad, 0.0,
 		0.0, 0.0, 0.0, 1.0);
@@ -373,7 +375,7 @@ WGE.mat4ZRotation = function(rad)
 {
 	var cosRad = Math.cos(rad);
 	var sinRad = Math.sin(rad);
-	return new WGE.mat4(cosRad, sinRad, 0.0, 0.0,
+	return new WGE.Mat4(cosRad, sinRad, 0.0, 0.0,
 		-sinRad, cosRad, 0.0, 0.0,
 		0.0, 0.0, 1.0, 0.0,
 		0.0, 0.0, 0.0, 1.0);
@@ -382,7 +384,7 @@ WGE.mat4ZRotation = function(rad)
 WGE.makePerspective = function(fovyRad, aspect, nearZ, farZ)
 {
 	var cotan = 1.0 / Math.tan(fovyRad / 2.0);
-	return new WGE.mat4(cotan / aspect, 0.0, 0.0, 0.0,
+	return new WGE.Mat4(cotan / aspect, 0.0, 0.0, 0.0,
 		0.0, cotan, 0.0, 0.0,
 		0.0, 0.0, (farZ + nearZ) / (nearZ - farZ), -1.0,
 		0.0, 0.0, (2.0 * farZ * nearZ) / (nearZ - farZ), 0.0);
@@ -397,7 +399,7 @@ WGE.makeFrustum = function(left, right, bottom, top, nearZ, farZ)
 	var fan = farZ + nearZ;
 	var fsn = farZ - nearZ;
 
-	return new WGE.mat4(2.0 * nearZ / rsl, 0.0, 0.0, 0.0,
+	return new WGE.Mat4(2.0 * nearZ / rsl, 0.0, 0.0, 0.0,
 		0.0, 2.0 * nearZ / tsb, 0.0, 0.0,
 		ral / rsl, tab / tsb, -fan / fsn, -1.0,
 		0.0, 0.0, (-2.0 * farZ * nearZ) / fsn, 0.0);
@@ -412,7 +414,7 @@ WGE.makeOrtho = function(left, right, bottom, top, nearZ, farZ)
 	var fan = farZ + nearZ;
 	var fsn = farZ - nearZ;
 
-	return new WGE.mat4(2.0 / rsl, 0.0, 0.0, 0.0,
+	return new WGE.Mat4(2.0 / rsl, 0.0, 0.0, 0.0,
 		0.0, 2.0 / tsb, 0.0, 0.0,
 		0.0, 0.0, -2.0 / fsn, 0.0,
 		-ral / rsl, -tab / tsb, -fan / fsn, 1.0);
@@ -420,14 +422,14 @@ WGE.makeOrtho = function(left, right, bottom, top, nearZ, farZ)
 
 WGE.makeLookAt = function(eyeX, eyeY, eyeZ, centerX, centerY, centerZ,	upX, upY, upZ)
 {
-	var ev = WYVec3.makeVec3(eyeX, eyeY, eyeZ);
-	var cv = WYVec3.makeVec3(centerX, centerY, centerZ);
-	var uv = WYVec3.makeVec3(upX, upY, upZ);
-	var n = WYVec3.vec3Sub(ev, cv).normalize();
-	var u = WYVec3.vec3Cross(uv, n).normalize();
-	var v = WYVec3.vec3Cross(n, u);
+    var ev = WGE.makeVec3(eyeX, eyeY, eyeZ);
+    var cv = WGE.makeVec3(centerX, centerY, centerZ);
+    var uv = WGE.makeVec3(upX, upY, upZ);
+    var n = WGE.vec3Sub(ev, cv).normalize();
+    var u = WGE.vec3Cross(uv, n).normalize();
+    var v = WGE.vec3Cross(n, u);
 
-	return new WGE.mat4(u.data[0], v.data[0], n.data[0], 0.0,
+	return new WGE.Mat4(u.data[0], v.data[0], n.data[0], 0.0,
 		u.data[1], v.data[1], n.data[1], 0.0,
 		u.data[2], v.data[2], n.data[2], 0.0,
 		-u.dot(ev),
@@ -438,7 +440,7 @@ WGE.makeLookAt = function(eyeX, eyeY, eyeZ, centerX, centerY, centerZ,	upX, upY,
 
 WGE.mat4Mul = function(mat4Left, mat4Right)
 {
-	return new WGE.mat4(
+	return new WGE.Mat4(
 		mat4Left.data[0] * mat4Right.data[0] + mat4Left.data[4] * mat4Right.data[1] + mat4Left.data[8] * mat4Right.data[2] + mat4Left.data[12] * mat4Right.data[3],
 		mat4Left.data[1] * mat4Right.data[0] + mat4Left.data[5] * mat4Right.data[1] + mat4Left.data[9] * mat4Right.data[2] + mat4Left.data[13] * mat4Right.data[3],
 		mat4Left.data[2] * mat4Right.data[0] + mat4Left.data[6] * mat4Right.data[1] + mat4Left.data[10] * mat4Right.data[2] + mat4Left.data[14] * mat4Right.data[3],
@@ -458,22 +460,22 @@ WGE.mat4Mul = function(mat4Left, mat4Right)
 		);
 };
 
-WGE.mat4MulVec4 = function(mat4, vec4)
+WGE.mat4MulVec4 = function(Mat4, vec4)
 {
-	return new WGE.mat4(
-		mat4.data[0] * vec4.data[0] + mat4.data[4] * vec4.data[1] + mat4.data[8] * vec4.data[2] + mat4.data[12] * vec4.data[3],
-		mat4.data[1] * vec4.data[0] + mat4.data[5] * vec4.data[1] + mat4.data[9] * vec4.data[2] + mat4.data[13] * vec4.data[3],
-		mat4.data[2] * vec4.data[0] + mat4.data[6] * vec4.data[1] + mat4.data[10] * vec4.data[2] + mat4.data[14] * vec4.data[3],
-		mat4.data[3] * vec4.data[0] + mat4.data[7] * vec4.data[1] + mat4.data[11] * vec4.data[2] + mat4.data[15] * vec4.data[3]
+	return new WGE.Mat4(
+		Mat4.data[0] * vec4.data[0] + Mat4.data[4] * vec4.data[1] + Mat4.data[8] * vec4.data[2] + Mat4.data[12] * vec4.data[3],
+		Mat4.data[1] * vec4.data[0] + Mat4.data[5] * vec4.data[1] + Mat4.data[9] * vec4.data[2] + Mat4.data[13] * vec4.data[3],
+		Mat4.data[2] * vec4.data[0] + Mat4.data[6] * vec4.data[1] + Mat4.data[10] * vec4.data[2] + Mat4.data[14] * vec4.data[3],
+		Mat4.data[3] * vec4.data[0] + Mat4.data[7] * vec4.data[1] + Mat4.data[11] * vec4.data[2] + Mat4.data[15] * vec4.data[3]
 		);
 };
 
-WGE.mat4MulVec3 = function(mat4, vec3)
+WGE.mat4MulVec3 = function(Mat4, vec3)
 {
-	return new WGE.mat4(
-		mat4.data[0] * vec3.data[0] + mat4.data[4] * vec3.data[1] + mat4.data[8] * vec3.data[2],
-		mat4.data[1] * vec3.data[0] + mat4.data[5] * vec3.data[1] + mat4.data[9] * vec3.data[2],
-		mat4.data[2] * vec3.data[0] + mat4.data[6] * vec3.data[1] + mat4.data[10] * vec3.data[2]
+	return new WGE.Mat4(
+		Mat4.data[0] * vec3.data[0] + Mat4.data[4] * vec3.data[1] + Mat4.data[8] * vec3.data[2],
+		Mat4.data[1] * vec3.data[0] + Mat4.data[5] * vec3.data[1] + Mat4.data[9] * vec3.data[2],
+		Mat4.data[2] * vec3.data[0] + Mat4.data[6] * vec3.data[1] + Mat4.data[10] * vec3.data[2]
 		);
 };
 
@@ -489,7 +491,7 @@ WGE.mat4WithQuaternion = function(x, y, z, w)
 	var _2y = y + y;
 	var _2z = z + z;
 	var _2w = w + w;
-	return new WGE.mat4(1.0 - _2y * y - _2z * z,
+	return new WGE.Mat4(1.0 - _2y * y - _2z * z,
 		_2x * y + _2w * z,
 		_2x * z - _2w * y,
 		0.0,
@@ -507,13 +509,13 @@ WGE.mat4WithQuaternion = function(x, y, z, w)
 		1.0);
 };
 
-//obj: WYVec4; w should be 1.0
-//modelViewMat, projMat: WYMat4;
-//viewport: WYVec4;
-//winCoord: WYVec3;
+//obj: WGEVec4; w should be 1.0
+//modelViewMat, projMat: WGE.Mat4;
+//viewport: WGE.Vec4;
+//winCoord: WGE.Vec3;
 WGE.projectMat4 = function(obj, modelViewMat, projMat, viewport, winCoord)
 {
-	var result = WGE.mat4MulVec4(projMat, WYMat4.mat4MulVec4(modelViewMat, obj));
+    var result = WGE.mat4MulVec4(projMat, WGE.mat4MulVec4(modelViewMat, obj));
 
 	if (result.data[3] == 0.0)
 		return false;
