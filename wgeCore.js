@@ -111,32 +111,64 @@ WGE.rotateArray = function(arr)
 {
 	arr.push(arr.shift());
 	return arr[arr.length - 1];
+};
+
+WGE.getContentByID = function(tagID)
+{
+	var content = document.getElementById(scriptID);
+	if (!content) return "";
+	return content.textContent || content.text || content.innerText || content.innerHTML;
+}
+
+WGE.getHTMLByID = function(tagID)
+{
+	var content = document.getElementById(scriptID);
+	if (!content) return "";
+	return content.innerHTML;
+}
+
+WGE.requestTextByURL(url, callback)
+{
+	var async = callback ? true : false;
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open('get', url, async);
+	if(async)
+	{
+		xmlHttp.onreadystatechange = function()	{
+			if(xmlHttp.readyState == 4)
+			{
+				callback(xmlHttp.responseText, xmlHttp);
+			}		
+		};
+	}
+	xmlHttp.send();
+	return xmlHttp.responseText;
 }
 
 WGE.CE = function(name)
 {
 	return document.createElement(name);
-}
+};
 
 WGE.ID = function(id)
 {
 	return document.getElementById(id);
-}
+};
 
 WGE.LOG = function()
 {
 	console.log(arguments);
-}
+};
 
 WGE.WARN = function()
 {
 	console.warn(arguments);
-}
+};
 
 WGE.ERR = function()
 {
 	console.error(arguments);
-}
+};
 
 if(!window.requestAnimationFrame)
 {
@@ -147,4 +179,4 @@ if(!window.requestAnimationFrame)
 							function(callback) {
 								setTimeout(callback, 1000 / 60);
 							};
-}
+};
