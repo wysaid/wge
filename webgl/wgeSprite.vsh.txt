@@ -1,0 +1,27 @@
+/*
+ * wgeSprite.vsh
+ *
+ *  Created on: 2014-8-6
+ *      Author: Wang Yang
+ *        Blog: http://blog.wysaid.org
+ */
+
+attribute vec2 vPosition; //Range: [-1, 1]
+varying vec2 textureCoordinate;
+uniform mat4 m4Projection;
+uniform vec2 v2HalfTexSize;
+
+uniform mat3 m3Rotation;
+uniform vec2 v2Scaling;
+uniform vec2 v2Translation;
+uniform vec2 v2Hotspot;
+
+void main()
+{
+	textureCoordinate = vec2(vPosition.x + 1.0, 1.0 - vPosition.y) / 2.0;
+	vec3 pos = m3Rotation * vec3((vPosition - v2Hotspot) * v2HalfTexSize, 0.0);
+	pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);
+	pos.xy *= v2Scaling;
+	pos.xy += v2Translation;
+	gl_Position = m4Projection * vec4(pos, 1.0);	
+}

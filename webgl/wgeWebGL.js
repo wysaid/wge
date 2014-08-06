@@ -60,7 +60,8 @@ WGE.Texture2D = WGE.Class(
 	initialize : function(ctx, config)
 	{
 		this._context = ctx || WGE.webgl;
-		WGE.extend(this._conf, config);
+		if(config)
+			WGE.extend(this._conf, config);
 	},
 
 	bindContext : function(ctx)
@@ -165,7 +166,7 @@ WGE.Framebuffer = WGE.Class(
 		this._context.bindFramebuffer(this._context.FRAMEBUFFER, this.framebuffer);
 	},
 
-	this.bindTexture2D = function(texObj, attachment)
+	bindTexture2D : function(texObj, attachment)
 	{
 		this.bind();
 		var webgl = this._context;
@@ -179,7 +180,7 @@ WGE.Framebuffer = WGE.Class(
 	}
 });
 
-WGE.Shader = Class(
+WGE.Shader = WGE.Class(
 {
 	shaderType : null,
 	shader : null,

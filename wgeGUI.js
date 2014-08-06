@@ -44,6 +44,12 @@ WGE.GUIInterface = WGE.Class(
 
 	initialize : function(fatherObj)
 	{
+		this.setupEvents();
+		this.bindFather(fatherObj);
+	},
+
+	setupEvents : function()
+	{
 		//Mark : onresize 添加至此无效。
 		this._events = {
 			'mousemove' : this.onmousemove.bind(this),
@@ -59,7 +65,6 @@ WGE.GUIInterface = WGE.Class(
 			//wheel 方法在firefox中不受支持。
 			'mousewheel' : this.onwheel.bind(this) 
 		};
-		this.bindFather(fatherObj);
 	},
 
 	release : function()

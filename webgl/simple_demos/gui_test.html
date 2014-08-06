@@ -1,0 +1,89 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeMatrix.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+var myGUI = WGE.Class(WGE.GUIInterface, 
+{
+	context : undefined,
+	x : 0,
+	y : 0,
+	isMouseDown : false,
+
+	bindFather : function(fatherObj)
+	{
+		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+		{
+			this.context = this.canvas.getContext('experimental-webgl');
+			return !!this.context;
+		}
+		return false;
+	},
+
+	setupPrograms : function()
+	{
+
+	},
+
+	update : function()
+	{
+		if(!this.isMouseDown)
+		{
+			this.x = Math.random() * this.canvas.width;
+			this.y = Math.random() * this.canvas.height;
+		}
+	},
+
+	render : function()
+	{
+		var ctx = this.context;
+		var cvs = this.canvas;
+		ctx.clearRect(0, 0, cvs.width, cvs.height);
+		this.context.fillStyle = "#f00";
+		ctx.fillRect(this.x, this.y, 100, 100);
+		ctx.fillText("click me!", 10, 10);
+	},
+
+	mouseDownEvent : function(e)
+	{
+		this.isMouseDown = true;
+		this.x = e.x || e.offsetX;
+		this.y = e.y || e.offsetY;
+	},
+
+	mouseUpEvent : function(e)
+	{
+		this.isMouseDown = false;
+	},
+
+	mouseMoveEvent : function(e)
+	{
+		if(this.isMouseDown)
+		{
+			this.x = e.offsetX || e.layerX;
+			this.y = e.offsetY || e.layerY;
+		}
+	}
+});
+
+
+var gui = new myGUI(document.body);
+document.body.setAttribute("onresize", "gui.onresize(event);");
+gui.start();
+
+</script>
+
+<p>测试GUI等</p>
+
+</body>
+</html>

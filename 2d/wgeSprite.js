@@ -1,6 +1,6 @@
 "use strict";
 /*
-* wgeTimeline.js
+* wgeSprite.js for context-2d
 *
 *  Created on: 2014-7-25
 *      Author: Wang Yang

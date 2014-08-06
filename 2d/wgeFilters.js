@@ -1,6 +1,6 @@
 "use strict";
 /*
-* wgeFilters.js
+* wgeFilters.js for context-2d
 *
 *  Created on: 2014-8-2
 *      Author: Wang Yang

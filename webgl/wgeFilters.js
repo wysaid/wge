@@ -71,9 +71,9 @@ WGE.TextureBlendModeName =
 "COLOR_BW",		// 22
 ];
 
-WGE.getBlendNameByMode(blendMode)
+WGE.getBlendNameByMode = function(blendMode)
 {
-	if(blendMode < WGE.TextureBlendMode.BLEND_MIX || blendMode >= WGE.TextureBlendMode.BLEND_MAX_NUM))
+	if(blendMode < WGE.TextureBlendMode.BLEND_MIX || blendMode >= WGE.TextureBlendMode.BLEND_MAX_NUM)
 	{
 		return "Invalid Blend Mode";
 	}
