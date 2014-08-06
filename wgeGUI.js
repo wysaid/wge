@@ -19,7 +19,6 @@ WGE.GUIInterface = WGE.Class(
 	father : undefined,
 	fatherWidthName : ['width', 'clientWidth', 'offsetWidth'],
 	fatherHeightName : ['height', 'clientHeight', 'offsetHeight'],
-	_forceAutoResize : false, //强制resize，设置标记后将在每一帧检测是否需要resize
 	resizeEvent : null, //Event由子类或者用户设置
 	mouseMoveEvent : null, 
 	mouseDownEvent : null,
@@ -38,11 +37,42 @@ WGE.GUIInterface = WGE.Class(
 	lastTime : 0,
 	nowTime : 0,
 
-	initialize : function(fatherObj, width, height)
+	_forceAutoResize : false, //强制resize，设置标记后将在每一帧检测是否需要resize
+
+	 //将在gui 重新绑定father或者release时解除对于原有father的绑定。
+	_events : null,
+
+	initialize : function(fatherObj)
 	{
-		this.boundingWidth = width;
-		this.boundingHeight = height;
+		//Mark : onresize 添加至此无效。
+		this._events = {
+			'mousemove' : this.onmousemove.bind(this),
+			'click' : this.onclick.bind(this),
+			'mousedown' : this.onmousedown.bind(this),
+			'mouseup' : this.onmouseup.bind(this),
+			'dblclick' : this.ondblclick.bind(this),
+			'mouseover' : this.onmouseover.bind(this),
+			'mouseout' : this.onmouseout.bind(this),
+			'keydown' : this.onkeydown.bind(this),
+			'keypress' : this.onkeypress.bind(this),
+			'keyup' : this.onkeyup.bind(this),
+			//wheel 方法在firefox中不受支持。
+			'mousewheel' : this.onwheel.bind(this) 
+		};
 		this.bindFather(fatherObj);
+	},
+
+	release : function()
+	{
+		this.canvas = undefined;
+		if(this.father && this.father.removeEventListener)
+		{
+			for(var i in _events)
+			{
+				this.father.removeEventListener(i, _events[i]);
+			}
+		}
+		this.father = undefined;
 	},
 
 	//设置在运行过程中，强制对界面长宽进行检测和刷新。
@@ -101,28 +131,29 @@ WGE.GUIInterface = WGE.Class(
 	//由于canvas元素不支持部分事件(如根据stype属性的百分比宽高设置实际像素宽高)，
 	//需要将它绑定到一个支持此类事件的DOM上，如body, div等
 	//画面将占满整个father元素，且根据father元素自适应
-	bindFather : function(fatherObj)
+	bindFather : function(fatherObj, width, height)
 	{
 		if(typeof fatherObj != 'object')
 		{
 			return false;
 		}
 
+		this.release();
+
+		if(width && height)
+		{
+			this.boundingWidth = width;
+			this.boundingHeight = height;
+		}
+
 		this.canvas = WGE.CE('canvas');
 		fatherObj.appendChild(this.canvas);
 		this.father = fatherObj;
 
-		fatherObj.onmousemove = this.onmousemove.bind(this);
-		fatherObj.onclick = this.onclick.bind(this);
-		fatherObj.onmousedown = this.onmousedown.bind(this);
-		fatherObj.onmouseup = this.onmouseup.bind(this);
-		fatherObj.ondblclick = this.ondblclick.bind(this);
-		fatherObj.onmouseover = this.onmouseover.bind(this);
-		fatherObj.onmouseout = this.onmouseout.bind(this);
-		fatherObj.onwheel = this.onwheel.bind(this);
-		fatherObj.onkeydown = this.onkeydown.bind(this);
-		fatherObj.onkeypress = this.onkeypress.bind(this);
-		fatherObj.onkeyup = this.onkeyup.bind(this);
+        for(var eventName in this._events)
+        {
+        	fatherObj.addEventListener(eventName, this._events[eventName]);
+        }
 
 		var widthName = null, heightName = null;
 
