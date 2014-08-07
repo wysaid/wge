@@ -23,21 +23,21 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 
 	randomize : function()
 	{
-		this.dx = Math.random() * 8.0 + 2.0;
-		this.dy = Math.random() * 8.0 + 2.0;
-		this.drz = Math.random() * 0.1 + 0.02;
+		this.dx = Math.random() * 0.5 + 0.01;
+		this.dy = Math.random() * 0.5 + 0.01;
+		this.drz = Math.random() * 0.005 + 0.001;
 		var x = Math.random();
-		this.dry = x > 0.5 ? x * 0.1 + 0.02 : 0;
+		this.dry = x > 0.5 ? Math.random() * 0.005 + 0.001 : 0;
 	},
 
-	update : function(boundingX, boundingY)
+	update : function(dt, boundingX, boundingY)
 	{
 		var d = this.pos.data;
-		d[0] += this.dx;
-		d[1] += this.dy;
-		this.rotateZ(this.drz);
+		d[0] += this.dx * dt;
+		d[1] += this.dy * dt;
+		this.rotateZ(this.drz * dt);
 		if(this.dry)
-			this.rotateY(this.dry);
+			this.rotateY(this.dry * dt);
 
 		if(d[0] < 0)
 		{
@@ -101,13 +101,13 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
 	},
 
-	update : function()
+	update : function(dt)
 	{
 		var w = this.canvas.width, h = this.canvas.height;
 		var sprites = this.sprites;
 		for(var i in sprites)
 		{
-			sprites[i].update(w, h);
+			sprites[i].update(dt, w, h);
 		}
 	},
 
