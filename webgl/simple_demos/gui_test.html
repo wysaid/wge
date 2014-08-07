@@ -13,74 +13,117 @@
 <body>
 
 <script type="text/javascript">
+"use strict";
+var MySprite = WGE.Class(WGE.Sprite2d,
+{
+	dx : 0,
+	dy : 0,
+	drz : 0,
+	dry : 0,
 
-var myGUI = WGE.Class(WGE.GUIInterface, 
+	randomize : function()
+	{
+		this.dx = Math.random() * 8.0 + 2.0;
+		this.dy = Math.random() * 8.0 + 2.0;
+		this.drz = Math.random() * 0.1 + 0.02;
+		var x = Math.random();
+		this.dry = x > 0.5 ? x * 0.1 + 0.02 : 0;
+	},
+
+	update : function(boundingX, boundingY)
+	{
+		var d = this.pos.data;
+		d[0] += this.dx;
+		d[1] += this.dy;
+		this.rotateZ(this.drz);
+		if(this.dry)
+			this.rotateY(this.dry);
+
+		if(d[0] < 0)
+		{
+			d[0] = 0;
+			this.dx = -this.dx;
+		}
+		else if(d[0] > boundingX)
+		{
+			d[0] = boundingX;
+			this.dx = -this.dx;
+		}
+
+		if(d[1] < 0)
+		{
+			d[1] = 0;
+			this.dy = -this.dy;
+		}
+		else if(d[1] > boundingY)
+		{
+			d[1] = boundingY;
+			this.dy = -this.dy;
+		}
+
+	}
+
+});
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
 {
 	context : undefined,
 	x : 0,
 	y : 0,
-	dx : 3,
-	dy : 3,
-	rot : 0,
 	isMouseDown : false,
-	sprite : null,
+	sprites : null,
 
 	bindFather : function(fatherObj)
 	{
 		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
 		{
-			this.context = this.canvas.getContext('experimental-webgl');
-			this.sprite = new WGE.Sprite2d(this.canvas, this.context);
+			var context = this.canvas.getContext('experimental-webgl');		
+			this.context = context;
+			context.enable(context.BLEND);
+			context.blendFunc(context.ONE, context.ONE);
 			return !!this.context;
 		}
 		return false;
 	},
 
-	initSprite : function(tex, config)
-	{		
-		this.sprite.initSprite(tex, config);
-		this.sprite.scaleTo(0.5, 0.5);//(100, 100);
-		this.sprite.setHotspot(0, 0);
-		this.sprite.setAlpha(0.9);
+	initSprites : function()
+	{
+		var sprites = [];
+		this.sprites = sprites;
+		for(var i = 0; i != 14; ++i)
+		{
+			var img = WGE.ID('test' + i);
+			sprites[i] = new MySprite(this.canvas, this.context);
+			sprites[i].initSprite(img);
+			//sprites[i].setAlpha(0.9);
+			sprites[i].randomize();
+		}
+		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
+		// this.sprite = new WGE.Sprite2d(this.canvas, this.context);
+		// this.sprite.initSprite(tex, config);
+		// this.sprite.scaleTo(0.5, 0.5);//(100, 100);
+		// this.sprite.setHotspot(0, 0);
+		// this.sprite.setAlpha(0.9);sprites[i].rotateTo(Math.random() * 10, Math.random(), Math.random(), Math.random())
 	},
 
 	update : function()
 	{
-		if(!this.isMouseDown)
+		var w = this.canvas.width, h = this.canvas.height;
+		var sprites = this.sprites;
+		for(var i in sprites)
 		{
-			this.x += this.dx;
-			this.y += this.dy;
-			if(this.x < 0)
-			{
-				this.x = 0;
-				this.dx = - this.dx;
-			}
-			else if(this.x > this.canvas.width)
-			{
-				this.x = this.canvas.width;
-				this.dx = - this.dx;
-			}
-
-			if(this.y < 0)
-			{
-				this.y = 0;
-				this.dy = - this.dy;
-			}
-			else if(this.y > this.canvas.height)
-			{
-				this.y = this.canvas.height;
-				this.dy = - this.dy;
-			}
+			sprites[i].update(w, h);
 		}
-		this.sprite.rotateZ(0.05);
-		this.sprite.rotateY(0.07);
-		this.sprite.rotateX(0.14);
 	},
 
 	render : function()
 	{
-		this.sprite.renderTo(this.x, this.y);
-		this.sprite.renderTo(this.canvas.width - this.x, this.canvas.height - this.y);
+		this.context.clear(this.context.COLOR_BUFFER_BIT);
+		var sprites = this.sprites;
+		for(var i in sprites)
+		{
+			sprites[i].render();
+		}
 	},
 
 	mouseDownEvent : function(e, x, y)
@@ -109,7 +152,11 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 		if(this.context)
 		{
 			this.context.viewport(0, 0, this.canvas.width, this.canvas.height);
-			this.sprite.onCanvasResize();
+			var sprites = this.sprites;
+			for(var i in sprites)
+			{
+				sprites[i].onCanvasResize();
+			}
 		}
 	}
 });
@@ -117,14 +164,28 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 var div = WGE.CE('div');
 document.body.appendChild(div);
 div.setAttribute('style', "width: 100%; height:100%;");
-var gui = new myGUI(div);
+var gui = new MyGUI(div);
 document.body.setAttribute("onresize", "gui.onresize(event);");
 
-document.body.setAttribute("onload", "gui.initSprite(WGE.ID('testImage'));gui.start();");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();");
 
 </script>
 
-<img src="../../res/comic0.jpg" id="testImage" style="display:none">
-
+<div style="display:none">
+<img src="../../res/png/0.png" id="test0">
+<img src="../../res/png/1.png" id="test1">
+<img src="../../res/png/2.png" id="test2">
+<img src="../../res/png/3.png" id="test3">
+<img src="../../res/png/4.png" id="test4">
+<img src="../../res/png/5.png" id="test5">
+<img src="../../res/png/6.png" id="test6">
+<img src="../../res/png/7.png" id="test7">
+<img src="../../res/png/8.png" id="test8">
+<img src="../../res/png/9.png" id="test9">
+<img src="../../res/png/10.png" id="test10">
+<img src="../../res/png/11.png" id="test11">
+<img src="../../res/png/12.png" id="test12">
+<img src="../../res/png/13.png" id="test13">
+</div>
 </body>
 </html>
