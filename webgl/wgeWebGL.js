@@ -49,8 +49,8 @@ WGE.Texture2D = WGE.Class(
 	_context : null,
 	//一些纹理配置参数
 	_conf : {
-		TEXTURE_MIN_FILTER : 'LINEAR',
-		TEXTURE_MAG_FILTER : 'LINEAR',
+		TEXTURE_MIN_FILTER : 'NEAREST',
+		TEXTURE_MAG_FILTER : 'NEAREST',
 		TEXTURE_WRAP_S : 'CLAMP_TO_EDGE',
 		TEXTURE_WRAP_T : 'CLAMP_TO_EDGE',
 	},
