@@ -76,11 +76,11 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 var MyGUI = WGE.Class(WGE.GUIInterface, 
 {
 	context : undefined,
-	x : 0,
-	y : 0,
 	isMouseDown : false,
 	sprites : null,
 	deltaTime : 10,
+	x : 0,
+	y : 0,
 
 	bindFather : function(fatherObj)
 	{
@@ -122,6 +122,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 			sprites.push(sprite);
 		}
 
+		sprites[0].setAlpha(1.0);
+
 		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
 	},
 
@@ -140,42 +142,30 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		this.deltaTime = dt;
 		var w = this.canvas.width, h = this.canvas.height;
 		var sprites = this.sprites;
-		for(var i = 0; i < runningSpriteNum; ++i)
+		for(var i = 1; i < runningSpriteNum; ++i)
 		{
 			sprites[i].update(dt, w, h);
 		}
+
+		sprites[0].moveTo(this.x, this.y);
+		sprites[0].rotate(sprites[0].drz * dt);
 	},
 
 	render : function()
 	{
 		this.context.clear(this.context.COLOR_BUFFER_BIT);
 		var sprites = this.sprites;
-		for(var i = 0; i < runningSpriteNum; ++i)
+		for(var i = 1; i < runningSpriteNum; ++i)
 		{
 			sprites[i].render();
 		}
-		//sprites[0].render();
-	},
-
-	mouseDownEvent : function(e, x, y)
-	{
-		this.isMouseDown = true;
-		this.x = x;
-		this.y = y;
-	},
-
-	mouseUpEvent : function()
-	{
-		this.isMouseDown = false;
+		sprites[0].render();
 	},
 
 	mouseMoveEvent : function(e, x, y)
 	{
-		if(this.isMouseDown)
-		{
-			this.x = x;
-			this.y = y;
-		}
+		this.x = x;
+		this.y = y;
 	},
 
 	resizeEvent : function()
