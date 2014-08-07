@@ -223,6 +223,207 @@ WGE.Vec4 = WGE.Class(
 //
 //////////////////////////////////////////////////////
 
+WGE.Mat2 = WGE.Class(
+{
+	data : null,
+
+	initialize : function(m00, m01, m10, m11)
+	{
+		this.data = new Float32Array([m00, m01, m10, m11]);
+	},
+
+	rotate : function(rad)
+	{
+		this.data = WGE.mat2Mul(this, WGE.mat2Rotation(rad)).data;
+	}
+
+});
+
+WGE.makeMat2 = function (m00, m01, m10, m11)
+{
+    return new WGE.Mat2(m00, m01, m10, m11);
+};
+
+WGE.mat2Identity = function ()
+{
+    return new WGE.Mat2(1.0, 0.0, 0.0, 1.0);
+};
+
+WGE.mat2Scale = function (x, y, z)
+{
+    return new WGE.Mat2(x, 0.0, 0.0, y);
+};
+
+WGE.mat2Rotation = function (rad)
+{
+    var cosRad = Math.cos(rad);
+    var sinRad = Math.sin(rad);
+    return new WGE.Mat2(cosRad, sinRad, -sinRad, cosRad);
+};
+
+WGE.mat2Mul = function (mat2Left, mat2Right)
+{
+    return new WGE.Mat2(mat2Left.data[0] * mat2Right.data[0] + mat2Left.data[2] * mat2Right.data[1],
+		mat2Left.data[1] * mat2Right.data[0] + mat2Left.data[3] * mat2Right.data[1],
+		mat2Left.data[0] * mat2Right.data[2] + mat2Left.data[2] * mat2Right.data[3],
+		mat2Left.data[1] * mat2Right.data[2] + mat2Left.data[3] * mat2Right.data[3])
+};
+
+//////////////////////////////////////////////////////
+// matrix 3 x 3
+//////////////////////////////////////////////////////
+
+WGE.Mat3 = WGE.Class(
+{
+    data: null,
+
+    initialize: function (m00, m01, m02, m10, m11, m12, m20, m21, m22)
+    {
+        this.data = new Float32Array([m00, m01, m02, m10, m11, m12, m20, m21, m22]);
+    },
+
+    transpose: function ()
+    {
+        this.data = new Float32Array([this.data[0], this.data[3], this.data[6],
+			this.data[1], this.data[4], this.data[7],
+			this.data[2], this.data[5], this.data[8]]);
+    },
+
+    rotate : function(rad, x, y, z)
+    {
+    	this.data = WGE.mat3Mul(this, WGE.mat3Rotation(rad, x, y, z)).data;
+    },
+    
+    rotateX : function(rad)
+    {
+    	this.data = WGE.mat3Mul(this, WGE.mat3XRotation(rad)).data;
+    },
+
+    rotateY : function(rad)
+    {
+    	this.data = WGE.mat3Mul(this, WGE.mat3YRotation(rad)).data;
+    },
+
+    rotateZ : function(rad)
+    {
+    	this.data = WGE.mat3Mul(this, WGE.mat3ZRotation(rad)).data;
+    }
+
+});
+
+WGE.mat3Mul = function (mat3Left, mat3Right)
+{
+    return new WGE.Mat3(mat3Left.data[0] * mat3Right.data[0] + mat3Left.data[3] * mat3Right.data[1] + mat3Left.data[6] * mat3Right.data[2],
+		mat3Left.data[1] * mat3Right.data[0] + mat3Left.data[4] * mat3Right.data[1] + mat3Left.data[7] * mat3Right.data[2],
+		mat3Left.data[2] * mat3Right.data[0] + mat3Left.data[5] * mat3Right.data[1] + mat3Left.data[8] * mat3Right.data[2],
+
+		mat3Left.data[0] * mat3Right.data[3] + mat3Left.data[3] * mat3Right.data[4] + mat3Left.data[6] * mat3Right.data[5],
+		mat3Left.data[1] * mat3Right.data[3] + mat3Left.data[4] * mat3Right.data[4] + mat3Left.data[7] * mat3Right.data[5],
+		mat3Left.data[2] * mat3Right.data[3] + mat3Left.data[5] * mat3Right.data[4] + mat3Left.data[8] * mat3Right.data[5],
+
+		mat3Left.data[0] * mat3Right.data[6] + mat3Left.data[3] * mat3Right.data[7] + mat3Left.data[6] * mat3Right.data[8],
+		mat3Left.data[1] * mat3Right.data[6] + mat3Left.data[4] * mat3Right.data[7] + mat3Left.data[7] * mat3Right.data[8],
+		mat3Left.data[2] * mat3Right.data[6] + mat3Left.data[5] * mat3Right.data[7] + mat3Left.data[8] * mat3Right.data[8]);
+};
+
+WGE.mat3MulVec3 = function (mat3, vec3)
+{
+    return new WGE.Mat3(mat3.data[0] * vec3.data[0] + mat3.data[3] * vec3.data[1] + mat3.data[6] * vec3.data[2],
+		mat3.data[1] * vec3.data[0] + mat3.data[4] * vec3.data[1] + mat3.data[7] * vec3.data[2],
+		mat3.data[2] * vec3.data[0] + mat3.data[5] * vec3.data[1] + mat3.data[8] * vec3.data[2]);
+};
+
+/////////////////////////////////////////////////////////////
+
+WGE.makeMat3 = function (m00, m01, m02, m10, m11, m12, m20, m21, m22)
+{
+    return new WGE.Mat3(m00, m01, m02, m10, m11, m12, m20, m21, m22);
+};
+
+WGE.mat3Identity = function ()
+{
+    return new WGE.Mat3(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+};
+
+WGE.mat3Scale = function (x, y, z)
+{
+    return new WGE.Mat3(x, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, z);
+};
+
+WGE.mat3Rotation = function (rad, x, y, z)
+{
+    var scale = 1.0 / Math.sqrt(x * x + y * y + z * z);
+    x *= scale;
+    y *= scale;
+    z *= scale;
+    var cosRad = Math.cos(rad);
+    var cosp = 1.0 - cosRad;
+    var sinRad = Math.sin(rad);
+    return new WGE.Mat3(cosRad + cosp * x * x,
+		cosp * x * y + z * sinRad,
+		cosp * x * z - y * sinRad,
+		cosp * x * y - z * sinRad,
+		cosRad + cosp * y * y,
+		cosp * y * z + x * sinRad,
+		cosp * x * z + y * sinRad,
+		cosp * y * z - x * sinRad,
+		cosRad + cosp * z * z);
+};
+
+WGE.mat3XRotation = function (rad)
+{
+    var cosRad = Math.cos(rad);
+    var sinRad = Math.sin(rad);
+    return new WGE.Mat3(1.0, 0.0, 0.0,
+		0.0, cosRad, sinRad,
+		0.0, -sinRad, cosRad);
+};
+
+WGE.mat3YRotation = function (rad)
+{
+    var cosRad = Math.cos(rad);
+    var sinRad = Math.sin(rad);
+    return new WGE.Mat3(cosRad, 0.0, -sinRad,
+		0.0, 1.0, 0.0,
+		sinRad, 0.0, cosRad);
+};
+
+WGE.mat3ZRotation = function (rad)
+{
+    var cosRad = Math.cos(rad);
+    var sinRad = Math.sin(rad);
+    return new WGE.Mat3(cosRad, sinRad, 0.0,
+		-sinRad, cosRad, 0.0,
+		0.0, 0.0, 1.0);
+};
+
+WGE.mat3Mul = function (mat3Left, mat3Right)
+{
+    return new WGE.Mat3(mat3Left.data[0] * mat3Right.data[0] + mat3Left.data[3] * mat3Right.data[1] + mat3Left.data[6] * mat3Right.data[2],
+		mat3Left.data[1] * mat3Right.data[0] + mat3Left.data[4] * mat3Right.data[1] + mat3Left.data[7] * mat3Right.data[2],
+		mat3Left.data[2] * mat3Right.data[0] + mat3Left.data[5] * mat3Right.data[1] + mat3Left.data[8] * mat3Right.data[2],
+
+		mat3Left.data[0] * mat3Right.data[3] + mat3Left.data[3] * mat3Right.data[4] + mat3Left.data[6] * mat3Right.data[5],
+		mat3Left.data[1] * mat3Right.data[3] + mat3Left.data[4] * mat3Right.data[4] + mat3Left.data[7] * mat3Right.data[5],
+		mat3Left.data[2] * mat3Right.data[3] + mat3Left.data[5] * mat3Right.data[4] + mat3Left.data[8] * mat3Right.data[5],
+
+		mat3Left.data[0] * mat3Right.data[6] + mat3Left.data[3] * mat3Right.data[7] + mat3Left.data[6] * mat3Right.data[8],
+		mat3Left.data[1] * mat3Right.data[6] + mat3Left.data[4] * mat3Right.data[7] + mat3Left.data[7] * mat3Right.data[8],
+		mat3Left.data[2] * mat3Right.data[6] + mat3Left.data[5] * mat3Right.data[7] + mat3Left.data[8] * mat3Right.data[8]);
+};
+
+WGE.mat3MulVec3 = function (mat3, vec3)
+{
+    return new WGE.Mat3(mat3.data[0] * vec3.data[0] + mat3.data[3] * vec3.data[1] + mat3.data[6] * vec3.data[2],
+		mat3.data[1] * vec3.data[0] + mat3.data[4] * vec3.data[1] + mat3.data[7] * vec3.data[2],
+		mat3.data[2] * vec3.data[0] + mat3.data[5] * vec3.data[1] + mat3.data[8] * vec3.data[2]);
+};
+
+
+////////////////////////////////////////////////////////////////////
+// matrix 4 x 4
+////////////////////////////////////////////////////////////////////
+
 WGE.Mat4 = WGE.Class(
 {
 	data : null,
@@ -290,7 +491,27 @@ WGE.Mat4 = WGE.Class(
 		this.scaleX(x);
 		this.scaleY(y);
 		this.scaleZ(z);
-	}
+	},
+
+	rotate : function(rad, x, y, z)
+    {
+    	this.data = WGE.mat4Mul(this, WGE.mat4Rotation(rad, x, y, z)).data;
+    },
+    
+    rotateX : function(rad)
+    {
+    	this.data = WGE.mat4Mul(this, WGE.mat4XRotation(rad)).data;
+    },
+
+    rotateY : function(rad)
+    {
+    	this.data = WGE.mat4Mul(this, WGE.mat4YRotation(rad)).data;
+    },
+
+    rotateZ : function(rad)
+    {
+    	this.data = WGE.mat4Mul(this, WGE.mat4ZRotation(rad)).data;
+    }
 });
 
 /////////////////////////////////////////////////////////////
@@ -344,11 +565,7 @@ WGE.mat4Rotation = function(rad, x, y, z)
 		cosp * x * z + y * sinRad,
 		cosp * y * z - x * sinRad,
 		cosRad + cosp * z * z,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		1.0);
+		0.0, 0.0, 0.0, 0.0, 1.0);
 };
 
 WGE.mat4XRotation = function(rad)
@@ -440,8 +657,7 @@ WGE.makeLookAt = function(eyeX, eyeY, eyeZ, centerX, centerY, centerZ,	upX, upY,
 
 WGE.mat4Mul = function(mat4Left, mat4Right)
 {
-	return new WGE.Mat4(
-		mat4Left.data[0] * mat4Right.data[0] + mat4Left.data[4] * mat4Right.data[1] + mat4Left.data[8] * mat4Right.data[2] + mat4Left.data[12] * mat4Right.data[3],
+	return new WGE.Mat4(mat4Left.data[0] * mat4Right.data[0] + mat4Left.data[4] * mat4Right.data[1] + mat4Left.data[8] * mat4Right.data[2] + mat4Left.data[12] * mat4Right.data[3],
 		mat4Left.data[1] * mat4Right.data[0] + mat4Left.data[5] * mat4Right.data[1] + mat4Left.data[9] * mat4Right.data[2] + mat4Left.data[13] * mat4Right.data[3],
 		mat4Left.data[2] * mat4Right.data[0] + mat4Left.data[6] * mat4Right.data[1] + mat4Left.data[10] * mat4Right.data[2] + mat4Left.data[14] * mat4Right.data[3],
 		mat4Left.data[3] * mat4Right.data[0] + mat4Left.data[7] * mat4Right.data[1] + mat4Left.data[11] * mat4Right.data[2] + mat4Left.data[15] * mat4Right.data[3],
@@ -456,27 +672,22 @@ WGE.mat4Mul = function(mat4Left, mat4Right)
 		mat4Left.data[0] * mat4Right.data[12] + mat4Left.data[4] * mat4Right.data[13] + mat4Left.data[8] * mat4Right.data[14] + mat4Left.data[12] * mat4Right.data[15],			
 		mat4Left.data[1] * mat4Right.data[12] + mat4Left.data[5] * mat4Right.data[13] + mat4Left.data[9] * mat4Right.data[14] + mat4Left.data[13] * mat4Right.data[15],			
 		mat4Left.data[2] * mat4Right.data[12] + mat4Left.data[6] * mat4Right.data[13] + mat4Left.data[10] * mat4Right.data[14] + mat4Left.data[14] * mat4Right.data[15],			
-		mat4Left.data[3] * mat4Right.data[12] + mat4Left.data[7] * mat4Right.data[13] + mat4Left.data[11] * mat4Right.data[14] + mat4Left.data[15] * mat4Right.data[15]
-		);
+		mat4Left.data[3] * mat4Right.data[12] + mat4Left.data[7] * mat4Right.data[13] + mat4Left.data[11] * mat4Right.data[14] + mat4Left.data[15] * mat4Right.data[15]);
 };
 
-WGE.mat4MulVec4 = function(Mat4, vec4)
+WGE.mat4MulVec4 = function(mat4, vec4)
 {
-	return new WGE.Mat4(
-		Mat4.data[0] * vec4.data[0] + Mat4.data[4] * vec4.data[1] + Mat4.data[8] * vec4.data[2] + Mat4.data[12] * vec4.data[3],
-		Mat4.data[1] * vec4.data[0] + Mat4.data[5] * vec4.data[1] + Mat4.data[9] * vec4.data[2] + Mat4.data[13] * vec4.data[3],
-		Mat4.data[2] * vec4.data[0] + Mat4.data[6] * vec4.data[1] + Mat4.data[10] * vec4.data[2] + Mat4.data[14] * vec4.data[3],
-		Mat4.data[3] * vec4.data[0] + Mat4.data[7] * vec4.data[1] + Mat4.data[11] * vec4.data[2] + Mat4.data[15] * vec4.data[3]
-		);
+	return new WGE.Mat4(mat4.data[0] * vec4.data[0] + mat4.data[4] * vec4.data[1] + mat4.data[8] * vec4.data[2] + mat4.data[12] * vec4.data[3],
+		mat4.data[1] * vec4.data[0] + mat4.data[5] * vec4.data[1] + mat4.data[9] * vec4.data[2] + mat4.data[13] * vec4.data[3],
+		mat4.data[2] * vec4.data[0] + mat4.data[6] * vec4.data[1] + mat4.data[10] * vec4.data[2] + mat4.data[14] * vec4.data[3],
+		mat4.data[3] * vec4.data[0] + mat4.data[7] * vec4.data[1] + mat4.data[11] * vec4.data[2] + mat4.data[15] * vec4.data[3]);
 };
 
-WGE.mat4MulVec3 = function(Mat4, vec3)
+WGE.mat4MulVec3 = function(mat4, vec3)
 {
-	return new WGE.Mat4(
-		Mat4.data[0] * vec3.data[0] + Mat4.data[4] * vec3.data[1] + Mat4.data[8] * vec3.data[2],
-		Mat4.data[1] * vec3.data[0] + Mat4.data[5] * vec3.data[1] + Mat4.data[9] * vec3.data[2],
-		Mat4.data[2] * vec3.data[0] + Mat4.data[6] * vec3.data[1] + Mat4.data[10] * vec3.data[2]
-		);
+	return new WGE.Mat4(mat4.data[0] * vec3.data[0] + mat4.data[4] * vec3.data[1] + mat4.data[8] * vec3.data[2],
+		mat4.data[1] * vec3.data[0] + mat4.data[5] * vec3.data[1] + mat4.data[9] * vec3.data[2],
+		mat4.data[2] * vec3.data[0] + mat4.data[6] * vec3.data[1] + mat4.data[10] * vec3.data[2]);
 };
 
 //通过四元数创建矩阵
@@ -502,11 +713,7 @@ WGE.mat4WithQuaternion = function(x, y, z, w)
 		_2x * z + _2w * y,
 		_2y * z - _2w * x,
 		1.0 - _2x * x - _2y * y,
-		0.0,
-		0.0,
-		0.0,
-		0.0,
-		1.0);
+		0.0, 0.0, 0.0, 0.0, 1.0);
 };
 
 //obj: WGEVec4; w should be 1.0

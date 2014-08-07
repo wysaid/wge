@@ -6,6 +6,7 @@
  *        Blog: http://blog.wysaid.org
  */
 
+precision mediump float;
 varying vec2 textureCoordinate;
 uniform sampler2D inputImageTexture;
 uniform float alpha;

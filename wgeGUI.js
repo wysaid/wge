@@ -91,6 +91,7 @@ WGE.GUIInterface = WGE.Class(
 	{
 		if(this.isStarted)
 			return;
+//		this.onresize();
 		this.isStarted = true;
 		this.startTime = Date.now();
 		this.lastTime = this.startTime;
@@ -209,43 +210,57 @@ WGE.GUIInterface = WGE.Class(
 	onmousemove : function(e)
 	{
 		if(this.mouseMoveEvent)
-			this.mouseMoveEvent(e);
+		{
+			this.mouseMoveEvent(e, e.offsetX || e.layerX, e.offsetY || e.layerY);
+		}
 	},
 
 	onclick : function(e)
 	{
 		if(this.mouseClickEvent)
-			this.mouseClickEvent(e);
+		{
+			this.mouseClickEvent(e, e.offsetX || e.layerX, e.offsetY || e.layerY);
+		}
 	},
 
 	onmousedown : function(e)
 	{
 		if(this.mouseDownEvent)
-			this.mouseDownEvent(e);
+		{
+			this.mouseDownEvent(e, e.offsetX || e.layerX, e.offsetY || e.layerY);
+		}
 	},
 
 	onmouseup : function(e)
 	{
 		if(this.mouseUpEvent)
-			this.mouseUpEvent(e);
+		{
+			this.mouseUpEvent(e, e.offsetX || e.layerX, e.offsetY || e.layerY);
+		}
 	},
 
 	ondblclick : function(e)
 	{
 		if(this.mouseDBLClickEvent)
-			this.mouseDBLClickEvent(e);
+		{
+			this.mouseDBLClickEvent(e, e.offsetX || e.layerX, e.offsetY || e.layerY);
+		}
 	},
 
 	onmouseover : function(e)
 	{
 		if(this.mouseOverEvent)
-			this.mouseOverEvent(e);
+		{
+			this.mouseOverEvent(e, e.offsetX || e.layerX, e.offsetY || e.layerY);
+		}
 	},
 
 	onmouseout : function(e)
 	{
 		if(this.mouseOutEvent)
-			this.mouseOutEvent(e);
+		{
+			this.mouseOutEvent(e, e.offsetX || e.layerX, e.offsetY || e.layerY);
+		}
 	},
 
 	onwheel : function(e)

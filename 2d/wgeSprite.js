@@ -98,10 +98,10 @@ WGE.Sprite = WGE.Class(
 		this.pos.data[1] = y;
 	},
 
-	scale : function(ds, dy)
+	scale : function(sx, sy)
 	{
-		this.scaling.data[0] *= ds;
-		this.scaling.data[1] *= dy;
+		this.scaling.data[0] *= sx;
+		this.scaling.data[1] *= sy;
 	},
 
 	scaleTo : function(sx, sy)

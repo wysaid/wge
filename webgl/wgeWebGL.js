@@ -83,16 +83,16 @@ WGE.Texture2D = WGE.Class(
 
 	initWithTag : function(tagID)
 	{
-		this.initWithObj(WGE.ID(tagID));
+		this.initWithImg(WGE.ID(tagID));
 	},
 
-	initWithObj : function(imgObj)
+	initWithImg : function(imageObj)
 	{
 		if(!imageObj)
  			return;
  		var webgl = this._context;
-		this.width = this.image.width;
- 		this.height = this.image.height;
+		this.width = imageObj.width;
+ 		this.height = imageObj.height;
  		this.texture = webgl.createTexture();
  		webgl.bindTexture(webgl.TEXTURE_2D, this.texture);
  		webgl.texImage2D(webgl.TEXTURE_2D, 0, webgl.RGBA, webgl.RGBA, webgl.UNSIGNED_BYTE, imageObj);
@@ -106,12 +106,12 @@ WGE.Texture2D = WGE.Class(
 	initWithURL : function(imgURL, callback)
 	{
 		var self = this;
-		this.image = new Image();
-		this.image.onload = function(){
-			this.initWithObj.call(self, this);
-		}
-		
-		this.image.src = imgURL;
+		var image = new Image();
+		image.onload = function(){
+			self.initWithImg.call(self, image);
+			callback();
+		};		
+		image.src = imgURL;
 	},
 
 	//textureIndex 从0开始， 对应 webgl.TEXTURE0 及其以后
@@ -119,8 +119,9 @@ WGE.Texture2D = WGE.Class(
  	//之后使用时，可以与传递的uniform值直接对应。
 	bindToIndex : function(textureIndex)
 	{
-		this._context.activeTexture(webgl.TEXTURE0 + textureIndex);
-		this._context.bindTexture(webgl.TEXTURE_2D, this.texture);
+		var webgl = this._context;
+		webgl.activeTexture(webgl.TEXTURE0 + textureIndex);
+		webgl.bindTexture(webgl.TEXTURE_2D, this.texture);
 	},
 
 	release : function()
@@ -134,12 +135,6 @@ WGE.Texture2D = WGE.Class(
 
  		this.texture = null;
  		this._context = null;
-
- 		if(this.image)
- 		{
- 			this.image.onload = null;
- 			this.image = null;
- 		}
 	}
 });
 
@@ -298,11 +293,12 @@ WGE.Program = WGE.Class(
 		return this.vertShader.loadShaderFromURL(shaderCode);
 	},
 
+	//在两种shader均指定并且初始化成功后，再执行链接操作
 	link : function()
 	{
 		var webgl = this._context;
-		webgl.attachShader(this.program, this.vertShader);
-		webgl.attachShader(this.program, this.fragShader);
+		webgl.attachShader(this.program, this.vertShader.shader);
+		webgl.attachShader(this.program, this.fragShader.shader);
 		webgl.linkProgram(this.program);
 		if (!webgl.getProgramParameter(this.program, webgl.LINK_STATUS))
 		{
@@ -329,7 +325,7 @@ WGE.Program = WGE.Class(
 
 	attribLocation : function(attribName)
 	{
-		return this._context.getAttribLocation(attribName);
+		return this._context.getAttribLocation(this.program, attribName);
 	},
 
 	//Should be called before "bind()"
@@ -341,67 +337,67 @@ WGE.Program = WGE.Class(
 	sendUniform1f : function(uniformName, v1)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform1f(loc, v1);
+		this._context.uniform1f(loc, v1);
 	},
 
 	sendUniform2f : function(uniformName, v1, v2)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform2f(loc, v1, v2);
+		this._context.uniform2f(loc, v1, v2);
 	},
 
 	sendUniform3f : function(uniformName, v1, v2, v3)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform3f(loc, v1, v2, v3);
+		this._context.uniform3f(loc, v1, v2, v3);
 	},
 
 	sendUniform4f : function(uniformName, v1, v2, v3, v4)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform4f(loc, v1, v2, v3, v4);
+		this._context.uniform4f(loc, v1, v2, v3, v4);
 	},
 
 	sendUniform1i : function(uniformName, v1)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform1i(loc, v1);
+		this._context.uniform1i(loc, v1);
 	},
 
 	sendUniform2i : function(uniformName, v1, v2)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform2i(loc, v1, v2);
+		this._context.uniform2i(loc, v1, v2);
 	},
 
 	sendUniform3i : function(uniformName, v1, v2, v3)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform3i(loc, v1, v2, v3);
+		this._context.uniform3i(loc, v1, v2, v3);
 	},
 
 	sendUniform4i : function(uniformName, v1, v2, v3, v4)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniform4i(loc, v1, v2, v3, v4);
+		this._context.uniform4i(loc, v1, v2, v3, v4);
 	},
 
 	sendUniformMat2 : function(uniformName, transpose, matrix)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniformMatrix2fv(loc, transpose, matrix);
+		this._context.uniformMatrix2fv(loc, transpose, matrix);
 	},
 
 	sendUniformMat3 : function(uniformName, transpose, matrix)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniformMatrix3fv(loc, transpose, matrix);
+		this._context.uniformMatrix3fv(loc, transpose, matrix);
 	},
 
 	sendUniformMat4 : function(uniformName, transpose, matrix)
 	{
 		var loc = this.uniformLocation(uniformName);
-		webgl.uniformMatrix4fv(loc, transpose, matrix);
+		this._context.uniformMatrix4fv(loc, transpose, matrix);
 	}
 
 });

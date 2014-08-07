@@ -4,6 +4,7 @@
 <title>simpleDemo</title>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeMatrix.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
 <script type="text/javascript" src="../wgeWebGL.js"></script>
 
@@ -18,72 +19,112 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 	context : undefined,
 	x : 0,
 	y : 0,
+	dx : 3,
+	dy : 3,
+	rot : 0,
 	isMouseDown : false,
+	sprite : null,
 
 	bindFather : function(fatherObj)
 	{
 		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
 		{
 			this.context = this.canvas.getContext('experimental-webgl');
+			this.sprite = new WGE.Sprite2d(this.canvas, this.context);
 			return !!this.context;
 		}
 		return false;
 	},
 
-	setupPrograms : function()
-	{
-
+	initSprite : function(tex, config)
+	{		
+		this.sprite.initSprite(tex, config);
+		this.sprite.scaleTo(0.5, 0.5);//(100, 100);
+		this.sprite.setHotspot(0, 0);
+		this.sprite.setAlpha(0.9);
 	},
 
 	update : function()
 	{
 		if(!this.isMouseDown)
 		{
-			this.x = Math.random() * this.canvas.width;
-			this.y = Math.random() * this.canvas.height;
+			this.x += this.dx;
+			this.y += this.dy;
+			if(this.x < 0)
+			{
+				this.x = 0;
+				this.dx = - this.dx;
+			}
+			else if(this.x > this.canvas.width)
+			{
+				this.x = this.canvas.width;
+				this.dx = - this.dx;
+			}
+
+			if(this.y < 0)
+			{
+				this.y = 0;
+				this.dy = - this.dy;
+			}
+			else if(this.y > this.canvas.height)
+			{
+				this.y = this.canvas.height;
+				this.dy = - this.dy;
+			}
 		}
+		this.sprite.rotateZ(0.05);
+		this.sprite.rotateY(0.07);
+		this.sprite.rotateX(0.14);
 	},
 
 	render : function()
 	{
-		var ctx = this.context;
-		var cvs = this.canvas;
-		ctx.clearRect(0, 0, cvs.width, cvs.height);
-		this.context.fillStyle = "#f00";
-		ctx.fillRect(this.x, this.y, 100, 100);
-		ctx.fillText("click me!", 10, 10);
+		this.sprite.renderTo(this.x, this.y);
+		this.sprite.renderTo(this.canvas.width - this.x, this.canvas.height - this.y);
 	},
 
-	mouseDownEvent : function(e)
+	mouseDownEvent : function(e, x, y)
 	{
 		this.isMouseDown = true;
-		this.x = e.x || e.offsetX;
-		this.y = e.y || e.offsetY;
+		this.x = x;
+		this.y = y;
 	},
 
-	mouseUpEvent : function(e)
+	mouseUpEvent : function()
 	{
 		this.isMouseDown = false;
 	},
 
-	mouseMoveEvent : function(e)
+	mouseMoveEvent : function(e, x, y)
 	{
 		if(this.isMouseDown)
 		{
-			this.x = e.offsetX || e.layerX;
-			this.y = e.offsetY || e.layerY;
+			this.x = x;
+			this.y = y;
+		}
+	},
+
+	resizeEvent : function()
+	{
+		if(this.context)
+		{
+			this.context.viewport(0, 0, this.canvas.width, this.canvas.height);
+			this.sprite.onCanvasResize();
 		}
 	}
 });
 
-
-var gui = new myGUI(document.body);
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+var gui = new myGUI(div);
 document.body.setAttribute("onresize", "gui.onresize(event);");
-gui.start();
+
+document.body.setAttribute("onload", "gui.initSprite(WGE.ID('testImage'));gui.start();");
 
 </script>
 
-<p>测试GUI等</p>
+<img src="../../res/comic0.jpg" id="testImage" style="display:none">
 
 </body>
 </html>
