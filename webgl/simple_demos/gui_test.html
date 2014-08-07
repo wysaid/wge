@@ -210,7 +210,7 @@ function setBlend(mode)
 
 </script>
 <input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
-<input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 0) runningSpriteNum = 0;"><br>
+<input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 1) runningSpriteNum = 1;"><br>
 <input type="button" value="No blend" style="width:100px" onclick="gui.context.disable(gui.context.BLEND);"><br>
 <input type="button" value="add" style="width:100px" onclick="setBlend('ONE');"><br>
 <input type="button" value="1 - src_alpha" style="width:100px" onclick="setBlend('ONE_MINUS_SRC_ALPHA');"><br>
