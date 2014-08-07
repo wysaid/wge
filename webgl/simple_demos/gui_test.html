@@ -95,15 +95,10 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 			var img = WGE.ID('test' + i);
 			sprites[i] = new MySprite(this.canvas, this.context);
 			sprites[i].initSprite(img);
-			//sprites[i].setAlpha(0.9);
+			sprites[i].setAlpha(0.5 + Math.random() * 0.5);
 			sprites[i].randomize();
 		}
 		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
-		// this.sprite = new WGE.Sprite2d(this.canvas, this.context);
-		// this.sprite.initSprite(tex, config);
-		// this.sprite.scaleTo(0.5, 0.5);//(100, 100);
-		// this.sprite.setHotspot(0, 0);
-		// this.sprite.setAlpha(0.9);sprites[i].rotateTo(Math.random() * 10, Math.random(), Math.random(), Math.random())
 	},
 
 	update : function()
