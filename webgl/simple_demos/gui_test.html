@@ -86,7 +86,11 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	{
 		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
 		{
-			var context = this.canvas.getContext('experimental-webgl');		
+			var context = this.canvas.getContext('experimental-webgl');
+			if(!context)
+			{
+				alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+			}
 			this.context = context;
 			context.enable(context.BLEND);
 			context.blendFunc(context.ONE, context.ONE);
