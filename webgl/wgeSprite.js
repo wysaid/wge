@@ -9,6 +9,7 @@
 
 //注： 带下划线的参数请勿直接写入
 
+//为了提升效率，对Sprite2d功能进行小幅度阉割，其余功能移到 Sprite2dExt中。
 WGE.Sprite2d = WGE.Class(
 {
 	//sprite绘制的目标canvas (主要用于在canvas长宽改变时获取canvas长宽)，
@@ -17,7 +18,7 @@ WGE.Sprite2d = WGE.Class(
 
 	texture : null,      //WGE.Texture2D 对象
 	pos : null,          //sprite2d 的位置, 包含两个参数, 分别表示 x 和 y
-	rot : null,          //sprite2d 旋转弧度，包含三个参数，可绕x,y,z轴旋转。
+	rot : 0,          //sprite2d 旋转弧度，包含一个参数，表示旋转弧度（逆时针）
 	scaling : null,      //sprite2d 缩放大小（倍率），包含两个参数，分别横竖方向缩放
 	zIndex : 0,          //sprite2d 的z 值， 直接支持， 需要开启 webgl的深度测试
 
@@ -25,7 +26,6 @@ WGE.Sprite2d = WGE.Class(
 	_hotspot : null,
 
 	_alpha : 1.0,     //设置sprite的透明度, 默认1
-	_blendMode : null, //混合模式（待实现）	
 
 	_program : null, //Sprite 所使用的 与webgl 相关信息
 	_posAttribLocation : 0, //Never change this!
@@ -52,7 +52,6 @@ WGE.Sprite2d = WGE.Class(
 	initialize : function(canvas, ctx)
 	{
 		this.pos = new WGE.Vec2(0, 0);
-		this.rot = WGE.mat3Identity();
 		this.scaling = new WGE.Vec2(1, 1);
 		this._hotspot = new WGE.Vec2(0, 0);
 
@@ -62,7 +61,7 @@ WGE.Sprite2d = WGE.Class(
 			WGE.ERR("Invalid Params while creating WGE.Sprite2d!");
 		}
 		this._context = ctx || WGE.webgl || this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
-		this._initProgram();
+		this._initProgram(WGE.Sprite2d.VertexShader, WGE.Sprite2d.FragmentShaderPremultiply);
 		this.onCanvasResize();
 		
 		this.setCanvasFlip(false, true);
@@ -98,7 +97,7 @@ WGE.Sprite2d = WGE.Class(
 
 		if(tex instanceof WGE.Texture2D)
 		{
-			this._textureRelease = !w;
+			this._textureRelease = !noRelease;
 			this.texture = tex;
 		}
 		else
@@ -181,6 +180,151 @@ WGE.Sprite2d = WGE.Class(
 		this._program.sendUniform2f(WGE.Sprite2d.FlipSpriteName, fx, fy); 
 	},
 
+	rotate : function(rad)
+	{
+		this.rot += rad;
+	},
+
+	rotateTo : function(rad)
+	{
+		this.rot = rad;
+	},
+
+	scale : function(sx, sy)
+	{
+		this.scaling.data[0] *= sx;
+		this.scaling.data[1] *= sy;
+	},
+
+	scaleTo : function(sx, sy)
+	{
+		this.scaling.data[0] = sx;
+		this.scaling.data[1] = sy;
+	},
+
+	scaleToPixel : function(sx, sy)
+	{
+		this.scaling.data[0] = sx / this.texture.width;
+		this.scaling.data[1] = sx / this.texture.height;
+	},
+
+	move : function(dx, dy)
+	{
+		this.pos.data[0] += dx;
+		this.pos.data[1] += dy;
+	},
+
+	moveTo : function(x, y)
+	{
+		this.pos.data[0] = x;
+		this.pos.data[1] = y;
+	},
+
+	//hotspot 默认为中心位置，并且x,y分别为纹理长宽的倍率
+	//(0, 0)表示中心位置，(-1, -1)表示左上角，与2d方式有较大区别
+	setHotspot : function(hx, hy)
+	{
+		this._hotspot.data[0] = hx;
+		this._hotspot.data[1] = hy;
+		this._updateHotspot();
+	},
+
+	_updateRotation : function()
+	{
+		this._context.uniform1f(this._rotationLoc, this.rot);
+	},
+
+	_updateTranslation : function()
+	{
+		this._context.uniform2f(this._translationLoc, this.pos.data[0], this.pos.data[1]);
+	},
+
+	_updateScaling : function()
+	{
+		this._context.uniform2f(this._scalingLoc, this.scaling.data[0], this.scaling.data[1]);
+	},	
+
+	_updateHotspot : function()
+	{
+		this._program.bind();
+		this._context.uniform2f(this._hotspotLoc, this._hotspot.data[0], this._hotspot.data[1]);
+	},
+
+	_initProgram : function(vsh, fsh)
+	{
+		var context = this._context;
+		var program = new WGE.Program(context);
+
+		this._program = program;
+
+		program.initWithShaderCode(vsh, fsh);
+		program.bindAttribLocation(WGE.Sprite2d.AtrribPositionName, this._posAttribLocation);
+		if(!program.link())
+		{
+			WGE.ERR("WGE.Sprite2d : Program link Failed!");
+			return false;
+		}
+
+		program.bind();
+
+		this._projectionLoc = program.uniformLocation(WGE.Sprite2d.ProjectionMatrixName);
+		this._halfTexLoc = program.uniformLocation(WGE.Sprite2d.HalfTexSizeName);
+		this._rotationLoc = program.uniformLocation(WGE.Sprite2d.RotationName);
+		this._scalingLoc = program.uniformLocation(WGE.Sprite2d.ScalingName);
+		this._translationLoc = program.uniformLocation(WGE.Sprite2d.TranslationName);
+		this._hotspotLoc = program.uniformLocation(WGE.Sprite2d.HotspotName);
+		this._alphaLoc = program.uniformLocation(WGE.Sprite2d.AlphaName);
+		this._zIndexLoc = program.uniformLocation(WGE.Sprite2d.ZIndexName);
+		this._textureLoc = program.uniformLocation(WGE.Sprite2d.TextureName);
+		if(!(this._projectionLoc && this._halfTexLoc && this._rotationLoc && this._scalingLoc &&
+			this._translationLoc && this._hotspotLoc && this._alphaLoc && this._zIndexLoc && this._textureLoc))
+		{
+			WGE.WARN("WGE.Sprite2d : Not all uniform locations are correct!");
+		}
+
+		context.uniform1f(this._alphaLoc, this._alpha);
+		context.uniform1f(this._zIndexLoc, this.zIndex);
+		
+		var verticesData = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
+
+		var buffer = context.createBuffer();
+		this._vertexBuffer = buffer;
+		context.bindBuffer(context.ARRAY_BUFFER, buffer);
+		context.bufferData(context.ARRAY_BUFFER, new Float32Array(verticesData), context.STATIC_DRAW);
+
+		WGE.checkGLErr("WGE.Sprite2d - init program", this._context);
+		return true;
+	}
+
+});
+
+
+//提供绕多个轴旋转功能。
+WGE.Sprite2dExt = WGE.Class(WGE.Sprite2d,
+{
+	rot : null,          //sprite2dExt 旋转弧度，包含三个参数，可绕x,y,z轴旋转。
+
+	initialize : function(canvas, ctx)
+	{
+		this.pos = new WGE.Vec2(0, 0);
+		this.rot = WGE.mat3Identity();
+		this.scaling = new WGE.Vec2(1, 1);
+		this._hotspot = new WGE.Vec2(0, 0);
+
+		this.canvas = canvas;
+		if(!this.canvas)
+		{
+			WGE.ERR("Invalid Params while creating WGE.Sprite2d!");
+		}
+		this._context = ctx || WGE.webgl || this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
+		this._initProgram(WGE.Sprite2d.VertexShaderExt, WGE.Sprite2d.FragmentShaderPremultiply);
+		this.onCanvasResize();
+		
+		this.setCanvasFlip(false, true);
+		this.setSpriteFilp(false, false);
+		this._updateHotspot();
+	},
+
 	rotate : function(rad, x, y, z)
 	{
 		this.rot.rotate(rad, x, y, z);
@@ -226,115 +370,15 @@ WGE.Sprite2d = WGE.Class(
 		this.rot = WGE.mat3Identity();
 	},
 
-	scale : function(sx, sy)
-	{
-		this.scaling.data[0] *= sx;
-		this.scaling.data[1] *= sy;
-	},
-
-	scaleTo : function(sx, sy)
-	{
-		this.scaling.data[0] = sx;
-		this.scaling.data[1] = sy;
-	},
-
-	scaleToPixel : function(sx, sy)
-	{
-		this.scaling.data[0] = sx / this.texture.width;
-		this.scaling.data[1] = sx / this.texture.height;
-	},
-
-	move : function(dx, dy)
-	{
-		this.pos.data[0] += dx;
-		this.pos.data[1] += dy;
-	},
-
-	moveTo : function(x, y)
-	{
-		this.pos.data[0] = x;
-		this.pos.data[1] = y;
-	},
-
-	//hotspot 默认为中心位置，并且x,y分别为纹理长宽的倍率
-	//(0, 0)表示中心位置，(-1, -1)表示左上角，与2d方式有较大区别
-	setHotspot : function(hx, hy)
-	{
-		this._hotspot.data[0] = hx;
-		this._hotspot.data[1] = hy;
-		this._updateHotspot();
-	},
-
 	_updateRotation : function()
 	{
 		this._context.uniformMatrix3fv(this._rotationLoc, false, this.rot.data);
-	},
-
-	_updateScaling : function()
-	{
-		this._context.uniform2f(this._scalingLoc, this.scaling.data[0], this.scaling.data[1]);
-	},
-
-	_updateTranslation : function()
-	{
-		this._context.uniform2f(this._translationLoc, this.pos.data[0], this.pos.data[1]);
-	},
-
-	_updateHotspot : function()
-	{
-		this._program.bind();
-		this._context.uniform2f(this._hotspotLoc, this._hotspot.data[0], this._hotspot.data[1]);
-	},
-
-	_initProgram : function()
-	{
-		var context = this._context;
-		var program = new WGE.Program(context);
-
-		this._program = program;
-
-		program.initWithShaderCode(WGE.Sprite2d.VertexShader, WGE.Sprite2d.FragmentShaderPremultiply);
-		program.bindAttribLocation(WGE.Sprite2d.AtrribPositionName, this._posAttribLocation);
-		if(!program.link())
-		{
-			WGE.ERR("WGE.Sprite2d : Program link Failed!");
-			return false;
-		}
-
-		program.bind();
-
-		this._projectionLoc = program.uniformLocation(WGE.Sprite2d.ProjectionMatrixName);
-		this._halfTexLoc = program.uniformLocation(WGE.Sprite2d.HalfTexSizeName);
-		this._rotationLoc = program.uniformLocation(WGE.Sprite2d.RotationName);
-		this._scalingLoc = program.uniformLocation(WGE.Sprite2d.ScalingName);
-		this._translationLoc = program.uniformLocation(WGE.Sprite2d.TranslationName);
-		this._hotspotLoc = program.uniformLocation(WGE.Sprite2d.HotspotName);
-		this._alphaLoc = program.uniformLocation(WGE.Sprite2d.AlphaName);
-		this._zIndexLoc = program.uniformLocation(WGE.Sprite2d.ZIndexName);
-		this._textureLoc = program.uniformLocation(WGE.Sprite2d.TextureName);
-		if(!(this._projectionLoc && this._halfTexLoc && this._rotationLoc && this._scalingLoc &&
-			this._translationLoc && this._hotspotLoc && this._alphaLoc && this._zIndexLoc && this._textureLoc))
-		{
-			WGE.WARN("WGE.Sprite2d : Not all uniform locations are correct!");
-		}
-
-		context.uniform1f(this._alphaLoc, this._alpha);
-		context.uniform1f(this._zIndexLoc, this.zIndex);
-		
-		var verticesData = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
-
-		var buffer = context.createBuffer();
-		this._vertexBuffer = buffer;
-		context.bindBuffer(context.ARRAY_BUFFER, buffer);
-		context.bufferData(context.ARRAY_BUFFER, new Float32Array(verticesData), context.STATIC_DRAW);
-
-		WGE.checkGLErr("WGE.Sprite2d - init program", this._context);
-		return true;
 	}
-
 });
 
-WGE.Sprite2d.VertexShader = "attribute vec2 vPosition; varying vec2 textureCoordinate;uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform mat3 m3Rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;void main(){textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = m3Rotation * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);	pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos, 1.0);gl_Position.xy *= canvasflip;}";
+WGE.Sprite2d.VertexShader = "attribute vec2 vPosition; varying vec2 textureCoordinate;uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform float rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;mat3 mat3ZRotation(float rad){float cosRad = cos(rad);float sinRad = sin(rad);return mat3(cosRad, sinRad, 0.0,-sinRad, cosRad, 0.0, 0.0, 0.0, 1.0);}void main(){textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = mat3ZRotation(rotation) * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos, 1.0);gl_Position.xy *= canvasflip;}";
+
+WGE.Sprite2d.VertexShaderExt = "attribute vec2 vPosition; varying vec2 textureCoordinate; uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform mat3 rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;void main(){	textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = rotation * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos, 1.0);gl_Position.xy *= canvasflip;}";
 
 WGE.Sprite2d.FragmentShader = "precision mediump float; varying vec2 textureCoordinate;uniform sampler2D inputImageTexture;uniform float alpha;void main(){gl_FragColor = texture2D(inputImageTexture, textureCoordinate);gl_FragColor.a *= alpha;}";
 
@@ -343,7 +387,7 @@ WGE.Sprite2d.FragmentShaderPremultiply = "precision mediump float; varying vec2 
 WGE.Sprite2d.AtrribPositionName = "vPosition";
 WGE.Sprite2d.ProjectionMatrixName = "m4Projection";
 WGE.Sprite2d.HalfTexSizeName = "v2HalfTexSize";
-WGE.Sprite2d.RotationName = "m3Rotation";
+WGE.Sprite2d.RotationName = "rotation";
 WGE.Sprite2d.ScalingName = "v2Scaling";
 WGE.Sprite2d.TranslationName = "v2Translation";
 WGE.Sprite2d.HotspotName = "v2Hotspot";

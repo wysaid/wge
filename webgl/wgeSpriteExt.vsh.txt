@@ -12,7 +12,7 @@ varying vec2 textureCoordinate;
 uniform mat4 m4Projection;
 uniform vec2 v2HalfTexSize;
 
-uniform float rotation;
+uniform mat3 rotation;
 uniform vec2 v2Scaling;
 uniform vec2 v2Translation;
 uniform vec2 v2Hotspot;
@@ -20,17 +20,10 @@ uniform vec2 canvasflip;
 uniform vec2 spriteflip;
 uniform float zIndex;
 
-mat3 mat3ZRotation(float rad)
-{
-    float cosRad = cos(rad);
-    float sinRad = sin(rad);
-    return mat3(cosRad, sinRad, 0.0, -sinRad, cosRad, 0.0, 0.0, 0.0, 1.0);
-}
-
 void main()
 {
 	textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;
-	vec3 pos = mat3ZRotation(rotation) * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);
+	vec3 pos = rotation * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);
 	pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);
 	pos.xy *= v2Scaling;
 	pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;

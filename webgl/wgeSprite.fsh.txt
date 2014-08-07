@@ -15,4 +15,5 @@ void main()
 {
 	gl_FragColor = texture2D(inputImageTexture, textureCoordinate);
 	gl_FragColor.a *= alpha;
+	gl_FragColor.rgb *= gl_FragColor.a;
 }

@@ -14,6 +14,10 @@
 
 <script type="text/javascript">
 "use strict";
+
+var maxSpriteNum = 500;
+var runningSpriteNum = 50;
+
 var MySprite = WGE.Class(WGE.Sprite2d,
 {
 	dx : 0,
@@ -23,6 +27,10 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 
 	randomize : function()
 	{
+		var w = this.canvas.width, h = this.canvas.height;
+
+		this.pos.data[0] = Math.random() * w;
+		this.pos.data[1] = Math.random() * h;
 		this.dx = Math.random() * 0.5 + 0.01;
 		this.dy = Math.random() * 0.5 + 0.01;
 		this.drz = Math.random() * 0.005 + 0.001;
@@ -35,9 +43,9 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 		var d = this.pos.data;
 		d[0] += this.dx * dt;
 		d[1] += this.dy * dt;
-		this.rotateZ(this.drz * dt);
-		if(this.dry)
-			this.rotateY(this.dry * dt);
+		this.rotate(this.drz * dt);
+// 		if(this.dry)
+// 			this.rotateY(this.dry * dt);
 
 		if(d[0] < 0)
 		{
@@ -72,6 +80,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	y : 0,
 	isMouseDown : false,
 	sprites : null,
+	deltaTime : 10,
 
 	bindFather : function(fatherObj)
 	{
@@ -89,23 +98,45 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	initSprites : function()
 	{
 		var sprites = [];
+		var textures = [];
+		var context = this.context;
 		this.sprites = sprites;
 		for(var i = 0; i != 14; ++i)
 		{
 			var img = WGE.ID('test' + i);
-			sprites[i] = new MySprite(this.canvas, this.context);
-			sprites[i].initSprite(img);
-			sprites[i].setAlpha(0.5 + Math.random() * 0.5);
-			sprites[i].randomize();
+			var tex = new WGE.Texture2D(context);
+			tex.initWithImg(img);
+			textures.push(tex);
 		}
+
+		for(var i = 0; i != maxSpriteNum; ++i)
+		{
+			var sprite = new MySprite(this.canvas, this.context);
+			sprite.initSprite(textures[parseInt(Math.random() * textures.length)]);
+			sprite.setAlpha(1.0 / maxSpriteNum + Math.random() * 0.2 + 0.1);
+			sprite.randomize();
+			sprites.push(sprite);
+		}
+
 		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
+	},
+
+	spritesAlphaPlus : function(value)
+	{
+		var sprites = this.sprites;
+		for(var i = 0; i < runningSpriteNum; ++i)
+		{
+			var alpha = Math.max(Math.min(sprites[i]._alpha + value, 1.0), 0.001);
+			sprites[i].setAlpha(alpha);
+		}
 	},
 
 	update : function(dt)
 	{
+		this.deltaTime = dt;
 		var w = this.canvas.width, h = this.canvas.height;
 		var sprites = this.sprites;
-		for(var i in sprites)
+		for(var i = 0; i < runningSpriteNum; ++i)
 		{
 			sprites[i].update(dt, w, h);
 		}
@@ -115,10 +146,11 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	{
 		this.context.clear(this.context.COLOR_BUFFER_BIT);
 		var sprites = this.sprites;
-		for(var i in sprites)
+		for(var i = 0; i < runningSpriteNum; ++i)
 		{
 			sprites[i].render();
 		}
+		//sprites[0].render();
 	},
 
 	mouseDownEvent : function(e, x, y)
@@ -160,11 +192,40 @@ var div = WGE.CE('div');
 document.body.appendChild(div);
 div.setAttribute('style', "width: 100%; height:100%;");
 var gui = new MyGUI(div);
-document.body.setAttribute("onresize", "gui.onresize(event);");
 
-document.body.setAttribute("onload", "gui.initSprites();gui.start();");
+function updateSpritesAndFPS()
+{
+	WGE.ID('totalSprites').innerHTML = "Total Sprites: " + runningSpriteNum + "<br>" + "FPS " + (1000/gui.deltaTime).toFixed(1);
+}
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(updateSpritesAndFPS, 1000);");
 
 </script>
+
+<div style="position:absolute;left:10px;top:10px;width:170px;height:auto;">
+<div style="width:100%;height:45px;background-color:#f00" id="totalSprites">
+ Initializing...
+</div>
+<script type="text/javascript">
+function setBlend(mode)
+{
+	gui.context.enable(gui.context.BLEND);
+	gui.context.blendFunc(gui.context.ONE, gui.context[mode]);
+}
+
+</script>
+<input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
+<input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 0) runningSpriteNum = 0;"><br>
+<input type="button" value="No blend" style="width:100px" onclick="gui.context.disable(gui.context.BLEND);"><br>
+<input type="button" value="add" style="width:100px" onclick="setBlend('ONE');"><br>
+<input type="button" value="1 - src_alpha" style="width:100px" onclick="setBlend('ONE_MINUS_SRC_ALPHA');"><br>
+<input type="button" value="1 - dst_alpha" style="width:100px" onclick="setBlend('ONE_MINUS_DST_ALPHA');"><br>
+<input type="button" value="1 - src_color" style="width:100px" onclick="setBlend('ONE_MINUS_SRC_COLOR');"><br>
+<input type="button" value="1 - dst_color" style="width:100px" onclick="setBlend('ONE_MINUS_DST_COLOR');"><br><br>
+<input type="button" value="sprite alpha+" style="width:100px" onclick="gui.spritesAlphaPlus(0.05);"><br>
+<input type="button" value="sprite alpha-" style="width:100px" onclick="gui.spritesAlphaPlus(-0.05);"><br>
+</div>
 
 <div style="display:none">
 <img src="../../res/png/0.png" id="test0">

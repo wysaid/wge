@@ -75,10 +75,10 @@ WGE.Texture2D = WGE.Class(
 	initWithTexture : function(texObj, w, h, noRelease, ctx)
 	{
 		this.texture = texObj;
-		this.width = w;
-		this.height = h;
+		this.width = w || texObj.width;
+		this.height = h || texObj.height;
 		this._shouldRelease = !noRelease;
-		this._context = ctx || WGE.webgl;
+		this._context = ctx || WGE.webgl || this._context;
 	},
 
 	initWithTag : function(tagID)
