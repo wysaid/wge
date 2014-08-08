@@ -14,7 +14,7 @@
 <script type="text/javascript">
 "use strict";
 
-var maxSpriteNum = 500;
+var maxSpriteNum = 2000;
 var runningSpriteNum = 50;
 
 var MySprite = WGE.Class(WGE.Sprite,
@@ -190,6 +190,8 @@ function setBlend(mode)
 </script>
 <input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
 <input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 1) runningSpriteNum = 1;"><br>
+<input type="button" value="Sprite +100" style="width:100px" onclick="runningSpriteNum += 100; if (runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
+<input type="button" value="Sprite -100" style="width:100px" onclick="runningSpriteNum -= 100; if (runningSpriteNum < 1) runningSpriteNum = 1;"><br>
 <input type="button" value="source-over" style="width:100px" onclick="setBlend('source-over');"><br>
 <input type="button" value="lighter" style="width:100px" onclick="setBlend('lighter');"><br>
 <input type="button" value="copy" style="width:100px" onclick="setBlend('copy');"><br>
