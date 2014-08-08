@@ -24,6 +24,10 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
 		{
 			this.context = this.canvas.getContext('2d');
+			if(!this.context)
+			{
+				alert('你的浏览器不支持html5啊，坟蛋！换一个好吗？');
+			}
 			return !!this.context;
 		}
 		return false;
