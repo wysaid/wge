@@ -4,7 +4,7 @@
 <title>simpleDemo</title>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeMatrix.js"></script>
-<script type="text/javascript" src="../wgeSprite.js"></script>
+<script type="text/javascript" src="../wgeSprite2d.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
 <script type="text/javascript" src="../wgeWebGL.js"></script>
 
@@ -23,7 +23,6 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 	dx : 0,
 	dy : 0,
 	drz : 0,
-	dry : 0,
 
 	randomize : function()
 	{
@@ -34,8 +33,6 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 		this.dx = Math.random() * 0.5 + 0.01;
 		this.dy = Math.random() * 0.5 + 0.01;
 		this.drz = Math.random() * 0.005 + 0.001;
-		var x = Math.random();
-		this.dry = x > 0.5 ? Math.random() * 0.005 + 0.001 : 0;
 	},
 
 	update : function(dt, boundingX, boundingY)
@@ -44,8 +41,6 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 		d[0] += this.dx * dt;
 		d[1] += this.dy * dt;
 		this.rotate(this.drz * dt);
-// 		if(this.dry)
-// 			this.rotateY(this.dry * dt);
 
 		if(d[0] < 0)
 		{

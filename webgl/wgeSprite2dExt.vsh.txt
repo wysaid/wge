@@ -1,5 +1,5 @@
 /*
- * wgeSprite.vsh
+ * wgeSprite2dExt.vsh
  *
  *  Created on: 2014-8-6
  *      Author: Wang Yang

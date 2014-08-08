@@ -1,6 +1,6 @@
 "use strict";
 /*
-* wgeSprite.js for webgl
+* wgeSprite2d.js for webgl
 *
 *  Created on: 2014-8-6
 *      Author: Wang Yang

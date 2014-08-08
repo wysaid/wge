@@ -1,0 +1,7 @@
+/*
+ * wgeSprite.fsh
+ *
+ *  Created on: 2014-8-8
+ *      Author: Wang Yang
+ *        Blog: http://blog.wysaid.org
+ */
