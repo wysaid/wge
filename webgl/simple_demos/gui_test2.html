@@ -18,7 +18,7 @@
 var maxSpriteNum = 500;
 var runningSpriteNum = 50;
 
-var MySprite = WGE.Class(WGE.Sprite2d,
+var MySprite = WGE.Class(WGE.Sprite2dExt,
 {
 	dx : 0,
 	dy : 0,
@@ -35,7 +35,7 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 		this.dy = Math.random() * 0.5 + 0.01;
 		this.drz = Math.random() * 0.005 + 0.001;
 		var x = Math.random();
-		this.dry = x > 0.5 ? Math.random() * 0.005 + 0.001 : 0;
+		this.dry = Math.random() * 0.005 + 0.001;
 	},
 
 	update : function(dt, boundingX, boundingY)
@@ -43,9 +43,9 @@ var MySprite = WGE.Class(WGE.Sprite2d,
 		var d = this.pos.data;
 		d[0] += this.dx * dt;
 		d[1] += this.dy * dt;
-		this.rotate(this.drz * dt);
-// 		if(this.dry)
-// 			this.rotateY(this.dry * dt);
+		this.rotateZ(this.drz * dt);
+		if(this.dry)
+			this.rotateY(this.dry * dt);
 
 		if(d[0] < 0)
 		{
@@ -148,7 +148,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		}
 
 		sprites[0].moveTo(this.x, this.y);
-		sprites[0].rotate(sprites[0].drz * dt);
+		sprites[0].rotateZ(sprites[0].drz * dt);
+		sprites[0].rotateY(sprites[0].dry * dt);
 	},
 
 	render : function()
@@ -219,7 +220,7 @@ function setBlend(mode)
 <input type="button" value="1 - dst_color" style="width:100px" onclick="setBlend('ONE_MINUS_DST_COLOR');"><br><br>
 <input type="button" value="sprite alpha+" style="width:100px" onclick="gui.spritesAlphaPlus(0.05);"><br>
 <input type="button" value="sprite alpha-" style="width:100px" onclick="gui.spritesAlphaPlus(-0.05);"><br><br>
-<input type="button" value="Y Rotation" style="width:100px" onclick="window.location='gui_test2.html'">
+<input type="button" value="No Y Rotation" style="width:100px" onclick="window.location='gui_test.html'">
 </div>
 
 <div style="display:none">
