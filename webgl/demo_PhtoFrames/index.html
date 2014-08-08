@@ -6,8 +6,9 @@
 <body >
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeMatrix.js"></script>
-<script type="text/javascript" src="../wgeSprite.js"></script>
 <script type="text/javascript" src="../../wgeAnimation.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
 <script type="text/javascript" src="../wgeFilters.js"></script>
 <script type="text/javascript" src="photoFrames.js"></script>
 
@@ -15,16 +16,18 @@
 <input type="button" value="MUTE or not" onclick="var snd = WGE.ID('bgSound'); snd.muted=!snd.muted">
 <input type="button" value="点击查看另一个版本" onclick="window.location='demo2.html'">
 <br>
-<p>本页面使用html5编写，如果您使用的是IE，请保证IE版本>=9。如果图片过多导致加载失败，请刷新界面</p>
+<p>本页面使用WebGL编写，如果您使用的是IE，请保证IE版本>=11。如果图片过多导致加载失败，请刷新界面</p>
 
 <script type="text/javascript">
 "use strict";
 var timeline = new WGE.TimeLine(60000);
 var cvs = WGE.ID('photoFrames');
-var ctx = cvs.getContext('2d');
+var ctx = cvs.getContext('2d');//cvs.getContext('experimental-webgl');
 var totalImages = 17;
 var loadedImages = 0;
 var lastTime = 0;
+
+//WGE.webgl = ctx;
 
 ctx.font = "50px Aria";
 
@@ -57,7 +60,11 @@ function scaleImage(img)
 	t.scale(c.width / img.width, c.height / img.height);
 	t.drawImage(img, 0, 0);
 	t.restore();
-	return c;
+	var image = new Image();
+	image.src = c.toDataURL("image/png");
+	image.width = c.width;
+	image.height = c.height;
+	return image;
 }
 
 function main()
@@ -131,8 +138,8 @@ function loadingDone()
 	if(loadedImages == totalImages)
 	{
 		ctx.clearRect(0,0, 800, 600);
-		ctx.fillText("初始化场景......", 10, cvs.height / 2);
-		setTimeout("main()", 100);
+		ctx.fillText("WebGL 版本尚未完成", 10, cvs.height / 2);
+		//setTimeout("main()", 100);
 		return ;
 	}
 
@@ -222,6 +229,5 @@ document.write(unescape("%3Cscript src='" + _bdhmProtocol + "tajs.qq.com/stats?s
 </script>
 
 </div>
-
 </body>
 </html>

@@ -340,11 +340,15 @@ WGE.AnimationInterface = WGE.Class(
 	}
 });
 
+
+/*
 // AnimationSprite 定义了某个时间段的动作。
 // AnimationSprite 与 TimeActionInterface 为包含关系，
 // 一个 AnimationSprite 包含一个或多个 TimeActionInterface或者其子类.
 // AnimationSprite 及其子类 根据action起始时间，计算动作开始或者结束
-WGE.AnimationSprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
+
+//以下为AnimationSprite 实现原型，本身是一个完整的sprite
+WGE.AnimationSprite = WGE.Class(WGE.Sprite*, WGE.AnimationInterface,
 {
 	initialize : function(startTime, endTime, img, w, h)
 	{
@@ -356,7 +360,7 @@ WGE.AnimationSprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
 		}
 	}
 });
-
+*/
 
 //时间轴
 WGE.TimeLine = WGE.Class(

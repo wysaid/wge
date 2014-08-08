@@ -312,18 +312,21 @@ FTPhotoFrame.PointAnimationManager = WGE.Class(WGE.AnimationInterface,
 
 
 
-FTPhotoFrame.PhotoFrameSprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
+FTPhotoFrame.PhotoFrameSprite = WGE.Class(WGE.Sprite2d, WGE.AnimationInterface,
 {
-	initialize : function(startTime, endTime, img, w, h)
+	initialize : function(canvas, startTime, endTime, img, noRelease)
 	{
 		this.setAttrib(startTime, endTime);
 		this.timeActions = [];
+		WGE.Sprite2d.initialize.call(this, canvas);
+
 		if(img)
 		{
-			this.initSprite(img, w, h);
+			this.initSprite(img, noRelease);
 		}
+
 	},
-	
+
 	//这里的zone 由 FTPhotoFrame.PointAnimationManager 维护。
 	zone : undefined,
 
@@ -389,14 +392,14 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 	if(globalZ == undefined)
 		globalZ = 0;
 
-	var filterBW = new WGE.FilterBW();
+//	var filterBW = new WGE.FilterBW();
 
 	//时间按每秒30帧计算
 	//0:5:25~0:8:20 [0, 2800]
 	{
 		var img = WGE.rotateArray(imageArray);
 		var frame1 = S(0, 2800, img, -1);
-		var frame2 = S(1000, 2800, filterBW.bind(img).run(), -1);
+		var frame2 = S(1000, 2800, img, -1);
 
 		frame1.zIndex = globalZ + 1;
 		frame2.zIndex = globalZ;
@@ -476,7 +479,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		////////////////////////////////////////////////
 		var img1 = WGE.rotateArray(imageArray);
 		var frame3 = S(3133, 6000, img1, -1);
-		var frame4 = S(3133, 6000, filterBW.bind(img1).run(), -1);
+		var frame4 = S(3133, 6000, img1, -1);
 		frame3.zIndex = globalZ;
 		frame4.zIndex = globalZ + 1;
 		frame3.setHotspot2Center();
@@ -493,7 +496,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		//////////////////////////////////////////////////
 
 		var img2 = WGE.rotateArray(imageArray);
-		var frame5 = S(4133, 6000, filterBW.bind(img2).run(), -1);
+		var frame5 = S(4133, 6000, img2, -1);
 		var frame6 = S(4133, 6000, img2, -1);
 		frame5.zIndex = globalZ - 2;
 		frame6.zIndex = globalZ - 1;
@@ -611,7 +614,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 	//0:14:22 
 	{
 		var frame1 = frames.frame1;
-		var frame2 = S(9100, 15000, filterBW.bind(frame1.img).run(), -1);
+		var frame2 = S(9100, 15000, frame1.img, -1);
 		frame2.setHotspot2Center();
 		frame2.moveTo(w / 2 - 10, h / 2);
 		frame2.zIndex = globalZ;
@@ -678,7 +681,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		else if(stillTime < 15000)
 			stillTime = 15000;
 
-		var frame5 = S(14000, stillTime, filterBW.bind(img4).run(), -1);
+		var frame5 = S(14000, stillTime, img4, -1);
 		frame5.setHotspot2Center();
 		frame5.moveTo(w / 2, h / 2);
 		frame5.zIndex = frame3.zIndex - 0.5;
