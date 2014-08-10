@@ -19,6 +19,13 @@ WGE.Sprite3d = WGE.Class(
 	//提示: zIndex 在Sprite3d中无意义，故不提供。开启OpenGL的深度测试即可。 
 	//若要按远近先后混合，请在渲染前按远近顺序排序。
 
+	_hotspot: null,
+
+	_alpha : 1.0,
+
+	_program : null,
+	_context : null,
+	_textureRelease : true,
 	
 
 
