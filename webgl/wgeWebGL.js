@@ -263,6 +263,22 @@ WGE.Program = WGE.Class(
 				this.fragShader.loadShaderCode(fsh);
 	},
 
+	initWithShaderTag : function(vshTag, fshTag)
+	{
+		if(!(vsh && fsh))
+			return false;
+		return this.vertShader.loadShaderFromTag(vshTag) &&
+				this.fragShader.loadShaderFromTag(fshTag);
+	},
+
+	initWithShaderURL : function(vshURL, fshURL)
+	{
+		if(!vshURL && fshURL)
+			return false;
+		return this.vertShader.loadShaderFromURL(vshURL) &&
+				this.fragShader.loadShaderFromURL(fshURL);
+	},
+
 	loadFragmentShaderCode : function(shaderCode)
 	{
 		return this.fragShader.loadShaderCode(shaderCode);

@@ -18,6 +18,8 @@
 var maxSpriteNum = 500;
 var runningSpriteNum = 50;
 
+WGE.Sprite2d.ShaderDir = "../";
+
 var MySprite = WGE.Class(WGE.Sprite2d,
 {
 	dx : 0,
@@ -155,6 +157,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 			sprites[i].render();
 		}
 		sprites[0].render();
+		this.context.finish();
 	},
 
 	mouseMoveEvent : function(e, x, y)

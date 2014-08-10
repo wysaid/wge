@@ -18,6 +18,8 @@
 var maxSpriteNum = 500;
 var runningSpriteNum = 50;
 
+WGE.Sprite2d.ShaderDir = "../";
+
 var MySprite = WGE.Class(WGE.Sprite2dExt,
 {
 	dx : 0,
@@ -118,6 +120,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 			var sprite = new MySprite(this.canvas, this.context);
 			sprite.initSprite(textures[parseInt(Math.random() * textures.length)]);
 			sprite.setAlpha(1.0 / maxSpriteNum + Math.random() * 0.2 + 0.1);
+			sprite.setBlendColor(Math.random() * 2, Math.random() * 2, Math.random() * 2);
 			sprite.randomize();
 			sprites.push(sprite);
 		}

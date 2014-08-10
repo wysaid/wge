@@ -61,7 +61,13 @@ WGE.Sprite2d = WGE.Class(
 			WGE.ERR("Invalid Params while creating WGE.Sprite2d!");
 		}
 		this._context = ctx || WGE.webgl || this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
-		this._initProgram(WGE.Sprite2d.VertexShader, WGE.Sprite2d.FragmentShaderPremultiply);
+
+		if(!WGE.Sprite2d.VertexShader)
+			WGE.Sprite2d.VertexShader = WGE.requestTextByURL(WGE.Sprite2d.ShaderDir + "wgeSprite2d.vsh.txt");
+		if(!WGE.Sprite2d.FragmentShader)
+			WGE.Sprite2d.FragmentShader = WGE.requestTextByURL(WGE.Sprite2d.ShaderDir + "wgeSprite2d.fsh.txt");
+		this._initProgram(WGE.Sprite2d.VertexShader, WGE.Sprite2d.FragmentShader);
+
 		this.onCanvasResize();
 		
 		this.setCanvasFlip(false, true);
@@ -299,17 +305,19 @@ WGE.Sprite2d = WGE.Class(
 });
 
 
-//提供绕多个轴旋转功能。
+//提供绕多个轴旋转，混合颜色等功能。
 WGE.Sprite2dExt = WGE.Class(WGE.Sprite2d,
 {
-	rot : null,          //sprite2dExt 旋转弧度，包含三个参数，可绕x,y,z轴旋转。
+	rot : null,         //sprite2dExt 旋转弧度，包含三个参数，可绕x,y,z轴旋转。
+	blendColor : null,  //sprite2d 的混合颜色。混合颜色仅包含r,g,b分量，若需要alpha，请直接设置alpha
 
 	initialize : function(canvas, ctx)
 	{
 		this.pos = new WGE.Vec2(0, 0);
 		this.rot = WGE.mat3Identity();
 		this.scaling = new WGE.Vec2(1, 1);
-		this._hotspot = new WGE.Vec2(0, 0);
+		this.blendColor = new WGE.Vec3(1, 1, 1);
+		this._hotspot = new WGE.Vec2(0, 0);		
 
 		this.canvas = canvas;
 		if(!this.canvas)
@@ -317,12 +325,24 @@ WGE.Sprite2dExt = WGE.Class(WGE.Sprite2d,
 			WGE.ERR("Invalid Params while creating WGE.Sprite2d!");
 		}
 		this._context = ctx || WGE.webgl || this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
-		this._initProgram(WGE.Sprite2d.VertexShaderExt, WGE.Sprite2d.FragmentShaderPremultiply);
+		
+		if(!WGE.Sprite2d.VertexShaderExt)
+			WGE.Sprite2d.VertexShaderExt = WGE.requestTextByURL(WGE.Sprite2d.ShaderDir + "wgeSprite2dExt.vsh.txt");
+		if(!WGE.Sprite2d.FragmentShader)
+			WGE.Sprite2d.FragmentShader = WGE.requestTextByURL(WGE.Sprite2d.ShaderDir + "wgeSprite2dExt.fsh.txt");
+		this._initProgram(WGE.Sprite2d.VertexShaderExt, WGE.Sprite2d.FragmentShader);
+
 		this.onCanvasResize();
 		
 		this.setCanvasFlip(false, true);
 		this.setSpriteFilp(false, false);
 		this._updateHotspot();
+	},
+
+	setBlendColor : function(r, g, b)
+	{
+		this._program.bind();
+		this._program.sendUniform3f(WGE.Sprite2d.BlendColor, r, g, b);
 	},
 
 	rotate : function(rad, x, y, z)
@@ -376,13 +396,16 @@ WGE.Sprite2dExt = WGE.Class(WGE.Sprite2d,
 	}
 });
 
-WGE.Sprite2d.VertexShader = "attribute vec2 vPosition; varying vec2 textureCoordinate;uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform float rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;mat3 mat3ZRotation(float rad){float cosRad = cos(rad);float sinRad = sin(rad);return mat3(cosRad, sinRad, 0.0,-sinRad, cosRad, 0.0, 0.0, 0.0, 1.0);}void main(){textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = mat3ZRotation(rotation) * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos, 1.0);gl_Position.xy *= canvasflip;}";
+//WGE.Sprite2d.VertexShader = "attribute vec2 vPosition; varying vec2 textureCoordinate;uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform float rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;mat3 mat3ZRotation(float rad){float cosRad = cos(rad);float sinRad = sin(rad);return mat3(cosRad, sinRad, 0.0,-sinRad, cosRad, 0.0, 0.0, 0.0, 1.0);}void main(){textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = mat3ZRotation(rotation) * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos, 1.0);gl_Position.xy *= canvasflip;}";
 
-WGE.Sprite2d.VertexShaderExt = "attribute vec2 vPosition; varying vec2 textureCoordinate; uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform mat3 rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;void main(){	textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = rotation * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos, 1.0);gl_Position.xy *= canvasflip;}";
+//WGE.Sprite2d.VertexShaderExt = "attribute vec2 vPosition; varying vec2 textureCoordinate; uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform mat3 rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;void main(){	textureCoordinate = (vPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = rotation * vec3((vPosition - v2Hotspot) * v2HalfTexSize, zIndex);pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos, 1.0);gl_Position.xy *= canvasflip;}";
 
-WGE.Sprite2d.FragmentShader = "precision mediump float; varying vec2 textureCoordinate;uniform sampler2D inputImageTexture;uniform float alpha;void main(){gl_FragColor = texture2D(inputImageTexture, textureCoordinate);gl_FragColor.a *= alpha;}";
+//WGE.Sprite2d.FragmentShader = "precision mediump float; varying vec2 textureCoordinate;uniform sampler2D inputImageTexture;uniform float alpha;void main(){gl_FragColor = texture2D(inputImageTexture, textureCoordinate);gl_FragColor.a *= alpha;}";
 
-WGE.Sprite2d.FragmentShaderPremultiply = "precision mediump float; varying vec2 textureCoordinate;uniform sampler2D inputImageTexture;uniform float alpha;void main(){gl_FragColor = texture2D(inputImageTexture, textureCoordinate);gl_FragColor.a *= alpha;gl_FragColor.rgb *= gl_FragColor.a;}";
+//WGE.Sprite2d.FragmentShaderPremultiply = "precision mediump float; varying vec2 textureCoordinate;uniform sampler2D inputImageTexture;uniform float alpha;void main(){gl_FragColor = texture2D(inputImageTexture, textureCoordinate);gl_FragColor.a *= alpha;gl_FragColor.rgb *= gl_FragColor.a;}";
+
+//调试使用，当编写的demo与sprite2d不在同一目录时设定。
+WGE.Sprite2d.ShaderDir = "";
 
 WGE.Sprite2d.AtrribPositionName = "vPosition";
 WGE.Sprite2d.ProjectionMatrixName = "m4Projection";
@@ -396,3 +419,5 @@ WGE.Sprite2d.ZIndexName = "zIndex";
 WGE.Sprite2d.TextureName = "inputImageTexture";
 WGE.Sprite2d.FlipCanvasName = "canvasflip";
 WGE.Sprite2d.FlipSpriteName = "spriteflip";
+
+WGE.Sprite2d.BlendColor = "blendColor";
