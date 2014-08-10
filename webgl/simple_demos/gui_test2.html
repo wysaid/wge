@@ -121,11 +121,13 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 			sprite.initSprite(textures[parseInt(Math.random() * textures.length)]);
 			sprite.setAlpha(1.0 / maxSpriteNum + Math.random() * 0.2 + 0.1);
 			sprite.setBlendColor(Math.random() * 2, Math.random() * 2, Math.random() * 2);
+			sprite.setHotspot(Math.random() * 2 - 1, Math.random() * 2 - 1);
 			sprite.randomize();
 			sprites.push(sprite);
 		}
 
 		sprites[0].setAlpha(1.0);
+		sprites[0].setHotspot(0, 0);
 
 		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
 	},

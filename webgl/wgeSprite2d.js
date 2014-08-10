@@ -7,7 +7,7 @@
 *        Blog: http://blog.wysaid.org
 */
 
-//注： 带下划线的参数请勿直接写入
+//注： 带下划线的参数请以只读方式使用。
 
 //为了提升效率，对Sprite2d功能进行小幅度阉割，其余功能移到 Sprite2dExt中。
 WGE.Sprite2d = WGE.Class(
@@ -308,7 +308,7 @@ WGE.Sprite2d = WGE.Class(
 //提供绕多个轴旋转，混合颜色等功能。
 WGE.Sprite2dExt = WGE.Class(WGE.Sprite2d,
 {
-	rot : null,         //sprite2dExt 旋转弧度，包含三个参数，可绕x,y,z轴旋转。
+	rot : null,         //sprite2dExt 3维旋转矩阵，可绕x,y,z轴旋转。
 	blendColor : null,  //sprite2d 的混合颜色。混合颜色仅包含r,g,b分量，若需要alpha，请直接设置alpha
 
 	initialize : function(canvas, ctx)
