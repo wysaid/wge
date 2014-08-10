@@ -7,7 +7,7 @@
 
 <div style="border:groove">
 <a href="http://wge.wysaid.org/2d/gui_test/gui_test2.html" target="_blank">2d gui test2</a>
-<img src="http://wge.wysaid.org/screenshots/webgl_gui_test2.jpg">
+<img src="http://wge.wysaid.org/screenshots/2d_gui_test2.jpg">
 </div>
 
 ## WebGL Version ##
