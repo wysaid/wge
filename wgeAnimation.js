@@ -67,7 +67,7 @@ WGE.UniformAlphaAction = WGE.Class(WGE.TimeActionInterface,
 			this.bindObj.alpha = this.fromAlpha + this.dis * t;
 		}catch(e)
 		{
-			WGE.ERR("Invalid Binding Object!");
+			console.error("Invalid Binding Object!");
 		}
 
 		this.act = function(percent)
@@ -103,7 +103,7 @@ WGE.BlinkAlphaAction = WGE.Class(WGE.UniformAlphaAction,
 			this.bindObj.alpha = this.fromAlpha + this.dis * t;
 		}catch(e)
 		{
-			WGE.ERR("Invalid Binding Object!");
+			console.error("Invalid Binding Object!");
 		}
 
 		this.act = function(percent)
@@ -184,7 +184,7 @@ WGE.UniformLinearMoveAction = WGE.Class(WGE.TimeActionInterface,
 			this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
 		}catch(e)
 		{
-			WGE.ERR("Invalid Binding Object!");
+			console.error("Invalid Binding Object!");
 		}
 
 		this.act = function(percent)
@@ -217,7 +217,7 @@ WGE.UniformScaleAction = WGE.Class(WGE.UniformLinearMoveAction,
 			this.bindObj.scaleTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
 		}catch(e)
 		{
-			WGE.ERR("Invalid Binding Object!");
+			console.error("Invalid Binding Object!");
 		}
 
 		this.act = function(percent)

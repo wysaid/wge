@@ -58,7 +58,7 @@ WGE.Sprite2d = WGE.Class(
 		this.canvas = canvas;
 		if(!this.canvas)
 		{
-			WGE.ERR("Invalid Params while creating WGE.Sprite2d!");
+			console.error("Invalid Params while creating WGE.Sprite2d!");
 		}
 		this._context = ctx || WGE.webgl || this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
 
@@ -267,7 +267,7 @@ WGE.Sprite2d = WGE.Class(
 		program.bindAttribLocation(WGE.Sprite2d.AtrribPositionName, this._posAttribLocation);
 		if(!program.link())
 		{
-			WGE.ERR("WGE.Sprite2d : Program link Failed!");
+			console.error("WGE.Sprite2d : Program link Failed!");
 			return false;
 		}
 
@@ -285,7 +285,7 @@ WGE.Sprite2d = WGE.Class(
 		if(!(this._projectionLoc && this._halfTexLoc && this._rotationLoc && this._scalingLoc &&
 			this._translationLoc && this._hotspotLoc && this._alphaLoc && this._zIndexLoc && this._textureLoc))
 		{
-			WGE.WARN("WGE.Sprite2d : Not all uniform locations are correct!");
+			console.warn("WGE.Sprite2d : Not all uniform locations are correct!");
 		}
 
 		context.uniform1f(this._alphaLoc, this._alpha);
@@ -322,7 +322,7 @@ WGE.Sprite2dExt = WGE.Class(WGE.Sprite2d,
 		this.canvas = canvas;
 		if(!this.canvas)
 		{
-			WGE.ERR("Invalid Params while creating WGE.Sprite2d!");
+			console.error("Invalid Params while creating WGE.Sprite2d!");
 		}
 		this._context = ctx || WGE.webgl || this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
 		

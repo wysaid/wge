@@ -155,20 +155,20 @@ WGE.ID = function(id)
 	return document.getElementById(id);
 };
 
-WGE.LOG = function()
-{
-	console.log(arguments);
-};
+// WGE.LOG = function()
+// {
+// 	console.log(arguments);
+// };
 
-WGE.WARN = function()
-{
-	console.warn(arguments);
-};
+// WGE.WARN = function()
+// {
+// 	console.warn(arguments);
+// };
 
-WGE.ERR = function()
-{
-	console.error(arguments);
-};
+// WGE.ERR = function()
+// {
+// 	console.error(arguments);
+// };
 
 if(!window.requestAnimationFrame)
 {

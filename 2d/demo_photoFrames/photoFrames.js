@@ -207,7 +207,7 @@ FTPhotoFrame.PointMoveAction = WGE.Class(WGE.TimeActionInterface,
 			this.bindObj.data[1] = this.fromY + this.disY * t;
 		}catch(e)
 		{
-			WGE.ERR("Invalid Binding Object!");
+			console.error("Invalid Binding Object!");
 		}
 
 		this.act = function(percent)

@@ -37,7 +37,7 @@ WGE.checkGLErr = function(tag, context)
 			case ctx.OUT_OF_MEMORY: msg = "out of memory"; break;
 			default: msg = "unknown error";
 		}
-		WGE.ERR(tag, msg, error);
+		console.error(tag, msg, error);
 	}
 };
 
@@ -170,7 +170,7 @@ WGE.Framebuffer = WGE.Class(
 
 		if(webgl.checkFramebufferStatus(webgl.FRAMEBUFFER) != webgl.FRAMEBUFFER_COMPLETE)
  		{
- 			WGE.ERR("WGE.Framebuffer - bindTexture2D - Frame buffer is not completed.");
+		    console.error("WGE.Framebuffer - bindTexture2D - Frame buffer is not completed.");
  		}
 	}
 });
@@ -211,7 +211,7 @@ WGE.Shader = WGE.Class(
 		webgl.compileShader(this.shader);
 		if (!webgl.getShaderParameter(this.shader, webgl.COMPILE_STATUS))
 		{
-			WGE.ERR(webgl.getShaderInfoLog(this.shader), this.shaderType) 
+		    console.error(webgl.getShaderInfoLog(this.shader), this.shaderType)
 			return false;
 		}
 		return true;
@@ -318,7 +318,7 @@ WGE.Program = WGE.Class(
 		webgl.linkProgram(this.program);
 		if (!webgl.getProgramParameter(this.program, webgl.LINK_STATUS))
 		{
-			WGE.ERR(webgl.getProgramInfoLog(this.program));
+		    console.error(webgl.getProgramInfoLog(this.program));
 			return false;
 		}
 		return true;
@@ -334,7 +334,7 @@ WGE.Program = WGE.Class(
 		var loc = this._context.getUniformLocation(this.program, uniformName);
 		if(!loc)
 		{
-			WGE.ERR("Uniform Name " + uniformName + " doesnot exist!");
+		    console.error("Uniform Name " + uniformName + " doesnot exist!");
 		}
 		return loc;
 	},
