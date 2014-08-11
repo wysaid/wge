@@ -123,20 +123,12 @@ WGE.Sprite = WGE.Class(
 	//将sprite渲染到指定的context
 	render : function(ctx)
 	{
-		//以后实现
-		// var cosRot = Math.cos(rotation), sinRot = Math.sin(rotation);
-
-		// ctx.setTransform(this.scaling.data[0] * cosRot, sinRot, 0, -sinRot, scaling.data[1] * cosRot, 0, realPos.data[0], realPos.data[1])
-
-		//ctx.setTransform(1, 0, -this.hotspot.data[0], 1, 0, -this.hotspot.data[1]);
-//		ctx.translate(this.hotspot.data[0], this.hotspot.data[1]);
-
 		ctx.save();
 		ctx.translate(this.pos.data[0], this.pos.data[1]);
 		if(this.rotation)
-			ctx.rotate(this.rotation);		
-		if(this.scaling)
-			ctx.scale(this.scaling.data[0], this.scaling.data[1]);
+			ctx.rotate(this.rotation);
+
+		ctx.scale(this.scaling.data[0], this.scaling.data[1]);
 		if(this.alpha != undefined)
 			ctx.globalAlpha = this.alpha;		
 		if(this.blendMode)
@@ -151,9 +143,9 @@ WGE.Sprite = WGE.Class(
 		ctx.save();
 		ctx.translate(pos.data[0], pos.data[1]);
 		if(rot)
-			ctx.rotate(rot);		
-		if(scaling)
-			ctx.scale(scaling.data[0], scaling.data[1]);
+			ctx.rotate(rot);
+
+		ctx.scale(scaling.data[0], scaling.data[1]);
 		if(this.alpha != undefined)
 			ctx.globalAlpha = alpha;
 		if(blendmode)
@@ -162,5 +154,47 @@ WGE.Sprite = WGE.Class(
 		ctx.restore();
 	}
 
+
+});
+
+
+//使用矩阵操作完成旋转平移缩放等。
+//WGE.SpriteExt 具有较快的渲染速度，但是如果频繁旋转的话，效率不高。
+//建议需要旋转，但并非每一帧都需要旋转的情况下使用。
+WGE.SpriteExt = WGE.Class(WGE.Sprite,
+{
+	rotation : null, //2x2矩阵
+
+	initialize : function(img, w, h)
+	{
+		this.initSprite(img, w, h);
+		this.rotation = new WGE.mat2Identity();
+	},
+
+	//将旋转平移缩放和到一次 transform 操作，渲染速度较快。
+	render : function(ctx)
+	{
+		ctx.save();
+		var m = this.rotation.data;
+		ctx.transform(m[0] * this.scaling.data[0], m[1], m[2] * this.scaling.data[1], m[3], this.pos.data[0], this.pos.data[1]);
+
+		if(this.alpha != undefined)
+			ctx.globalAlpha = this.alpha;		
+		if(this.blendMode)
+			ctx.globalCompositeOperation = this.blendMode;
+
+		ctx.drawImage(this.img, -this.hotspot.data[0], -this.hotspot.data[1]);
+		ctx.restore();
+	},
+
+	rotate : function(dRot)
+	{
+		this.rotation.rotate(dRot);
+	},
+
+	rotateTo : function(rot)
+	{
+		this.rotation = WGE.mat2Rotation(rot);
+	}
 
 });
