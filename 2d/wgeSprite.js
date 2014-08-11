@@ -7,6 +7,11 @@
 *        Blog: http://blog.wysaid.org
 */
 
+//
+// 下方提供渲染速度较快的 SpriteExt， 但是旋转操作需要进行矩阵运算，较慢。
+// 请考虑场景综合选择。
+//
+
 WGE.Sprite = WGE.Class(
 {
 	pos : undefined,
