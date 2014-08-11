@@ -1,0 +1,90 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>js validation test</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeMatrix.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../../wgeAnimation.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
+
+</head>
+<body onload="init();gui.start();">
+<script type="text/javascript">
+
+var timeline = new WGE.TimeLine(10000);
+
+function init()
+{
+	var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
+	{
+		initialize : function(startTime, endTime, img, w, h)
+		{
+			this.setAttrib(startTime, endTime);
+			this.timeActions = [];
+			if(img)
+			{
+				this.initSprite(img, w, h);
+			}
+		}
+	});
+
+	var sprite = new mySprite(3000, 8000, WGE.ID('test0'), -1);
+	sprite.moveTo(200, 200);
+	sprite.setHotspot2Center();
+
+	var action = new WGE.UniformScaleAction([0, 3500], [1.3, 1.3], [0.5, 0.5], 5);
+	var action2 = new WGE.BlinkAlphaAction([500, 3500], 0, 1, 3);
+
+	sprite.push(action);
+	//sprite.push(action2);
+
+	timeline.push(sprite);
+	timeline.start(0);
+}
+
+var myGUI = WGE.Class(WGE.GUIInterface, 
+{
+	context : undefined,
+	x : 0,
+	y : 0,
+	isMouseDown : false,
+
+	bindFather : function(fatherObj)
+	{
+		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+		{
+			this.context = this.canvas.getContext('2d');
+			if(!this.context)
+			{
+				alert('你的浏览器不支持html5啊，坟蛋！换一个好吗？');
+			}
+			return !!this.context;
+		}
+		return false;
+	},
+
+	update : function(dt)
+	{
+		timeline.update(dt);
+	},
+
+	render : function()
+	{
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		timeline.render(this.context);
+	}
+	
+});
+
+window.gui = new myGUI(document.body);
+
+//下面两句都是使整个ui大小跟随父元素变化，推荐前者。嫌麻烦或者跟已有代码有冲突（比如body的onresize有别的代码会随时更改）写成后者也没关系。
+document.body.setAttribute("onresize", "gui.onresize(event);"); //较好
+//gui.forceAutoResize(true); //这一句和上一句功能类似，这种方法可保证正确性
+
+</script>
+
+<div style="display:none"><img src="../../res/png/0.png" id="test0"></div>
+</body>
+</html>

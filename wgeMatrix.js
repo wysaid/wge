@@ -464,7 +464,7 @@ WGE.Mat4 = WGE.Class(
 
 	scaleX : function(x)
 	{
-		data[0] *= x;
+		this.data[0] *= x;
 		data[1] *= x;
 		data[2] *= x;
 		data[3] *= x;
@@ -472,18 +472,18 @@ WGE.Mat4 = WGE.Class(
 
 	scaleY : function(y)
 	{
-		data[4] *= y;
-		data[5] *= y;
-		data[6] *= y;
-		data[7] *= y;
+		this.data[4] *= y;
+		this.data[5] *= y;
+		this.data[6] *= y;
+		this.data[7] *= y;
 	},
 
 	scaleZ : function(z)
 	{
-		data[8] *= z;
-		data[9] *= z;
-		data[10] *= z;
-		data[11] *= z;
+		this.data[8] *= z;
+		this.data[9] *= z;
+		this.data[10] *= z;
+		this.data[11] *= z;
 	},
 
 	scale : function(x, y, z)

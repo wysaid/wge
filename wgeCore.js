@@ -83,28 +83,28 @@ WGE.extend = function(dst, src)
 
 WGE.Class = function()
 {
-	var c = function()
+	var wge = function()
 	{
     	//initialize 为所有类的初始化方法。
     	if(this.initialize && this.initialize.apply)
     		this.initialize.apply(this, arguments);
     };
-    c.ancestors = WGE.clone(arguments);
-    c.prototype = {};
+    wge.ancestors = WGE.clone(arguments);
+    wge.prototype = {};
     for (var i = 0; i < arguments.length; i++)
     {
     	var a = arguments[i]
     	if (a.prototype)
     	{
-    		WGE.extend(c.prototype, a.prototype);
+    		WGE.extend(wge.prototype, a.prototype);
     	}
     	else
     	{
-    		WGE.extend(c.prototype, a);
+    		WGE.extend(wge.prototype, a);
     	}
     }
-    WGE.extend(c, c.prototype);
-    return c;
+    WGE.extend(wge, wge.prototype);
+    return wge;
 };
 
 WGE.rotateArray = function(arr)
