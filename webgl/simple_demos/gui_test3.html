@@ -17,7 +17,7 @@
 
 document.body.oncontextmenu=function(){ return false;} 
 
-var maxSpriteNum = 10;
+var maxSpriteNum = 500;
 var runningSpriteNum = 5;
 
 WGE.Sprite3d.ShaderDir = "../";
@@ -211,6 +211,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	modelViewMatrix : null, //mat4x4
 	projectionMatrix : null, //mat4x4
 
+	useBlend : true,
+
 	initialize : function()
 	{
 		WGE.GUIInterface.initialize.apply(this, arguments);
@@ -222,7 +224,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		
 		this.updateView();
 		
-		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
+		var gl = this.context;
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);		
+		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 	},
 
 	bindFather : function(fatherObj)
@@ -301,11 +305,11 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 			sprites[i].render(mvp);
 		}
 
-		gl.disable(gl.DEPTH_TEST);
-
-		gl.enable(gl.BLEND);
-		gl.blendFunc(gl.ONE, gl.ONE);
-
+		if(this.useBlend)
+		{
+			gl.disable(gl.DEPTH_TEST);
+			gl.enable(gl.BLEND);
+		}
 		this.boundingBox.render(mvp);
 	},
 
@@ -378,15 +382,15 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	goLeft : function(dis)
 	{
 		var h = this._helpFunc(this.lookDir.data, dis)
-		this.myPosition.data[0] -= h[0];
-		this.myPosition.data[1] += h[1]
+		this.myPosition.data[0] -= h[1];
+		this.myPosition.data[1] += h[0]
 	},
 
 	goRight : function(dis)
 	{
 		var h = this._helpFunc(this.lookDir.data, dis)
-		this.myPosition.data[0] += h[0];
-		this.myPosition.data[1] -= h[1]
+		this.myPosition.data[0] += h[1];
+		this.myPosition.data[1] -= h[0]
 	},
 
 	keypressEvent : function(e)
@@ -456,6 +460,9 @@ document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(
 <div style="width:100%;height:45px;background-color:#f00" id="totalSprites">
  Initializing...
 </div>
+<div style="width:100%;height:70px;background-color:#f00">
+使用鼠标可拖动视角，使用键盘w,a,s,d控制简单场景漫游。
+</div>
 <script type="text/javascript">
 function setBlend(mode)
 {
@@ -466,15 +473,11 @@ function setBlend(mode)
 </script>
 <input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
 <input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 1) runningSpriteNum = 1;"><br>
-<input type="button" value="No blend" style="width:100px" onclick="gui.context.disable(gui.context.BLEND);"><br>
-<input type="button" value="add" style="width:100px" onclick="setBlend('ONE');"><br>
-<input type="button" value="1 - src_alpha" style="width:100px" onclick="setBlend('ONE_MINUS_SRC_ALPHA');"><br>
-<input type="button" value="1 - dst_alpha" style="width:100px" onclick="setBlend('ONE_MINUS_DST_ALPHA');"><br>
-<input type="button" value="1 - src_color" style="width:100px" onclick="setBlend('ONE_MINUS_SRC_COLOR');"><br>
-<input type="button" value="1 - dst_color" style="width:100px" onclick="setBlend('ONE_MINUS_DST_COLOR');"><br><br>
 <input type="button" value="box alpha+" style="width:100px" onclick="gui.boundingBoxAlphaPlus(0.05);"><br>
 <input type="button" value="box alpha-" style="width:100px" onclick="gui.boundingBoxAlphaPlus(-0.05);"><br><br>
-<input type="button" value="No Y Rotation" style="width:100px" onclick="window.location='gui_test.html'">
+
+<input type="button" value="No Blend" style="width:100px" onclick="gui.useBlend = false;"><br>
+<input type="button" value="Use Blend" style="width:100px" onclick="gui.useBlend = true;"><br>
 </div>
 
 <div style="display:none">
