@@ -263,28 +263,29 @@ WGE.GUIInterface = WGE.Class(
 		}
 	},
 
-	onwheel : function(e)
-	{
-		if(this.mouseWheelEvent)
-			this.mouseWheelEvent(e);
-	},
-
-	onkeydown : function(e)
+	onwheel : function()
 	{
 		if(this.wheelEvent)
-			this.wheelEvent(e);
+			this.wheelEvent.apply(this, arguments);
 	},
 
-	onkeypress : function(e)
+	//注: 如果div元素无法响应key事件，则很可能是因为div无法获得焦点，请设置tabindex
+	onkeydown : function()
+	{
+		if(this.keyDownEvent)
+			this.keyDownEvent.apply(this, arguments);
+	},
+
+	onkeypress : function()
 	{
 		if(this.keypressEvent)
-			this.keypressEvent(e);
+			this.keypressEvent.apply(this, arguments);
 	},
 
-	onkeyup : function(e)
+	onkeyup : function()
 	{
 		if(this.keyUpEvent)
-			this.keyUpEvent(e);
+			this.keyUpEvent.apply(this, arguments);
 	}
 
 });

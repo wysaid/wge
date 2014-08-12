@@ -266,8 +266,14 @@ WGE.mat2Mul = function (mat2Left, mat2Right)
     return new WGE.Mat2(mat2Left.data[0] * mat2Right.data[0] + mat2Left.data[2] * mat2Right.data[1],
 		mat2Left.data[1] * mat2Right.data[0] + mat2Left.data[3] * mat2Right.data[1],
 		mat2Left.data[0] * mat2Right.data[2] + mat2Left.data[2] * mat2Right.data[3],
-		mat2Left.data[1] * mat2Right.data[2] + mat2Left.data[3] * mat2Right.data[3])
+		mat2Left.data[1] * mat2Right.data[2] + mat2Left.data[3] * mat2Right.data[3]);
 };
+
+WGE.mat2MulVec2 = function(mat2Left, vec2Right)
+{
+	return new WGE.Vec2(mat2Left.data[0] * vec2Right.data[0] + mat2Left.data[2] * vec2Right.data[1],
+		mat2Left.data[1] * vec2Right.data[0] + mat2Left.data[3] * vec2Right.data[1]);
+}
 
 //////////////////////////////////////////////////////
 // matrix 3 x 3
@@ -465,9 +471,9 @@ WGE.Mat4 = WGE.Class(
 	scaleX : function(x)
 	{
 		this.data[0] *= x;
-		data[1] *= x;
-		data[2] *= x;
-		data[3] *= x;
+		this.data[1] *= x;
+		this.data[2] *= x;
+		this.data[3] *= x;
 	},
 
 	scaleY : function(y)

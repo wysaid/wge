@@ -5,3 +5,15 @@
  *      Author: Wang Yang
  *        Blog: http://blog.wysaid.org
  */
+
+varying vec2 textureCoordinate;
+attribute vec4 vPosition;
+attribute vec2 vTexture;
+
+uniform mat4 mvp;
+
+void main()
+{	
+	gl_Position = mvp * vPosition;
+	textureCoordinate = vTexture;
+}

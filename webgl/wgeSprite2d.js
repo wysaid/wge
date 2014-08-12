@@ -8,6 +8,7 @@
 */
 
 //注： 带下划线的参数请以只读方式使用。
+//     默认上下翻转，兼容屏幕坐标系，可自行翻转回来，使用笛卡尔坐标系。
 
 //为了提升效率，对Sprite2d功能进行小幅度阉割，其余功能移到 Sprite2dExt中。
 WGE.Sprite2d = WGE.Class(
@@ -264,7 +265,7 @@ WGE.Sprite2d = WGE.Class(
 		this._program = program;
 
 		program.initWithShaderCode(vsh, fsh);
-		program.bindAttribLocation(WGE.Sprite2d.AtrribPositionName, this._posAttribLocation);
+		program.bindAttribLocation(WGE.Sprite2d.AttribPositionName, this._posAttribLocation);
 		if(!program.link())
 		{
 			console.error("WGE.Sprite2d : Program link Failed!");
@@ -407,7 +408,7 @@ WGE.Sprite2d.FragmentShaderExt = "precision mediump float;varying vec2 textureCo
 //调试使用，当编写的demo与sprite2d不在同一目录时设定。
 WGE.Sprite2d.ShaderDir = "";
 
-WGE.Sprite2d.AtrribPositionName = "vPosition";
+WGE.Sprite2d.AttribPositionName = "vPosition";
 WGE.Sprite2d.ProjectionMatrixName = "m4Projection";
 WGE.Sprite2d.HalfTexSizeName = "v2HalfTexSize";
 WGE.Sprite2d.RotationName = "rotation";

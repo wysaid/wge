@@ -11,23 +11,23 @@
 	本类只提供基础功能，需要更强大的功能需要自己继承定制。
 */
 
+//提示: zIndex 在Sprite3d中无意义，故不提供。开启OpenGL的深度测试即可。 
+// 不直接提供 pos等参数，如果需要，则继承此类，并记录这些参数以使用。
+//若要按远近先后混合，请在渲染前按远近顺序排序。
 
-//注： 同名参数含义请参考Sprite2d，为了减少篇幅，这里不再赘述
+//同名参数含义请参考Sprite2d，为了减少篇幅，这里不再赘述
 //内部包含set方法的参数，请使用set方法，不要直接修改参数值。
+
+//与Sprite2d 的默认坐标系不同！
+
 WGE.Sprite3d = WGE.Class(
 {
 	canvas : null,
 	texture : null,
 
-	// 不直接提供 pos等参数，如果需要，则继承此类，并记录这些参数以使用。
-	// pos : null,     //包含x, y, z轴信息。下方类似参数同理
-	// rot : null,		//与Sprite2dExt类似。
-	// scaling : null,
+	renderMethod : null, //渲染方式，默认为 gl.TRIANGLES.
 
-	//提示: zIndex 在Sprite3d中无意义，故不提供。开启OpenGL的深度测试即可。 
-	//若要按远近先后混合，请在渲染前按远近顺序排序。
-
-	_modelMatrix,  //模型矩阵，内含sprite3d所包含模型所进行的所有矩阵转换操作。
+	_modelMatrix : null,  //4x4模型矩阵，内含sprite3d所包含模型所进行的所有矩阵转换操作。
 
 	_hotspot: null,
 
@@ -39,12 +39,20 @@ WGE.Sprite3d = WGE.Class(
 	_meshIndexVBO : null,
 	_textureVBO : null,
 	_meshIndexSize : null,
+	_vertexDataType : null,         //顶点数据类型，默认为 gl.FLOAT
+	_meshIndexDataType : null,    //索引数据类型，默认为 gl.UNSIGNED_SHORT
+	_meshDataSize : null,     //每个顶点所包含的分量，可选值为1,2,3,4，默认4
+	_texDataSize : null,      //每个纹理坐标所包含的分量，同上。
+	//定义attrib location
+	_vertAttribLoc : 0,
+	_texAttribLoc : 1,
 
 	//缓存一些可能用到的location
-	_modelViewProjectionLoc : null,
+	_mvpLoc : null,
+	_textureLoc : null,
 
-
-	initialize : function(canvas, ctx)
+	//vsh和fsh表示自写的shader代码，可以自行定制。
+	initialize : function(canvas, ctx, vsh, fsh)
 	{
 		// this.pos = new WGE.Vec3(0, 0, 0);
 		// this.scaling = new WGE.Vec3(1, 1, 1);
@@ -59,16 +67,28 @@ WGE.Sprite3d = WGE.Class(
 		var gl = ctx || WGE.webgl || this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
 		this._context = gl;
 
-		if(!WGE.Sprite3d.VertexShader)
-			WGE.Sprite3d.VertexShader = WGE.requestTextByURL(WGE.Sprite3d.ShaderDir + "wgeSprite3d.vsh.txt");
-		if(!WGE.Sprite3d.FragmentShader)
-			WGE.Sprite3d.FragmentShader = WGE.requestTextByURL(WGE.Sprite3d.ShaderDir + "wgeSprite3d.fsh.txt");
-		this._initProgram(WGE.Sprite3d.VertexShader, WGE.Sprite3d.FragmentShader);
+		if(!this.renderMethod)
+		{
+			this.renderMethod = gl.TRIANGLES;
+		}
 
+		if(vsh && fsh)
+		{
+			this._initProgram(vsh, fsh);
+		}
+		else
+		{
+			if(!WGE.Sprite3d.VertexShader)
+				WGE.Sprite3d.VertexShader = WGE.requestTextByURL(WGE.Sprite3d.ShaderDir + "wgeSprite3d.vsh.txt");
+			if(!WGE.Sprite3d.FragmentShader)
+				WGE.Sprite3d.FragmentShader = WGE.requestTextByURL(WGE.Sprite3d.ShaderDir + "wgeSprite3d.fsh.txt");
+			this._initProgram(WGE.Sprite3d.VertexShader, WGE.Sprite3d.FragmentShader);
+		}
 		this._meshVBO = gl.createBuffer();
 		this._meshIndexVBO = gl.createBuffer();
 		this._textureVBO = gl.createBuffer();
-
+		this._vertexDataType = gl.FLOAT;
+		this._meshIndexDataType = gl.UNSIGNED_SHORT;
 	},
 
 	release : function()
@@ -86,8 +106,12 @@ WGE.Sprite3d = WGE.Class(
 	},
 
 	//仅简单渲染模型外形，如需要光照等请自行继承操作，重写shader。
-	//前三个参数分别代表模型顶点数据，纹理坐标，面索引。
-	initSprite : function(vertexArr, texArr, indexArr, tex, noRelease)
+	//vertexArr, texArr, indexArr 分别代表模型顶点数据，纹理坐标，面索引。
+	//顶点数据，纹理坐标必须为 Array或者 Float32Array
+	//面索引必须为 Array 或者 Uint16Array. 如果需要其他类型请自行重写本方法。
+	//vertexDataSize 表示每个顶点包含几个分量， 范围为1,2,3,4
+	//texDataSize 表示每个纹理坐标包含几个分量，范围为1,2,3,4
+	initSprite : function(vertexArr, vertexDataSize, texArr, texDataSize, indexArr, tex, noRelease)
 	{		
 		var gl = this._context;
 		var vertData = vertexArr instanceof Array ? new Float32Array(vertexArr) : vertexArr;
@@ -103,9 +127,11 @@ WGE.Sprite3d = WGE.Class(
 		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
 
 		this._meshIndexSize = indexArr.length;
+		this._meshDataSize = vertexDataSize;
+		this._texDataSize = texDataSize;
 
 		if(tex)
-			initTexture(tex, noRelease);
+			this.initTexture(tex, noRelease);
 		WGE.checkGLErr("WGE.Sprite3d.initSprite", gl);
 	},
 
@@ -126,6 +152,30 @@ WGE.Sprite3d = WGE.Class(
 			this.texture.initWithImg(tex);
 		}
 		return true;
+	},
+
+	//参数： 4x4矩阵，由整个世界给出，以确定当前sprite的局部。
+	render : function(mvp)
+	{
+		var matrix = WGE.mat4Mul(mvp, this._modelMatrix);
+		var gl = this._context;
+		var program = this._program;
+		program.bind();
+		gl.uniformMatrix4fv(this._mvpLoc, false, matrix.data);
+
+		this.texture.bindToIndex(1); //index请随意~ 尽量不要大于7就好
+		gl.uniform1i(this._textureLoc, 1);
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+		gl.enableVertexAttribArray(this._vertAttribLoc);
+		gl.vertexAttribPointer(this._vertAttribLoc, this._meshDataSize, this._vertexDataType, false, 0, 0)
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, this._textureVBO);
+		gl.enableVertexAttribArray(this._texAttribLoc);
+		gl.vertexAttribPointer(this._texAttribLoc, this._texDataSize, this._vertexDataType, false, 0, 0);
+
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+		gl.drawElements(this.renderMethod, this._meshIndexSize, this._meshIndexDataType, 0);
 	},
 
 	translate : function(tx, ty, tz)
@@ -192,9 +242,45 @@ WGE.Sprite3d = WGE.Class(
 		this._modelMatrix.rotateZ(rad);
 	},
 
+	_initProgram : function(vsh, fsh)
+	{
+		var gl = this._context;
+		var program = new WGE.Program(gl);
+		this._program = program;
+
+		program.initWithShaderCode(vsh, fsh);
+
+		program.bindAttribLocation(WGE.Sprite3d.AttribVertexName, this._vertAttribLoc);
+		program.bindAttribLocation(WGE.Sprite3d.AttribTextureName, this._texAttribLoc);
+
+		if(!program.link())
+		{
+			console.error("WGE.Sprite2d : Program link Failed!");
+			return false;
+		}
+
+		program.bind();
+
+		this._mvpLoc = program.uniformLocation(WGE.Sprite3d.MVPName);
+		this._textureLoc = program.uniformLocation(WGE.Sprite3d.TextureName);
+		if(!(this._mvpLoc && this._textureLoc))
+		{
+			console.warn("WGE.Sprite3d : Not all uniform locations are correct!");
+		}
+
+		WGE.checkGLErr("WGE.Sprite2d - init program", gl);
+		return true;
+	}
+
+
+
 });
 
 //WGE.Sprite3d.VertexShader = "";
 
 //WGE.Sprite3d.FragmentShader = "";
 
+WGE.Sprite3d.AttribVertexName = "vPosition";
+WGE.Sprite3d.AttribTextureName = "vTexture";
+WGE.Sprite3d.TextureName = "inputImageTexture";
+WGE.Sprite3d.MVPName = "mvp";
