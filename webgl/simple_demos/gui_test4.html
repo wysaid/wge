@@ -430,21 +430,9 @@ WGE demo操作说明:<br>
 使用键盘w,a,s,d控制场景漫游，
 空格键为跳跃。
 </div>
-<script type="text/javascript">
-function setBlend(mode)
-{
-	gui.context.enable(gui.context.BLEND);
-	gui.context.blendFunc(gui.context.ONE, gui.context[mode]);
-}
 
-</script>
 <input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
 <input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 1) runningSpriteNum = 1;"><br>
-<input type="button" value="box alpha+" style="width:100px" onclick="gui.boundingBoxAlphaPlus(0.05);"><br>
-<input type="button" value="box alpha-" style="width:100px" onclick="gui.boundingBoxAlphaPlus(-0.05);"><br><br>
-
-<input type="button" value="No Blend" style="width:100px" onclick="gui.useBlend(false);"><br>
-<input type="button" value="Use Blend" style="width:100px" onclick="gui.useBlend(true);"><br>
 </div>
 
 <div style="display:none">
