@@ -63,8 +63,14 @@ WGE.GUIInterface = WGE.Class(
 			'keypress' : this.onkeypress.bind(this),
 			'keyup' : this.onkeyup.bind(this),
 			//wheel 方法在firefox中不受支持。
-			'mousewheel' : this.onwheel.bind(this) 
+			'wheel' : this.onwheel.bind(this),
 		};
+		
+		if(document.body.onwheel === undefined)
+        {
+        	this._events['mousewheel'] = this._events['wheel'];
+        	this._events['wheel'] = undefined;
+        }
 	},
 
 	release : function()
