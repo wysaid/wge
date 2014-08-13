@@ -8,7 +8,7 @@
 */
 
 //
-// 下方提供渲染速度较快的 SpriteExt， 但是旋转操作需要进行矩阵运算，较慢。
+// 下方提供渲染速度较快的 SpriteExt, 但是旋转操作需要进行矩阵运算，较慢。
 // 请考虑场景综合选择。
 //
 
@@ -201,5 +201,10 @@ WGE.SpriteExt = WGE.Class(WGE.Sprite,
 	{
 		this.rotation = WGE.mat2Rotation(rot);
 	}
+
+});
+
+WGE.SpriteExt3d = WGE.Class(WGE.Sprite,
+{
 
 });

@@ -321,7 +321,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		var tmp = -this.lookDir.data[2] / len;
 		var dirBackX = dirX * tmp;
 		var dirBackY = dirY * tmp;
-		this.modelViewMatrix = WGE.makeLookAt(this.myPosition.data[0], this.myPosition.data[1], this.myPosition.data[2], this.lookDir.data[0], this.lookDir.data[1], this.lookDir.data[2], dirBackX, dirBackY, len);
+		this.modelViewMatrix = WGE.makeLookAt(this.myPosition.data[0], this.myPosition.data[1], this.myPosition.data[2], dirX, dirY, this.lookDir.data[2], dirBackX, dirBackY, len);
 	},
 
 	mouseDownEvent : function(e, x, y)

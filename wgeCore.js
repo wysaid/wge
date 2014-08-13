@@ -9,7 +9,7 @@
 */
 
 /*
-简介： WGE (WYSAID's (Web) Graphics Engine) 是一个web平台下的图形引擎。
+简介： WGE (Web Graphics Engine) 是一个web平台下的图形引擎。
        主要使用webgl实现，同时编写context 2d兼容版本
 	   context 2d版本主要用于兼容部分低版本的IE浏览器，但不保证支持WGE的所有功能
 */
