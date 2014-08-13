@@ -263,10 +263,10 @@ WGE.GUIInterface = WGE.Class(
 		}
 	},
 
-	onwheel : function()
+	onwheel : function(e)
 	{
 		if(this.wheelEvent)
-			this.wheelEvent.apply(this, arguments);
+		    this.wheelEvent(e, e.deltaY || e.wheelDelta);
 	},
 
 	//注: 如果div元素无法响应key事件，则很可能是因为div无法获得焦点，请设置tabindex

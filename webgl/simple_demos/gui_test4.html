@@ -383,9 +383,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		}
 	},	
 
-	wheelEvent : function(e)
+	wheelEvent : function(e, delta)
 	{
-		this.lookIn(e.deltaY / 1000);
+		this.lookIn(delta / 1000);
 		this.resize(this.canvas.width, this.canvas.height);
 	},
 
