@@ -146,7 +146,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 			var context = this.canvas.getContext('experimental-webgl');
 			if(!context)
 			{
-				alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+				alert('你的浏览器不支持webgl啊，坟蛋！换chrome或者firefox好吗？');
 			}
 			this.context = context;
 			return !!this.context;
@@ -424,7 +424,7 @@ document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(
  Initializing...
 </div>
 <div style="width:100%;height:120px;background-color:#f00">
-WGE demo操作说明：
+WGE demo操作说明:<br>
 使用鼠标可拖动视角，
 鼠标滚轮可以调节视野角度。
 使用键盘w,a,s,d控制场景漫游，
