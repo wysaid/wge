@@ -19,7 +19,7 @@
 document.body.oncontextmenu=function(){ return false;} 
 
 var maxSpriteNum = 500;
-var runningSpriteNum = 5;
+var runningSpriteNum = 3;
 
 WGE.Sprite3d.ShaderDir = "../";
 
@@ -48,6 +48,61 @@ var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 	}
 });
 
+var MySprite = WGE.Class(WGE.Sprite3d,
+{
+	x : 0,
+	y : 0,
+	z : 0,
+	dx : 0,
+	dy : 0,
+	dz : 0,
+
+	drx : 1,
+	drz : 1,
+	dry : 1,
+	rot : 0,
+	dRot : 0,
+
+	scaling : 1,
+
+	randomize : function()
+	{
+		this.x = Math.random() * 2.0 - 1.0;
+		this.y = Math.random() * 2.0 - 1.0;
+		this.z = Math.random();
+		this.dx = (Math.random() - 0.5) * 0.5 + 0.001;
+		this.dy = (Math.random() - 0.5) * 0.5 + 0.001;
+		this.dz = Math.random() * 0.5 + 0.001;
+
+		this.drx = (Math.random() - 0.5) * 10 + 0.1;
+		this.dry = (Math.random() - 0.5) * 10 + 0.1;
+		this.drz = (Math.random() - 0.5) * 10 + 0.1;
+		this.dRot = Math.PI * Math.random() * 0.01 + 0.001;
+
+		this.scaling = Math.random() * 10 + 3;
+	},
+
+	update : function(dt, boundingX, boundingY, boundingZ)
+	{
+		this.x += this.dx * dt;
+		this.y += this.dy * dt;
+		this.z += this.dz * dt;
+
+		if(this.x < -boundingX || this.x > boundingX)
+			this.dx = -this.dx;
+		if(this.y < -boundingY || this.y > boundingY)
+			this.dy = -this.dy;
+		if(this.z < 0 || this.z > boundingZ * 2)
+			this.dz = -this.dz;
+		this.rot += this.dRot * dt;
+
+		this._modelMatrix = WGE.mat4Translation(this.x, this.y, this.z);
+		this.scale(this.scaling, this.scaling, this.scaling);
+		this.rotate(this.rot, this.drx, this.dry, this.drz);
+	}
+
+});
+
 var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 {
 	context : undefined,
@@ -57,9 +112,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 
 	boxSizeX : 100,
 	boxSizeY : 100,
-	boxSizeZ : 50,
+	boxSizeZ : 60,
 
-	zHeight : 0,
+	zHeight : 10,
 	dz : 0,  //z方向速度
 	ddz : -0.05, //重力加速度
 
@@ -67,6 +122,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 	isBacking : false,
 	isGoingLeft : false,
 	isGoingRight : false,
+
+	sprites : null,
 
 	initialize : function()
 	{
@@ -77,7 +134,6 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);		
 		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 		this.useBlend(false);
-		this.zHeight = 10 - this.boxSizeZ;
 		this.eye.data[2] = this.zHeight;
 		this.updateView();
 	},
@@ -101,8 +157,30 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 	{
 		var boundingBox = new MyBoundingBox(this.canvas, this.context);
 		boundingBox.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, WGE.ID('test3'), {TEXTURE_MIN_FILTER:'LINEAR',TEXTURE_MAG_FILTER:'LINEAR'});
+		boundingBox.translateZ(this.boxSizeZ);
 		boundingBox.scale(this.boxSizeX, this.boxSizeY, this.boxSizeZ);
 		this.boundingBox = boundingBox;
+
+		var sprites = [];
+		var textures = [];
+		var context = this.context;
+		this.sprites = sprites;
+		for(var i = 0; i != 7; ++i)
+		{
+			var img = WGE.ID('test' + i);
+			var tex = new WGE.Texture2D(context);
+			tex.initWithImg(img);
+			textures.push(tex);
+		}
+
+		for(var i = 0; i != maxSpriteNum; ++i)
+		{
+			var sprite = new MySprite(this.canvas, this.context);
+			sprite.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, textures[parseInt(Math.random() * textures.length)]);
+
+			sprite.randomize();
+			sprites.push(sprite);
+		}
 	},
 
 	boundingBoxAlphaPlus : function(value)
@@ -144,9 +222,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 				eye[2] = this.zHeight;
 				this.dz = 0;
 			}
-			else if(eye[2] > this.boxSizeZ * 0.95)
+			else if(eye[2] > this.boxSizeZ * 1.9)
 			{
-				eye[2] = this.boxSizeZ * 0.95;
+				eye[2] = this.boxSizeZ * 1.9;
 				this.dz = 0;
 			}
 			else
@@ -161,6 +239,12 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		{
 			this.updateView();
 		}
+
+		var sprites = this.sprites;
+		for(var i = 0; i < runningSpriteNum; ++i)
+		{
+			sprites[i].update(dt, this.boxSizeX, this.boxSizeY, this.boxSizeZ);
+		}
 	},
 
 	render : function()
@@ -170,6 +254,12 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		gl.clear(this.context.COLOR_BUFFER_BIT);
 
 		this.boundingBox.render(mvp);
+
+		var sprites = this.sprites;
+		for(var i = 0; i < runningSpriteNum; ++i)
+		{
+			sprites[i].render(mvp);
+		}
 	},
 
 	useBlend : function(blend)
@@ -320,20 +410,23 @@ var gui = new MyGUI(div);
 
 function updateSpritesAndFPS()
 {
-	WGE.ID('totalSprites').innerHTML = "Total Sprites: " + runningSpriteNum + "<br>" + "FPS " + (1000/gui.deltaTime).toFixed(1);
+	WGE.ID('totalSprites').innerHTML = "Total Sprites: " + runningSpriteNum + "<br>" + "FPS " + (1000/gui.deltaTime).toFixed(1) + "<br>分辨率: " + gui.canvas.width + " x " + gui.canvas.height + "<br>x: " + gui.eye.data[0].toFixed(1) + "<br>y: " + gui.eye.data[1].toFixed(1) + "<br>z: " + gui.eye.data[2].toFixed(1);
 }
 
 document.body.setAttribute("onresize", "gui.onresize(event);");
-document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(updateSpritesAndFPS, 1000);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(updateSpritesAndFPS, 250);");
 
 </script>
 
 <div style="position:absolute;left:10px;top:10px;width:170px;height:auto;">
-<div style="width:100%;height:45px;background-color:#f00" id="totalSprites">
+<div style="width:100%;height:120px;background-color:#f00" id="totalSprites">
  Initializing...
 </div>
-<div style="width:100%;height:70px;background-color:#f00">
-使用鼠标可拖动视角，使用键盘w,a,s,d控制简单场景漫游。
+<div style="width:100%;height:120px;background-color:#f00">
+使用鼠标可拖动视角，
+鼠标滚轮可以调节视野角度。
+使用键盘w,a,s,d控制场景漫游，
+空格键为跳跃。
 </div>
 <script type="text/javascript">
 function setBlend(mode)
