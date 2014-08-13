@@ -404,10 +404,10 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frames.frame1 = frame1;
 		frames.frame2 = frame2;
 
-		frame1.setHotspot2Center();
-		frame1.moveTo(w / 2, h / 2);
-		frame2.setHotspot2Center();
-		frame2.moveTo(w / 2, h / 2);
+		frame1.setHotspotWithRatio(0.5, 0.1);
+		frame1.moveTo(w / 2, h / 10);
+		frame2.setHotspotWithRatio(0.5, 0.1);
+		frame2.moveTo(w / 2, h / 10);
 
 		var frame1Action = new WGE.UniformScaleAction([0, 6000], [1.3, 1.3], [1, 1]);
 		var frame2Action = new WGE.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
@@ -479,10 +479,10 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		var frame4 = S(3133, 6000, filterBW.bind(img1).run(), -1);
 		frame3.zIndex = globalZ;
 		frame4.zIndex = globalZ + 1;
-		frame3.setHotspot2Center();
-		frame4.setHotspot2Center();
-		frame3.moveTo(w / 2, h / 2);
-		frame4.moveTo(w / 2, h / 2);
+		frame3.setHotspotWithRatio(0.5, 0.1);
+		frame4.setHotspotWithRatio(0.5, 0.1);
+		frame3.moveTo(w / 2, h / 10);
+		frame4.moveTo(w / 2, h / 10);
 
 		var frame3Action = new WGE.UniformScaleAction([0, 5000], [0.8, 0.8], [1.2, 1.2]);
 		var frame4Action = new WGE.UniformScaleAction([0, 5000], [1.2, 1.2], [1.0, 1.0]);
@@ -497,10 +497,10 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		var frame6 = S(4133, 6000, img2, -1);
 		frame5.zIndex = globalZ - 2;
 		frame6.zIndex = globalZ - 1;
-		frame5.setHotspot2Center();
-		frame6.setHotspot2Center();
-		frame5.moveTo(w / 2, h / 2 - 5);
-		frame6.moveTo(w / 2, h / 2);
+		frame5.setHotspotWithRatio(0.5, 0.1);
+		frame6.setHotspotWithRatio(0.5, 0.1);
+		frame5.moveTo(w / 2, h / 10);
+		frame6.moveTo(w / 2, h / 10);
 
 		var frame5Action = new WGE.UniformScaleAction([0, 5000], [0.9, 0.9], [1.1, 1.1]);
 		var frame6Action = new WGE.UniformScaleAction([0, 5000], [1.1, 1.1], [0.9, 0.9]);
@@ -573,16 +573,23 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		var action3 = new FTPhotoFrame.PointMoveSlowDown3X([1000, 1667], P(w * 0.5, 0), P(w * 0.2, 0), frames.pUp);
 		var action4 = new FTPhotoFrame.PointMoveSlowDown3X([500, 1667], P(w * 0.5, h), P(w * 0.2, h), frames.pDown);
 
-		var action5 = new FTPhotoFrame.PointIntersectionAction([0, 3500], [frames.pUp, frames.pDown, frames.pLeft, frames.pRight], frames.pCenter);
+		var actionInsert = new FTPhotoFrame.PointIntersectionAction([0, 3500], [frames.pUp, frames.pDown, frames.pLeft, frames.pRight], frames.pCenter);
 
-		var action6 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 3500], P(0, h * 0.2), P2, frames.pLeft);
-		var action7 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 3500], P(w, h * 0.2), P3, frames.pRight);
 
-		var action8 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 3500], P(w * 0.2, 0), P1, frames.pUp);
-		var action9 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 3500],  P(w * 0.2, h), P3, frames.pDown);
+		var action10 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(0, h * 0.2), P(0, h * 0.05), frames.pLeft);
+		var action11 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w, h * 0.2), P(w, h * 0.05), frames.pRight);
+
+		var action12 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w * 0.2, 0), P(w * 0.05, 0), frames.pUp);
+		var action13 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w * 0.2, h), P(w * 0.05, h), frames.pDown);
+
+		var action6 = new FTPhotoFrame.PointMoveSlowDown3X([2500, 3300 + R(200)], P(0, h * 0.05), P2, frames.pLeft);
+		var action7 = new FTPhotoFrame.PointMoveSlowDown3X([2500 + R(200), 3500], P(w, h * 0.05), P3, frames.pRight);
+
+		var action8 = new FTPhotoFrame.PointMoveSlowDown3X([2500 + R(200), 3500], P(w * 0.05, 0), P1, frames.pUp);
+		var action9 = new FTPhotoFrame.PointMoveSlowDown3X([2500, 3300 + R(200)], P(w * 0.05, h), P3, frames.pDown);
 
 		var actionManager = M(5300, 9000);
-		actionManager.pushArr([action1, action2, action3, action4, action6, action7, action8, action9, action5]);
+		actionManager.pushArr([action1, action2, action3, action4, action6, action7, action8, action9, action10, action11, action12, action13, actionInsert]);
 
 		var img3 = WGE.rotateArray(imageArray);
 
@@ -590,8 +597,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame1.zIndex = fs[0].zIndex + 0.5;
 		frame1.alpha = 0;
 
-		frame1.setHotspot2Center();
-		frame1.moveTo(w/2, h/2);
+		frame1.setHotspotWithRatio(0.5, 0.1);
+		frame1.moveTo(w/2, h/10);
 		frame1.zone = fs[0].zone;
 
 		var frame1Action = new WGE.UniformAlphaAction([0, 1000], 0, 1);
@@ -612,8 +619,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 	{
 		var frame1 = frames.frame1;
 		var frame2 = S(9100, 15000, filterBW.bind(frame1.img).run(), -1);
-		frame2.setHotspot2Center();
-		frame2.moveTo(w / 2 - 10, h / 2);
+		frame2.setHotspotWithRatio(0.5, 0.1);
+		frame2.moveTo(w / 2 - 10, h / 10);
 		frame2.zIndex = globalZ;
 
 		var frame2Action = new WGE.UniformScaleAction([0, 6000], [1.3, 1.3], [0.9, 0.9]);
@@ -624,8 +631,18 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		var zone1 = Z([P(0, 0), pnts[0], pnts[1], P(0, h)]);
 		frame2.zone = zone1;
 
-		var action1 = new FTPhotoFrame.PointMoveSlowDown3X([0, 1500 + R(500)], P0, P(w * 0.6, 0), pnts[0]);
-		var action2 = new FTPhotoFrame.PointMoveSlowDown3X([R(500), 1000 + R(1000)], P2, P(w * 0.6, h), pnts[1]);
+		var action1, action2;
+
+		if (R(10) > 5)
+		{
+		    action1 = new FTPhotoFrame.PointMoveSlowDown3X([0, 1500 + R(500)], P0, P(w * 0.6, 0), pnts[0]);
+		    action2 = new FTPhotoFrame.PointMoveSlowDown3X([R(500), 1000 + R(1000)], P2, P(w * 0.6, h), pnts[1]);
+		}
+		else
+		{
+		    action1 = new FTPhotoFrame.PointMoveSlowDown3X([R(500), 1000 + R(1000)], P0, P(w * 0.6, 0), pnts[0]);
+		    action2 = new FTPhotoFrame.PointMoveSlowDown3X([0, 1500 + R(500)], P2, P(w * 0.6, h), pnts[1]);
+		}
 		var action3 = new FTPhotoFrame.PointMoveSlowDown3X([2600, 2900], P(w * 0.6, 0), P1, pnts[0]);
 		var action4 = new FTPhotoFrame.PointMoveSlowDown3X([2500, 3000], P(w * 0.6, h), P3, pnts[1]);
 		var actionManager = M(9100, 12100);
@@ -638,12 +655,12 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 
 		var frame3 = S(11000, 15000, img4, -1);
 		var frame4 = S(11000, 15000, img4, -1);
-		frame3.setHotspot2Center();
-		frame3.moveTo(w / 2, h / 2);
+		frame3.setHotspotWithRatio(0.5, 0.1);
+		frame3.moveTo(w / 2, h / 10);
 		frame3.zIndex = globalZ + 1;
 
-		frame4.setHotspot2Center();
-		frame4.moveTo(w / 2, h / 2);
+		frame4.setHotspotWithRatio(0.5, 0.1);
+		frame4.moveTo(w / 2, h / 10);
 		frame4.zIndex = globalZ + 2;
 
 		var frame3Action = new WGE.UniformScaleAction([0, 5000], [1.3, 1.3], [1.0, 1.0]);
@@ -660,15 +677,31 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		var zone3 = Z([pnts2[2], P(w, 0), P(w, h), pnts2[3]]);
 		frame4.zone = zone3;
 
-		var action5 = new FTPhotoFrame.PointMoveSlowDown3X([0, 1500], P0, P(w * 0.5, 0), pnts2[0]);
-		var action6 = new FTPhotoFrame.PointMoveSlowDown3X([500, 2000], P2, P(w * 0.5, h), pnts2[1]);
-		var action7 = new FTPhotoFrame.PointMoveSlowDown3X([1000, 2000], P1, P(w * 0.5, 0), pnts2[2]);
-		var action8 = new FTPhotoFrame.PointMoveSlowDown3X([1000, 1800], P3, P(w * 0.5, h), pnts2[3]);
+		var action5, action6, action7, action8, action9, action10, action11, action12;
 
-		var action9 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500],  P(w * 0.5, 0), P0, pnts2[0]);
-		var action10 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2900], P(w * 0.5, h), P2, pnts2[1]);
-		var action11 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2900], P(w * 0.5, 0), P1, pnts2[2]);
-		var action12 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w * 0.5, h), P3, pnts2[3]);
+		if (R(10) > 5)
+		{
+		    action5 = new FTPhotoFrame.PointMoveSlowDown3X([0, 1500], P0, P(w * 0.5, 0), pnts2[0]);
+		    action6 = new FTPhotoFrame.PointMoveSlowDown3X([500, 2000], P2, P(w * 0.5, h), pnts2[1]);
+		    action9 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w * 0.5, 0), P0, pnts2[0]);
+		    action7 = new FTPhotoFrame.PointMoveSlowDown3X([1000, 2000], P1, P(w * 0.5, 0), pnts2[2]);
+		    action8 = new FTPhotoFrame.PointMoveSlowDown3X([1000, 1800], P3, P(w * 0.5, h), pnts2[3]);
+		    action10 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2900], P(w * 0.5, h), P2, pnts2[1]);		    
+		    action11 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2900], P(w * 0.5, 0), P1, pnts2[2]);
+		    action12 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w * 0.5, h), P3, pnts2[3]);
+		}
+		else
+		{
+		    action5 = new FTPhotoFrame.PointMoveSlowDown3X([0, 2000], P0, P(w * 0.5, 0), pnts2[0]);
+		    action6 = new FTPhotoFrame.PointMoveSlowDown3X([0, 1500 + R(500)], P2, P(w * 0.5, h), pnts2[1]);
+		    action7 = new FTPhotoFrame.PointMoveSlowDown3X([1000, 1800], P1, P(w * 0.5, 0), pnts2[2]);
+		    action8 = new FTPhotoFrame.PointMoveSlowDown3X([1000, 2000], P3, P(w * 0.5, h), pnts2[3]);
+		    action9 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w * 0.5, 0), P0, pnts2[0]);
+		    action10 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2900], P(w * 0.5, h), P2, pnts2[1]);
+		    action11 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2500], P(w * 0.5, 0), P1, pnts2[2]);
+		    action12 = new FTPhotoFrame.PointMoveSlowDown3X([2000, 2900], P(w * 0.5, h), P3, pnts2[3]);
+		}
+		
 
 		var actionManager2 = M(12000, 15000);
 		actionManager2.pushArr([action5, action6, action7, action8, action9, action10, action11, action12]);
@@ -679,8 +712,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 			stillTime = 15000;
 
 		var frame5 = S(14000, stillTime, filterBW.bind(img4).run(), -1);
-		frame5.setHotspot2Center();
-		frame5.moveTo(w / 2, h / 2);
+		frame5.setHotspotWithRatio(0.5, 0.1);
+		frame5.moveTo(w / 2, h / 10);
 		frame5.zIndex = frame3.zIndex - 0.5;
 
 		var frame5Action = new WGE.UniformScaleAction([0, 2000], [1.3, 1.3], [1.0, 1.0]);
