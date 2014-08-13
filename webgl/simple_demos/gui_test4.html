@@ -4,9 +4,10 @@
 <title>simpleDemo</title>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeMatrix.js"></script>
-<script type="text/javascript" src="../wgeSprite3d.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
 <script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../wgeScene.js"></script>
+<script type="text/javascript" src="../wgeSprite3d.js"></script>
 <script type="text/javascript" src="../models/cube.js"></script>
 </head>
 
@@ -22,66 +23,6 @@ var runningSpriteNum = 5;
 
 WGE.Sprite3d.ShaderDir = "../";
 
-var MySprite = WGE.Class(WGE.Sprite3d,
-{
-	x : 0,
-	y : 0,
-	z : 0,
-	dx : 0,
-	dy : 0,
-	dz : 0,
-
-	drx : 1,
-	drz : 1,
-	dry : 1,
-	rot : 0,
-	dRot : 0,
-
-	scaling : 1,
-
-	randomize : function()
-	{
-		this.x = Math.random() * 2.0 - 1.0;
-		this.y = Math.random() * 2.0 - 1.0;
-		this.z = Math.random() * 2.0 - 1.0;
-		this.dx = (Math.random() - 0.5) * 0.5 + 0.001;
-		this.dy = (Math.random() - 0.5) * 0.5 + 0.001;
-		this.dz = (Math.random() - 0.5) * 0.5 + 0.001;
-
-		this.drx = (Math.random() - 0.5) * 10 + 0.1;
-		this.dry = (Math.random() - 0.5) * 10 + 0.1;
-		this.drz = (Math.random() - 0.5) * 10 + 0.1;
-		this.dRot = Math.PI * Math.random() * 0.01 + 0.001;
-
-		this.scaling = Math.random() * 5 + 1;
-	},
-
-	update : function(dt, boundingX, boundingY, boundingZ)
-	{
-		this.x += this.dx;
-		this.y += this.dy;
-		this.z += this.dz;
-
-		if(this.x < -boundingX || this.x > boundingX)
-			this.dx = -this.dx;
-		if(this.y < -boundingY || this.y > boundingY)
-			this.dy = -this.dy;
-		if(this.z < -boundingZ || this.z > boundingZ)
-			this.dz = -this.dz;
-		this.rot += this.dRot;
-
-		// this._modelMatrix = WGE.mat4Rotation(this.rot, this.drx, this.dry, this.drz);
-		// var mat = this._modelMatrix;
-		// this.scale(this.scaling, this.scaling, this.scaling);
-		// this.translate(this.x, this.y, this.z);
-
-		this._modelMatrix = WGE.mat4Translation(this.x, this.y, this.z);
-		this.scale(this.scaling, this.scaling, this.scaling);
-		this.rotate(this.rot, this.drx, this.dry, this.drz);
-
-	}
-
-});
 
 var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 {
@@ -107,37 +48,38 @@ var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 	}
 });
 
-var MyGUI = WGE.Class(WGE.GUIInterface, 
+var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 {
 	context : undefined,
 	isMouseDown : false,
-	sprites : null,
 	boundingBox : null, 
 	deltaTime : 10,
 
-	lookDir : null,
-	myPosition : null,
-	farAway : 1000,
+	boxSizeX : 100,
+	boxSizeY : 100,
+	boxSizeZ : 50,
 
-	modelViewMatrix : null, //mat4x4
-	projectionMatrix : null, //mat4x4
+	zHeight : 0,
+	dz : 0,  //z方向速度
+	ddz : -0.05, //重力加速度
 
-	useBlend : true,
+	isForwarding : false,
+	isBacking : false,
+	isGoingLeft : false,
+	isGoingRight : false,
 
 	initialize : function()
 	{
 		WGE.GUIInterface.initialize.apply(this, arguments);
-
-		var w = this.canvas.width, h = this.canvas.height;
-		this.projectionMatrix = WGE.makePerspective(Math.PI / 3, w / h, 1, 10000.0);
-		this.lookDir = new WGE.Vec3(0, this.farAway, 0); //观察方向
-		this.myPosition = new WGE.Vec3(0, -20, 0); //观察位置。
-		
-		this.updateView();
+		WGE.SceneInterface.initialize.call(this, this.canvas.width, this.canvas.height);
 		
 		var gl = this.context;
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);		
 		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+		this.useBlend(false);
+		this.zHeight = 10 - this.boxSizeZ;
+		this.eye.data[2] = this.zHeight;
+		this.updateView();
 	},
 
 	bindFather : function(fatherObj)
@@ -158,31 +100,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	initSprites : function()
 	{
 		var boundingBox = new MyBoundingBox(this.canvas, this.context);
-		boundingBox.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, WGE.ID('test6'));
-		boundingBox.setAlpha(0.5);
-		boundingBox.scale(30, 30, 30);
+		boundingBox.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, WGE.ID('test3'), {TEXTURE_MIN_FILTER:'LINEAR',TEXTURE_MAG_FILTER:'LINEAR'});
+		boundingBox.scale(this.boxSizeX, this.boxSizeY, this.boxSizeZ);
 		this.boundingBox = boundingBox;
-
-		var sprites = [];
-		var textures = [];
-		var context = this.context;
-		this.sprites = sprites;
-		for(var i = 0; i != 7; ++i)
-		{
-			var img = WGE.ID('test' + i);
-			var tex = new WGE.Texture2D(context);
-			tex.initWithImg(img);
-			textures.push(tex);
-		}
-
-		for(var i = 0; i != maxSpriteNum; ++i)
-		{
-			var sprite = new MySprite(this.canvas, this.context);
-			sprite.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, textures[parseInt(Math.random() * textures.length)]);
-
-			sprite.randomize();
-			sprites.push(sprite);
-		}
 	},
 
 	boundingBoxAlphaPlus : function(value)
@@ -195,10 +115,51 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 	update : function(dt)
 	{
 		this.deltaTime = dt;
-		var sprites = this.sprites;
-		for(var i = 0; i < runningSpriteNum; ++i)
+
+		var motion = 1;
+		var needUpdateView = false;
+
+		if(this.isForwarding || this.isBacking || this.isGoingLeft || this.isGoingRight)
 		{
-			sprites[i].update(dt, 20, 20, 20);
+			if(this.isForwarding)
+				this.goForward(motion);
+			else if(this.isBacking)
+				this.goBack(motion);
+
+			if(this.isGoingRight)
+				this.goRight(motion);
+			else if(this.isGoingLeft)
+				this.goLeft(motion);
+
+			this.boundingMyPosition();
+			needUpdateView = true;
+		}
+
+		var eye = this.eye.data;
+
+		if(this.dz || eye[2] > this.zHeight)
+		{
+			if(eye[2] < this.zHeight)
+			{
+				eye[2] = this.zHeight;
+				this.dz = 0;
+			}
+			else if(eye[2] > this.boxSizeZ * 0.95)
+			{
+				eye[2] = this.boxSizeZ * 0.95;
+				this.dz = 0;
+			}
+			else
+			{
+				this.dz += this.ddz;
+				eye[2] += this.dz;
+				needUpdateView = true;
+			}
+		}
+
+		if(needUpdateView)
+		{
+			this.updateView();
 		}
 	},
 
@@ -208,31 +169,23 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		var gl = this.context;
 		gl.clear(this.context.COLOR_BUFFER_BIT);
 
-		gl.enable(gl.DEPTH_TEST);
-		gl.disable(gl.BLEND);
-		var sprites = this.sprites;
-		for(var i = 0; i < runningSpriteNum; ++i)
-		{
-			sprites[i].render(mvp);
-		}
+		this.boundingBox.render(mvp);
+	},
 
-		if(this.useBlend)
+	useBlend : function(blend)
+	{
+		var gl = this.context;
+
+		if(blend)
 		{
 			gl.disable(gl.DEPTH_TEST);
 			gl.enable(gl.BLEND);
 		}
-		this.boundingBox.render(mvp);
-	},
-
-	updateView : function()
-	{
-		var dirX = this.myPosition.data[0] + this.lookDir.data[0];
-		var dirY = this.myPosition.data[1] + this.lookDir.data[1];
-		var len = Math.sqrt(dirX * dirX + dirY * dirY);
-		var tmp = -this.lookDir.data[2] / len;
-		var dirBackX = dirX * tmp;
-		var dirBackY = dirY * tmp;
-		this.modelViewMatrix = WGE.makeLookAt(this.myPosition.data[0], this.myPosition.data[1], this.myPosition.data[2], dirX, dirY, this.lookDir.data[2], dirBackX, dirBackY, len);
+		else
+		{
+			gl.enable(gl.DEPTH_TEST);
+			gl.disable(gl.BLEND);
+		}
 	},
 
 	mouseDownEvent : function(e, x, y)
@@ -247,22 +200,37 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		this.isMouseDown = false;
 	},
 
+	boundingMyPosition : function()
+	{
+		var eye = this.eye.data;
+		var xBound = this.boxSizeX * 0.95;
+		var xLim = this.boxSizeX * 0.94
+		
+		if(eye[0] < -xBound)
+			eye[0] = -xLim;
+		else if(eye[0] > xBound)
+			eye[0] = xLim;
+
+		var yBound = this.boxSizeY * 0.95;
+		var yLim = this.boxSizeY * 0.94
+
+		if(eye[1] < -yBound)
+			eye[1] = -yLim;
+		else if(eye[1] > yBound)
+			eye[1] = yLim;
+		
+	},
+
 	mouseMoveEvent : function(e, x, y)
 	{
 		if(this.isMouseDown)
 		{
 			var lookDir = this.lookDir.data;
-			var rad = (x - this.x) / 180.0;
-			var v2 = WGE.mat2MulVec2(WGE.mat2Rotation(rad), this.lookDir);
-			lookDir[0] = v2.data[0];
-			lookDir[1] = v2.data[1];
-			lookDir[2] += (y - this.y) * this.farAway / 200;
+			var radX = (x - this.x) / 150.0;
+			var radY = (y - this.y) / 150.0;
 
-			if(lookDir[2] < -this.farAway)
-				lookDir[2] = -this.farAway;
-			else if(lookDir[2] > this.farAway * 2.0)
-				lookDir[2] = this.farAway * 2.0;
-
+			this.turnRight(radX);
+			this.lookUp(radY);
 			this.updateView();
 
 			this.x = x;
@@ -270,72 +238,65 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 		}		
 	},
 
-	_helpFunc : function(data, dis)
+	keyDownEvent : function(e)
 	{
-		var len = Math.sqrt(data[0]*data[0] + data[1]*data[1]);
-		return [dis * data[0] / len, dis * data[1] / len];
+		var charCode = e.keyCode || e.which;
+		if(charCode < 97)
+			charCode += 32; //大写转小写
+
+		switch(charCode)
+		{			
+		case 119: //'w'
+			this.isForwarding = true;
+			this.isBacking = false;
+			break;			
+		case 97: //'a'
+			this.isGoingLeft = true;
+			this.isGoingRight = false;
+			break;
+		case 115: //'s'
+			this.isBacking = true;
+			this.isForwarding = false;
+			break;
+		case 100: //'d'
+			this.isGoingRight = true;
+			this.isGoingLeft = false;
+			break;
+		case 32: case 64://space
+			this.dz = 2.5;
+		default:
+			;
+		}
 	},
 
-	goForward : function(dis)
-	{
-		var h = this._helpFunc(this.lookDir.data, dis)
-		this.myPosition.data[0] += h[0];
-		this.myPosition.data[1] += h[1]
-	},
-
-	goBack : function(dis)
-	{
-		var h = this._helpFunc(this.lookDir.data, dis)
-		this.myPosition.data[0] -= h[0];
-		this.myPosition.data[1] -= h[1]
-	},
-
-	goLeft : function(dis)
-	{
-		var h = this._helpFunc(this.lookDir.data, dis)
-		this.myPosition.data[0] -= h[1];
-		this.myPosition.data[1] += h[0]
-	},
-
-	goRight : function(dis)
-	{
-		var h = this._helpFunc(this.lookDir.data, dis)
-		this.myPosition.data[0] += h[1];
-		this.myPosition.data[1] -= h[0]
-	},
-
-	keypressEvent : function(e)
+	keyUpEvent : function(e)
 	{
 		var charCode = e.which || e.keyCode;
 		if(charCode < 97)
 			charCode += 32; //大写转小写
-
-		var motion = 2;
 		switch(charCode)
-		{			
+		{
 		case 119: //'w'
-			this.goForward(motion);
+			this.isForwarding = false;
 			break;			
 		case 97: //'a'
-			this.goLeft(motion);
+			this.isGoingLeft = false;
 			break;
 		case 115: //'s'
-			this.goBack(motion);
+			this.isBacking = false;
 			break;
 		case 100: //'d'
-			this.goRight(motion);
+			this.isGoingRight = false;
 			break;
 		default:
-			;
 		}
-		this.updateView();
-	},
+	},	
 
-	// wheelEvent : function(e)
-	// {
-	// 	this.farAway += e.deltaY / 100
-	// 	this.modelViewMatrix = WGE.makeLookAt(0, 0, this.farAway, 0, 0, -10000, 0, 1, 0);
-	// },
+	wheelEvent : function(e)
+	{
+		this.lookIn(e.deltaY / 1000);
+		this.resize(this.canvas.width, this.canvas.height);
+	},
 
 	resizeEvent : function()
 	{
@@ -387,8 +348,8 @@ function setBlend(mode)
 <input type="button" value="box alpha+" style="width:100px" onclick="gui.boundingBoxAlphaPlus(0.05);"><br>
 <input type="button" value="box alpha-" style="width:100px" onclick="gui.boundingBoxAlphaPlus(-0.05);"><br><br>
 
-<input type="button" value="No Blend" style="width:100px" onclick="gui.useBlend = false;"><br>
-<input type="button" value="Use Blend" style="width:100px" onclick="gui.useBlend = true;"><br>
+<input type="button" value="No Blend" style="width:100px" onclick="gui.useBlend(false);"><br>
+<input type="button" value="Use Blend" style="width:100px" onclick="gui.useBlend(true);"><br>
 </div>
 
 <div style="display:none">
