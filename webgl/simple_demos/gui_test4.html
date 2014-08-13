@@ -295,7 +295,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 	{
 		var eye = this.eye.data;
 		var xBound = this.boxSizeX * 0.95;
-		var xLim = this.boxSizeX * 0.94
+		var xLim = this.boxSizeX * 0.95
 		
 		if(eye[0] < -xBound)
 			eye[0] = -xLim;
@@ -303,7 +303,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 			eye[0] = xLim;
 
 		var yBound = this.boxSizeY * 0.95;
-		var yLim = this.boxSizeY * 0.94
+		var yLim = this.boxSizeY * 0.95
 
 		if(eye[1] < -yBound)
 			eye[1] = -yLim;
