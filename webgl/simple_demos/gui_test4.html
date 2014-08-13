@@ -70,20 +70,21 @@ var MySprite = WGE.Class(WGE.Sprite3d,
 		this.x = Math.random() * 2.0 - 1.0;
 		this.y = Math.random() * 2.0 - 1.0;
 		this.z = Math.random();
-		this.dx = (Math.random() - 0.5) * 0.5 + 0.001;
+		this.dx = ((Math.random() - 0.5) * 0.5 + 0.001);
 		this.dy = (Math.random() - 0.5) * 0.5 + 0.001;
 		this.dz = Math.random() * 0.5 + 0.001;
 
 		this.drx = (Math.random() - 0.5) * 10 + 0.1;
 		this.dry = (Math.random() - 0.5) * 10 + 0.1;
 		this.drz = (Math.random() - 0.5) * 10 + 0.1;
-		this.dRot = Math.PI * Math.random() * 0.01 + 0.001;
+		this.dRot = Math.PI * Math.random() * 0.01 + 0.01;
 
 		this.scaling = Math.random() * 10 + 3;
 	},
 
 	update : function(dt, boundingX, boundingY, boundingZ)
 	{
+		dt *= 60 / 1000;
 		this.x += this.dx * dt;
 		this.y += this.dy * dt;
 		this.z += this.dz * dt;
