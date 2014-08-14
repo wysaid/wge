@@ -89,12 +89,38 @@ var MySprite = WGE.Class(WGE.Sprite3d,
 		this.y += this.dy * dt;
 		this.z += this.dz * dt;
 
-		if(this.x < -boundingX || this.x > boundingX)
+		if(this.x < -boundingX)
+		{
 			this.dx = -this.dx;
-		if(this.y < -boundingY || this.y > boundingY)
+			this.x = -boundingX;
+		}
+		else if(this.x > boundingX)
+		{
+			this.dx = -this.dx;
+			this.x = boundingX;
+		}
+
+		if(this.y < -boundingY)
+		{
 			this.dy = -this.dy;
-		if(this.z < 0 || this.z > boundingZ * 2)
+			this.y = -boundingY;
+		}
+		else if(this.y > boundingY)
+		{
+			this.dy = -this.dy;
+			this.y = boundingY;
+		}
+
+		if(this.z < 0)
+		{
 			this.dz = -this.dz;
+			this.z = 0;
+		}
+		else if(this.z > boundingZ * 2)
+		{
+			this.dz = -this.dz;
+			this.z = boundingZ * 2;
+		}
 		this.rot += this.dRot * dt;
 
 		this._modelMatrix = WGE.mat4Translation(this.x, this.y, this.z);
