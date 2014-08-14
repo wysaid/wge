@@ -728,7 +728,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame5.moveTo(w / 2, h / 10);
 		frame5.zIndex = frame3.zIndex - 0.5;
 
-		var frame5Action = new WGE.UniformScaleAction([0, 2000], [1.3, 1.3], [1.0, 1.0]);
+		var frame5Action = new WGE.UniformScaleAction([0, 2000], [1.1, 1.1], [0.9, 0.9]);
 		frame5.push(frame5Action);
 
 		scene.push(actionManager2, frame3, frame4, frame5);

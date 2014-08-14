@@ -135,6 +135,12 @@ WGE.Sprite3d = WGE.Class(
 		WGE.checkGLErr("WGE.Sprite3d.initSprite", gl);
 	},
 
+	//使用已创建好的buffer来初始化sprite，标注noRelease以后说明这些buffer是共享的，不允许此对象删除。
+	initBuffer : function(vertBuffer, vertIndexBuffer, texBuffer, noRelease)
+	{
+
+	},
+
 	initTexture : function(tex, noRelease)
 	{
 		if(!tex)
