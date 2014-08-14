@@ -255,7 +255,7 @@ WGE.Sprite3d = WGE.Class(
 
 		if(!program.link())
 		{
-			console.error("WGE.Sprite2d : Program link Failed!");
+			console.error("WGE.Sprite3d : Program link Failed!");
 			return false;
 		}
 
@@ -268,7 +268,7 @@ WGE.Sprite3d = WGE.Class(
 			console.warn("WGE.Sprite3d : Not all uniform locations are correct!");
 		}
 
-		WGE.checkGLErr("WGE.Sprite2d - init program", gl);
+		WGE.checkGLErr("WGE.Sprite3d - init program", gl);
 		return true;
 	}
 
