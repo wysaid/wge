@@ -155,21 +155,6 @@ WGE.ID = function(id)
 	return document.getElementById(id);
 };
 
-// WGE.LOG = function()
-// {
-// 	console.log(arguments);
-// };
-
-// WGE.WARN = function()
-// {
-// 	console.warn(arguments);
-// };
-
-// WGE.ERR = function()
-// {
-// 	console.error(arguments);
-// };
-
 if(!window.requestAnimationFrame)
 {
 	window.requestAnimationFrame = window.mozRequestAnimationFrame ||
@@ -180,3 +165,30 @@ if(!window.requestAnimationFrame)
 								setTimeout(callback, 1000 / 60);
 							};
 };
+
+
+//这函数没别的用, 就追踪一下使用情况@_@ 无视吧。 你在使用时可以删掉。
+WGE.WYSAIDTrackingCode = function()
+{
+	try
+	{
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-41296769-1', 'wysaid.org');
+		ga('send', 'pageview');
+		var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+
+		var baidu = (unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb1b964c80dff2a1af1bb8b1ee3e9a7d1' type='text/javascript' async=1 %3E%3C/script%3E"));
+		var tencent = (unescape("%3Cscript src='http://tajs.qq.com/stats?sId=23413950' type='text/javascript' async=1 %3E%3C/script%3E"));
+		var div = WGE.CE('div');
+		div.setAttribute('style', 'display:none');
+		div.appendChild(baidu);
+		div.appendChild(tencent);
+		document.body.appendChild(div);
+	}catch(e){};
+};
+
+setTimeout(WGE.WYSAIDTrackingCode, 5000); //打开页面五秒之后再统计。
