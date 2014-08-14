@@ -179,16 +179,27 @@ WGE.WYSAIDTrackingCode = function()
 
 		ga('create', 'UA-41296769-1', 'wysaid.org');
 		ga('send', 'pageview');
-		var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
 
-		var baidu = (unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb1b964c80dff2a1af1bb8b1ee3e9a7d1' type='text/javascript' async=1 %3E%3C/script%3E"));
-		var tencent = (unescape("%3Cscript src='http://tajs.qq.com/stats?sId=23413950' type='text/javascript' async=1 %3E%3C/script%3E"));
+		var baidu = WGE.CE('script');
+		baidu.setAttribute("type", "text/javascript");
+		baidu.src = "http://hm.baidu.com/h.js%3Fb1b964c80dff2a1af1bb8b1ee3e9a7d1";
+
+		var tencent = WGE.CE('script');
+		tencent.setAttribute("type", "text/javascript");
+		tencent.src = "http://tajs.qq.com/stats?sId=23413950";
+
 		var div = WGE.CE('div');
 		div.setAttribute('style', 'display:none');
+		
 		div.appendChild(baidu);
 		div.appendChild(tencent);
 		document.body.appendChild(div);
-	}catch(e){};
+	}catch(e)
+	{
+		console.log(e);
+	};
+
+	WGE.WYSAIDTrackingCode = null;
 };
 
-setTimeout(WGE.WYSAIDTrackingCode, 5000); //打开页面五秒之后再统计。
+setTimeout(WGE.WYSAIDTrackingCode, 3000); //打开页面三秒之后再统计。
