@@ -27,6 +27,6 @@
 </div>
 
 <div style="border:groove">
-<h3><a href="http://wge.wysaid.org/webgl/simple_demos/gui_test4.html" target="_blank">webgl gui test3</a></h3>
+<h3><a href="http://wge.wysaid.org/webgl/simple_demos/gui_test4.html" target="_blank">webgl gui test4</a></h3>
 <img src="http://wge.wysaid.org/screenshots/webgl_gui_test4.jpg">
 </div>
