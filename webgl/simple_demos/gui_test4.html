@@ -18,7 +18,8 @@
 
 document.body.oncontextmenu=function(){ return false;} 
 
-var maxSpriteNum = 1000;
+var maxCacheSpriteNum = 1000;
+var maxSpriteNum = 10;
 var runningSpriteNum = 3;
 
 WGE.Sprite3d.ShaderDir = "../";
@@ -151,6 +152,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 	isGoingRight : false,
 
 	sprites : null,
+	textures : null,
 
 	initialize : function()
 	{
@@ -192,6 +194,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		var textures = [];
 		var context = this.context;
 		this.sprites = sprites;
+		this.textures = textures;
 		for(var i = 0; i != 7; ++i)
 		{
 			var img = WGE.ID('test' + i);
@@ -207,7 +210,41 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 
 			sprite.randomize();
 			sprites.push(sprite);
+		}		
+	},
+
+	addSprite : function(n)
+	{
+		var num = n ? n : 50;
+
+		if(runningSpriteNum + num < maxSpriteNum)
+		{
+			runningSpriteNum += num;
+			return ;
 		}
+
+		if(runningSpriteNum >= maxCacheSpriteNum)
+			return;
+
+		var newMaxNum = Math.min(maxSpriteNum + num, maxCacheSpriteNum);
+
+		var textures = this.textures;
+		for(var i = maxSpriteNum; i < newMaxNum; ++i)
+		{
+			var sprite = new MySprite(this.canvas, this.context);
+			sprite.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, textures[parseInt(Math.random() * textures.length)]);
+
+			sprite.randomize();
+			this.sprites.push(sprite);
+		}
+		runningSpriteNum = maxSpriteNum = newMaxNum;
+	},
+
+	decSprite : function(n)
+	{
+		runningSpriteNum -= (n ? n : 10);
+		if(runningSpriteNum < 1)
+			runningSpriteNum = 1;
 	},
 
 	boundingBoxAlphaPlus : function(value)
@@ -457,8 +494,11 @@ WGE demo操作说明:<br>
 空格键为跳跃。
 </div>
 
-<input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
-<input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 1) runningSpriteNum = 1;"><br>
+<input type="button" value="Sprite +10" style="width:100px" onclick="gui.addSprite(10);"><br>
+<input type="button" value="Sprite -10" style="width:100px" onclick="gui.decSprite(10);"><br>
+
+<input type="button" value="Sprite +100" style="width:100px" onclick="gui.addSprite(100);"><br>
+<input type="button" value="Sprite -100" style="width:100px" onclick="gui.decSprite(100);"><br>
 </div>
 
 <div style="display:none">
