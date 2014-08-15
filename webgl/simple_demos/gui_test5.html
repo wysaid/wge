@@ -50,6 +50,8 @@ var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 	}
 });
 
+var TeapotVSH = "varying vec2 textureCoordinate;attribute vec4 vPosition;attribute vec4 vTexture;uniform mat4 mvp;void main(){gl_Position = mvp * vPosition;textureCoordinate = vTexture.st / 2.0;}";
+
 var MySprite = WGE.Class(WGE.Sprite3d,
 {
 	x : 0,
@@ -206,12 +208,13 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 
 		for(var i = 0; i != maxSpriteNum; ++i)
 		{
-			var sprite = new MySprite(this.canvas, this.context);
+			var sprite = new MySprite(this.canvas, this.context, TeapotVSH, WGE.Sprite3d.FragmentShader);
 			sprite.initSprite(WGE.TeapotModel.positions, 3, WGE.TeapotModel.texCoords, 3, WGE.TeapotModel.indices, textures[parseInt(Math.random() * textures.length)]);
 
 			sprite.randomize();
+			//sprite.renderMethod = context.LINE_STRIP;
 			sprites.push(sprite);
-		}		
+		}
 	},
 
 	addSprite : function(n)

@@ -8,12 +8,12 @@
 
 varying vec2 textureCoordinate;
 attribute vec4 vPosition;
-attribute vec2 vTexture;
+attribute vec4 vTexture;
 
 uniform mat4 mvp;
 
 void main()
 {	
 	gl_Position = mvp * vPosition;
-	textureCoordinate = vTexture;
+	textureCoordinate = vTexture.st;
 }
