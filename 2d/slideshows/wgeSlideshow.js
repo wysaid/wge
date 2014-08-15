@@ -9,4 +9,7 @@
 
 WGE.Slideshow = {};
 
-window.WGESlideshow
+//如需隐藏 wgeSlideshow 这个全局变量，文件末尾直接对其赋值即可、
+var wgeSlideshow = WGE.Slideshow;
+
+//wgeSlideshow.
