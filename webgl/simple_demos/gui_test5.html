@@ -50,7 +50,7 @@ var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 	}
 });
 
-var TeapotVSH = "varying vec2 textureCoordinate;attribute vec4 vPosition;attribute vec4 vTexture;uniform mat4 mvp;void main(){gl_Position = mvp * vPosition;textureCoordinate = vTexture.st / 2.0;}";
+var TeapotVSH = "varying vec2 textureCoordinate;attribute vec4 vPosition;attribute vec4 vTexture;uniform mat4 mvp;void main(){gl_Position = mvp * vPosition;textureCoordinate = vTexture.st - floor(vTexture.st);}";
 
 var MySprite = WGE.Class(WGE.Sprite3d,
 {
