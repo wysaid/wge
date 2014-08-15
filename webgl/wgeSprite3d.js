@@ -38,6 +38,7 @@ WGE.Sprite3d = WGE.Class(
 	_meshVBO : null,
 	_meshIndexVBO : null,
 	_textureVBO : null,
+	_vboNoRelease : false,
 	_meshIndexSize : null,
 	_vertexDataType : null,         //顶点数据类型，默认为 gl.FLOAT
 	_meshIndexDataType : null,    //索引数据类型，默认为 gl.UNSIGNED_SHORT
@@ -111,6 +112,7 @@ WGE.Sprite3d = WGE.Class(
 	//面索引必须为 Array 或者 Uint16Array. 如果需要其他类型请自行重写本方法。
 	//vertexDataSize 表示每个顶点包含几个分量， 范围为1,2,3,4
 	//texDataSize 表示每个纹理坐标包含几个分量，范围为1,2,3,4
+	//末尾两个参数将直接传递给 initTexture 函数
 	initSprite : function(vertexArr, vertexDataSize, texArr, texDataSize, indexArr, tex, noRelease)
 	{		
 		var gl = this._context;
@@ -136,11 +138,18 @@ WGE.Sprite3d = WGE.Class(
 	},
 
 	//使用已创建好的buffer来初始化sprite，标注noRelease以后说明这些buffer是共享的，不允许此对象删除。
-	initBuffer : function(vertBuffer, vertIndexBuffer, texBuffer, noRelease)
+	initBuffer : function(vertBuffer, vertexDataSize, texBuffer, texDataSize, vertIndexBuffer, noRelease)
 	{
-
+		this._meshVBO = vertBuffer;
+		this._textureVBO = texBuffer;
+		this._meshIndexVBO = vertIndexBuffer;
+		this._meshDataSize = vertexDataSize;
+		this._texDataSize = texDataSize;
+		this._vboNoRelease = !!noRelease;
 	},
 
+	//首参数为 WGE.Texture2D 时， 第二个参数表示是否在销毁本类的同时销毁 WGE.Texture2D
+	//首参数为 img 对象时，第二个参数表示新创建的 WGE.Texture2D 的配置参数。详情参见WGE.Texture2D 构造函数。
 	initTexture : function(tex, noRelease)
 	{
 		if(!tex)
