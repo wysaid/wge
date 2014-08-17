@@ -28,9 +28,9 @@ WGE.Sprite3d.ShaderDir = "../";
 
 var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 {
-	vshBoundingBox : "varying vec2 textureCoordinate;attribute vec4 vPosition;attribute vec2 vTexture;uniform mat4 mvp;void main(){gl_Position = mvp * vPosition;textureCoordinate = vTexture;}",
+	vshBoundingBox : "varying vec2 vTextureCoord;attribute vec4 aPosition;attribute vec2 aTexCoord;uniform mat4 mvp;void main(){gl_Position = mvp * aPosition;vTextureCoord = aTexCoord;}",
 
-	fshBoundingBox : "precision mediump float;varying vec2 textureCoordinate;uniform sampler2D inputImageTexture;uniform float alpha;void main(){gl_FragColor = texture2D(inputImageTexture,textureCoordinate) * alpha;}",
+	fshBoundingBox : "precision mediump float;varying vec2 vTextureCoord;uniform sampler2D sTexture;uniform float alpha;void main(){gl_FragColor = texture2D(sTexture,vTextureCoord) * alpha;}",
 
 	alphaName : "alpha",
 	alpha : 1.0,
@@ -50,7 +50,7 @@ var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 	}
 });
 
-var TeapotVSH = "varying vec2 textureCoordinate;attribute vec4 vPosition;attribute vec4 vTexture;uniform mat4 mvp;void main(){gl_Position = mvp * vPosition;textureCoordinate = vTexture.st - floor(vTexture.st);}";
+var TeapotVSH = "varying vec2 vTextureCoord;attribute vec4 aPosition;attribute vec4 aTexCoord;uniform mat4 mvp;void main(){gl_Position = mvp * aPosition;vTextureCoord = aTexCoord.st - floor(aTexCoord.st);}";
 
 var MySprite = WGE.Class(WGE.Sprite3d,
 {

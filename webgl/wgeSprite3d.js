@@ -291,11 +291,11 @@ WGE.Sprite3d = WGE.Class(
 
 });
 
-WGE.Sprite3d.VertexShader = "varying vec2 textureCoordinate;attribute vec4 vPosition;attribute vec4 vTexture;uniform mat4 mvp;void main(){gl_Position = mvp * vPosition;textureCoordinate = vTexture.st;}";
+WGE.Sprite3d.VertexShader = "varying vec2 vTextureCoord;attribute vec4 aPosition;attribute vec4 aTexCoord;uniform mat4 mvp;void main(){gl_Position = mvp * aPosition;vTextureCoord = aTexCoord.st;}";
 
-WGE.Sprite3d.FragmentShader = "precision mediump float;varying vec2 textureCoordinate;uniform sampler2D inputImageTexture;void main(){gl_FragColor = texture2D(inputImageTexture,textureCoordinate);}";
+WGE.Sprite3d.FragmentShader = "precision mediump float;varying vec2 vTextureCoord;uniform sampler2D sTexture;void main(){gl_FragColor = texture2D(sTexture,vTextureCoord);}";
 
-WGE.Sprite3d.AttribVertexName = "vPosition";
-WGE.Sprite3d.AttribTextureName = "vTexture";
-WGE.Sprite3d.TextureName = "inputImageTexture";
+WGE.Sprite3d.AttribVertexName = "aPosition";
+WGE.Sprite3d.AttribTextureName = "aTexCoord";
+WGE.Sprite3d.TextureName = "sTexture";
 WGE.Sprite3d.MVPName = "mvp";
