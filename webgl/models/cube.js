@@ -17,6 +17,8 @@ WGE.CubeModel.mesh = new Float32Array(
 -1,-1,-1,  1,-1,-1,  1,-1, 1,  -1,-1, 1,
 1,-1,-1,  -1,-1,-1,  -1, 1,-1,  1, 1,-1]);
 
+WGE.CubeModel.meshDataSize = 3; //每个点包含三个分量。
+
 WGE.CubeModel.meshIndex = new Uint16Array(
 [0, 1, 2,  0, 2, 3,
 4, 5, 6,  4, 6, 7,
@@ -33,6 +35,8 @@ WGE.CubeModel.texMesh = new Float32Array(
 0, 0,  1, 0,  1, 1,  0, 1,
 0, 0,  1, 0,  1, 1,  0, 1]);
 
+WGE.CubeModel.texMeshDataSize = 2;
+
 WGE.CubeModel.normals = new Float32Array(
 [0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
 1, 0, 0,  1, 0, 0,  1, 0, 0,  1, 0, 0,
@@ -40,3 +44,5 @@ WGE.CubeModel.normals = new Float32Array(
 -1, 0, 0,  -1, 0, 0,  -1, 0, 0,  -1, 0, 0,
 0,-1, 0,  0,-1, 0,  0,-1, 0,  0,-1, 0,
 0, 0,-1,  0, 0,-1,  0, 0,-1,  0, 0,-1]);
+
+WGE.CubeModel.normalsDataSize = 3;
