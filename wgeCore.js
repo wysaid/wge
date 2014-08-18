@@ -69,6 +69,46 @@ WGE.deepClone = function(myObj)
 	return myNewObj; 
 };
 
+WGE.release = function(myObj)
+{
+	//不允许删除function里面的属性。
+	if(!(myObj instanceof Object))
+		return ;
+
+	for(var i in myObj) 
+	{
+		try
+		{
+			delete myObj[i];
+		} catch(e){}
+	}
+};
+
+//deepRelease 会彻底删掉给出类里面的所有元素，包括数组等
+//如果传入的类里面和别的类引用了同一项内容，也会被彻底删除
+//在不确定的情况下最好不要使用。
+WGE.deepRelease = function(myObj)
+{
+	if(!(myObj instanceof Object))
+		return ;
+	else if(myObj instanceof Array)
+	{
+		for(var i in myObj)
+		{
+			WGE.release(myObj[i]);
+		}
+	}
+
+	for(var i in myObj) 
+	{
+		try
+		{
+			WGE.release(myObj[i]);
+			delete myObj[i];
+		} catch(e){}
+	}
+};
+
 WGE.extend = function(dst, src)
 {
 	for (var i in src)
@@ -155,6 +195,39 @@ WGE.ID = function(id)
 	return document.getElementById(id);
 };
 
+//第一个参数为包含image url的数组
+//第二个参数为所有图片完成后的callback，传递参数为一个包含所有图片的数组
+//第三个参数为单张图片完成后的callback，传递两个参数，分别为当前完成的图片和当前已经完成的图片数
+WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
+{
+	var n = 0;
+	var imgArr = [];
+
+	var F = function() {
+		++n;
+		if(typeof eachCallback == 'function')
+			eachCallback(this, n);
+		if(n >= imgArr.length && typeof finishCallback == 'function')
+			finishCallback(imgArr);
+		this.onload = null; //解除对imgArr, n 等的引用
+	};
+
+	for(var i = 0; i != imageURLArr.length; ++i)
+	{
+		var img = new Image();
+		img.src = imageURLArr[i];
+		if(img.complete)
+		{
+			F.call(img);
+		}
+		else
+		{
+			img.onload = F;
+		}
+		imgArr.push(img);
+	}
+}
+
 if(!window.requestAnimationFrame)
 {
 	window.requestAnimationFrame = window.mozRequestAnimationFrame ||
@@ -199,7 +272,7 @@ WGE.WYSAIDTrackingCode = function()
 		console.log(e);
 	};
 
-	WGE.WYSAIDTrackingCode = null;
+	delete WGE.WYSAIDTrackingCode;
 };
 
 setTimeout(WGE.WYSAIDTrackingCode, 3000); //打开页面三秒之后再统计。
