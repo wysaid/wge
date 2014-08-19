@@ -1,2 +1,47 @@
 <meta charset="utf-8">
-<p>简介。。。</p>
+<style type="text/css">
+#wge_about {
+
+}
+
+#wge_about b {
+	color: #00f;
+	font: 20px arial, 宋体;
+}
+
+</style>
+
+<center><h1>WGE 简介</h1></center>
+<div id="wge_about">
+
+<h2>WGE 主要目录结构及其文件简介:</h2>
+<div style="margin:10px 10px">
+<p><h3>公共文件:</h3>
+<b>wgeCore.js</b> WGE核心组件，提供了一些公用功能，必须引用，若要分开引用，则需要把它放在第一位。<br>
+<b>wgeMatrix.js</b>
+WGE核心组件， 提供了所有矩阵向量运算。必须引用。<br>
+<b>wgeAnimation.js</b>
+WGE扩展组建，提供了动画，时间轴，动作等功能的接口。如果未使用，则不需要引用。<br>
+<b>wgeGUI.js</b>
+WGE扩展组建(不是必须)，提供了独立的UI控制，封装了一些界面操作，比如鼠标、键盘事件等，同时对窗口事件如全局resize事件进行了处理，使得canvas能够适应分辨率。 WGE的所有demo均使用此组建完成操作。所以就算你不使用，也请稍微了解一下其运行过程<br>
+<b>wgeParticleSystem.js</b>
+WGE扩展组建，提供了粒子系统接口（暂未实现），如未使用，则不需要引用。<br>
+<b>wgeFont.js</b>
+WGE扩展组建，主要提供webgl版的字体渲染接口（暂未实现）。
+</p>
+<p><h3>canvas-2d版:</h3>
+<b>wgeSprite.js</b>
+提供sprite渲染，支持基于自定义重心点的旋转、缩放、平移等，支持伪3d旋转。<br>
+<b>wgeFilters.js</b>
+提供2d版的滤镜操作，CPU滤镜性能较低，不建议大量、频繁地使用。<br>
+<b>wgeSlideshow.js</b>
+提供slideshow的功能接口，为所有的slideshow提供统一的对外接口。
+</p>
+<p><h3>canvas-webgl版:</h3>
+<b>wgeSprite2d.js</b>
+webgl版的平面sprite，兼容2d版的sprite所有操作（同时兼容2d版的坐标系，默认使用屏幕坐标系），并支持更多的功能，如绕任意点，任意轴旋转。shader代码可自行定制，如加入光照，混合等。<br>
+<b>wgeSprite3d.js</b>
+webgl版的3d sprite，默认支持直接导入模型的position，面索引以及纹理坐标等，直接简单绘制模型。提供绕重心点的旋转缩放平移，同时支持绕任意点，任意轴旋转等。shader代码可自行定制，如加入光照、环境贴图顶。<br>
+</p>
+</div>
+</div>
