@@ -1,15 +1,147 @@
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8">
-<title>WGE (Web Graphics Engine) By wysaid</title>
-</head>
+<title>WGE (Web Graphics Engine)</title>
+<script type="text/javascript" src="wgeCore.js"></script>
+<style type="text/css">
+div {
+	border: groove;
+}
 
+#globalView {
+	width: 80%;
+	min-width: 800px;
+	height: auto;
+	min-height: 600px;
+	margin: 0px auto;
+}
+
+#logoBar {
+	width: auto;
+	height: 80px;
+}
+
+#navContainer {
+	width: auto;
+	height: 32px;
+	margin: 5px 5px;
+}
+
+#navContainer ul {
+	font: 20px verdana, arial, 宋体;
+	font-weight: bold;
+	list-style: none;
+	list-style-type: none;
+	padding: 0;
+	margin: 0;	
+}
+
+#navContainer ul li{
+	float: left;
+	width: 100px;
+	margin: 4px 0 0 16px;
+	background-color: #ddd;
+	display: list-item;
+	text-align: center;
+	background-color: #235a83;
+}
+
+#navContainer a {
+	color: #ddd;
+}
+
+#contentContainer {
+	width: 100%;
+	height: auto;
+	position: relative;
+}
+
+#content {
+	position: relative;
+	width: 80%;
+	min-height: 600px;
+	height: auto;
+	margin-left: 2px;
+	background-color: #ddd;
+}
+
+#infoBar {
+	position: absolute;
+	width: 18%;
+	left: 80%;
+	top: 0;
+	margin-right: 1%;
+	min-height: 600px;
+}
+
+</style>
+<script type="text/javascript">
+
+function contentUpdate(contentID, url)
+{
+	WGE.requestTextByURL(url, function(text, reqXHR){
+		var content = WGE.ID(contentID);
+		content.innerHTML = text;
+	});
+}
+
+</script>
+</head>
 <body>
-<h1>WGE建设中。</h1>
-<h2>WGE 是一个基于canvas 2d和 canvas webgl 的图形引擎，目前正在开发中</h2>
-<h2>项目主页： <a href="https://github.com/wysaid/wge/" target="_blank">https://github.com/wysaid/wge/</a></h2>
-<h3>建设度列表：</h3>
-<a href="./2d/index.html" target="_blank">2d版本</a><br>
-<a href="./webgl/index.html" target="_blank">webgl版本</a>
+<div id="globalView">
+<div id="logoBar">
+<img src="logo.png" style="margin:auto auto auto 10px;"></div>
+
+<div id="navContainer">
+<script type="text/javascript">
+var navContainer = WGE.ID("navContainer");
+var navUL = WGE.CE("ul");
+navContainer.appendChild(navUL);
+
+//ajax 更新content
+var li = 
+{
+	"首页" : "./index.html",
+	"简介" : "javascript:contentUpdate('content', 'about.html')",
+	"文档" : "./man/index.html",
+	"下载" : "http://github.com/wysaid/wge",
+	"demo" : ""
+}
+
+for(var i in li)
+{
+	var element = WGE.CE('li');
+	element.setAttribute("style", "");
+	element.innerHTML = '<a href="' + li[i] + '">' + i + '</a>';
+	navUL.appendChild(element);
+}
+</script>
+</div>
+<div id="contentContainer">
+<div id="content">
+<div style="margin:10px 10px">
+<p>WGE (Web Graphics Engine) 是一个基于Web平台的图形引擎。主要使用js, canvas 2d, canvas webgl开发</p>
+<p>WGE 目前主要定位为一个简单易用，快速上手，并能够加快web应用开发的框架库</p>
+</div>
+<div style="margin:10px 10px">
+<p>2d版： xxxxxx</p>
+</div>
+<div style="margin:10px 10px">
+<p>webgl版： xxxxxx</p>
+</div>
+</div>
+<div id="infoBar">
+<div style="width:98%;height:100px;">
+<p>WGE正在建设中！</p>
+</div>
+<div style="width:98%;height:100px;">
+<p>当前版本: 0.0.1</p>
+</div>
+<div style="width:98%;height:100px;">
+<p>联系我: <a href="mailto:admin@wysaid.org?subject=To_WGE&body=About_WGE" target="_blank">请点击</a></p>
+</div>
+</div>
+</div>
+</div>
 </body>
 </html>

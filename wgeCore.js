@@ -178,7 +178,7 @@ WGE.requestTextByURL = function(url, callback)
 			if(xmlHttp.readyState == 4)
 			{
 				callback(xmlHttp.responseText, xmlHttp);
-			}		
+			}
 		};
 	}
 	xmlHttp.send();
