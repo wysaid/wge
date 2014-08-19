@@ -136,7 +136,7 @@ WGE.SlideshowInterface = WGE.Class(
 
 	},
 
-
+	
 
 
 });
