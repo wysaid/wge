@@ -113,8 +113,11 @@ WGE.GUIInterface = WGE.Class(
 
 	stop : function()
 	{
-		cancelAnimationFrame(this._animationRequest);
-		this._animationRequest = null;
+		if(this._animationRequest)
+		{
+			cancelAnimationFrame(this._animationRequest);
+			this._animationRequest = null;
+		}
 	},
 
 	_run : function()
@@ -131,7 +134,10 @@ WGE.GUIInterface = WGE.Class(
 		this.render(deltaTime);
 
 		this.lastTime = this.nowTime;
-		this._animationRequest = requestAnimationFrame(this._run.bind(this));
+
+		//如果在_run函数执行期间调用过stop，则不再继续请求frame.
+		if(this._animationRequest)
+			this._animationRequest = requestAnimationFrame(this._run.bind(this));
 	},
 
 	//update和render 由用户自定义，
