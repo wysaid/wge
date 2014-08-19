@@ -230,14 +230,28 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 
 if(!window.requestAnimationFrame)
 {
-	window.requestAnimationFrame = window.mozRequestAnimationFrame ||
-							window.webkitRequestAnimationFrame ||
-							window.msRequestAnimationFrame ||
-							window.oRequestAnimationFrame ||
-							function(callback) {
-								setTimeout(callback, 1000 / 60);
-							};
-};
+	// window.requestAnimationFrame = window.mozRequestAnimationFrame ||
+	// 						window.webkitRequestAnimationFrame ||
+	// 						window.msRequestAnimationFrame ||
+	// 						window.oRequestAnimationFrame ||
+	// 						function(callback) {
+	// 							return setTimeout(callback, 1000 / 60);
+	// 						};
+
+	// 目前主流浏览器支持html5的话，均已支持 requestAnimationFrame
+	// 仅使用 setTimeout确保兼容，以方便 cancel方法一一对应！
+	window.requestAnimationFrame = function(callback) {
+		return setTimeout(callback, 1000/60);
+	}
+}
+
+if(!window.cancelAnimationFrame)
+{
+	window.cancelAnimationFrame = function(reqID) {
+		clearTimeout(reqID);
+	}
+}
+
 
 
 //这函数没别的用, 就追踪一下使用情况@_@ 无视吧。 你在使用时可以删掉。

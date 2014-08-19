@@ -204,6 +204,9 @@ WGE.SpriteExt = WGE.Class(WGE.Sprite,
 
 });
 
+
+//延后实现，使用2d canvas模拟3d
+//主要运用wgeMatrix 计算出渲染点坐标，配合canvas自带的 transform 转换
 WGE.SpriteExt3d = WGE.Class(WGE.Sprite,
 {
 

@@ -32,7 +32,7 @@ WGE.GUIInterface = WGE.Class(
 	keyUpEvent : null,
 	keypressEvent : null,
 
-	isStarted : false,
+	_animationRequest : null,
 	startTime : 0,
 	lastTime : 0,
 	nowTime : 0,
@@ -93,26 +93,32 @@ WGE.GUIInterface = WGE.Class(
 		this._forceAutoResize = flag;
 	},
 
+	isStarted : function()
+	{
+		return !!this._animationRequest;
+	},
+
 	start : function()
 	{
-		if(this.isStarted)
+		if(this._animationRequest)
+		{
+			console.warn("wgeGUI is already started!");
 			return;
+		}
 //		this.onresize();
-		this.isStarted = true;
 		this.startTime = Date.now();
 		this.lastTime = this.startTime;
-		requestAnimationFrame(this._run.bind(this));
+		this._animationRequest = requestAnimationFrame(this._run.bind(this));
 	},
 
 	stop : function()
 	{
-		this.isStarted = false;
+		cancelAnimationFrame(this._animationRequest);
+		this._animationRequest = null;
 	},
 
 	_run : function()
 	{
-		if(!this.isStarted)
-			return ;
 		if(this._forceAutoResize)
 		{
 			this.onresize();
@@ -125,7 +131,7 @@ WGE.GUIInterface = WGE.Class(
 		this.render(deltaTime);
 
 		this.lastTime = this.nowTime;
-		requestAnimationFrame(this._run.bind(this));
+		this._animationRequest = requestAnimationFrame(this._run.bind(this));
 	},
 
 	//update和render 由用户自定义，

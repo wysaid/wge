@@ -21,15 +21,40 @@
 
 WGE.SlideshowSettings = 
 {
-	width : 800,
-	height : 600,
+	width : 1024,
+	height : 768,
 	style : "width:100%;height:100%"
 };
 
-WGE.fitSlideImages(imgs)
-{
 
-}
+//如果不添加后两个参数， 则默认统一规范，slideshow使用分辨率为 1024*768
+//本函数将等比缩放图片，将使图片宽或者高满足这个分辨率并且另一边大于等于这个分辨率。
+//如： 图片分辨率为 1024 * 1024， 则图片不变
+//     图片分辨率为 768 * 768， 则将等比缩放为 1024 * 1024
+//     图片分辨率为 1024 * 500， 则将等比缩放为 1573 * 768
+// 后两个参数表示将分辨率缩小至这个尺寸， 可根据实际需求设定。
+WGE.fitSlideImages = function(imgs, w, h)
+{
+	if(!(w && h))
+	{
+		w = 1024;
+		h = 768;
+	}
+
+	var fitImgs = [];
+
+	for(var i = 0; i != imgs.length; ++i)
+	{
+		var img = imgs[i];
+		var canvas = WGE.CE('canvas');
+		var scale = Math.min(img.width / w, img.height / h);
+		canvas.width = img.width / scale;
+		canvas.height = img.height / scale;
+		canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+		fitImgs.push(canvas);
+	}
+	return fitImgs;
+};
 
 WGE.SlideshowInterface = WGE.Class(
 {
@@ -42,7 +67,7 @@ WGE.SlideshowInterface = WGE.Class(
 	canvas : null, //绘制目标
 	context : null, //绘制目标的context
 
-	srcImages : null,
+	srcImages : null,  //canvas类型的数组。
 
 	//在initialize末尾把子类的构造函数传递进来，末尾执行是很愚蠢的行为
 	//请直接在子类里面执行。
@@ -105,7 +130,11 @@ WGE.SlideshowInterface = WGE.Class(
 
 	},
 
+	//进度跳转
+	jump : function(time)
+	{
 
+	},
 
 
 
