@@ -206,6 +206,17 @@ WGE.UniformLinearMoveAction = WGE.Class(WGE.TimeActionInterface,
 	}
 });
 
+WGE.NatureMoveAction = WGE.Class(WGE.UniformLinearMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
+	}
+});
+
 WGE.UniformScaleAction = WGE.Class(WGE.UniformLinearMoveAction,
 {
 	act : function(percent)
@@ -237,6 +248,52 @@ WGE.UniformScaleAction = WGE.Class(WGE.UniformLinearMoveAction,
 	{
 		this.bindObj.scaleTo(this.toX, this.toY);
 	}
+});
+
+//简单适用实现，兼容2d版sprite和webgl版sprite2d
+WGE.UniformRotateAction = WGE.Class(WGE.UniformLinearMoveAction,
+{
+	fromRot : 0,
+	toRot : 0,
+	disRot : 0,
+
+	initialize : function(time, from, to, repeatTimes)
+	{
+		if(time instanceof Array)
+		{
+			this.tStart = time[0];
+			this.tEnd = time[1];
+		}
+		else
+		{
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];
+		}
+
+		this.fromRot = from;
+		this.toRot = to;
+		this.disRot = to - from;
+
+		this.repeatTimes = repeatTimes ? repeatTimes : 1;
+	},
+
+	actionStart : function()
+	{
+		this.bindObj.rotateTo(this.fromRot);
+	},
+
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		this.bindObj.rotateTo(this.fromRot + t * this.disRot);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.rotateTo(this.toRot);
+	}
+
 });
 
 

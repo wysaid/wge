@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>js validation test</title>
+<title>WGE 时间轴测试</title>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeMatrix.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
@@ -59,6 +59,7 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 		{
 			this.stop();
 			console.log("end");
+			WGE.ID('myText').innerHTML = "时间轴结束";
 		}
 	},
 
@@ -66,8 +67,14 @@ var myGUI = WGE.Class(WGE.GUIInterface,
 	{
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		timeline.render(this.context);
-	}
+	},
 	
+	start : function()
+	{
+		WGE.ID('myText').innerHTML = "时间轴开始!";
+		WGE.GUIInterface.start.call(this);
+	}
+
 });
 
 var div = WGE.CE('div');
@@ -85,40 +92,252 @@ document.body.setAttribute("onresize", "gui.onresize(event);"); //较好
 <div style="position:absolute;top:10px;left:10px;width:200px;height:auto;background-color:#f00;filter:alpha(Opacity=80);-moz-opacity:0.8;opacity:0.8;">
 重复次数:<input type="number" value="1" id="repeatTimes"><br>
 Sprite起始:<input type="number" value="0" id="spriteStartTime"><br>
-Sprite结束:<input type="number" value="2000" id="spriteEndTime"><br>
+Sprite结束:<input type="number" value="5000" id="spriteEndTime"><br>
 Action起始:<input type="number" value="500" id="actionStartTime"><br>
-Action结束:<input type="number" value="1500" id="actionEndTime"><br>
+Action结束:<input type="number" value="4500" id="actionEndTime"><br>
 x重心：<input type="number" value="0.5" id="hotspotX"><br>
 y重心：<input type="number" value="0.5" id="hotspotY"><br>
 (0.5为中心点)<br><br>
 动作列表:<br>
-<input type="button" onclick="" value="匀速移动0"><br>
-<input type="button" onclick="" value="变速移动1"><br>
-<input type="button" onclick="" value="变速移动2"><br>
-<input type="button" onclick="" value="变速移动3"><br>
-<input type="button" onclick="" value="透明"><br>
-<input type="button" onclick="" value="闪烁"><br>
-<input type="button" onclick="" value="旋转"><br>
-<input type="button" onclick="" value="缩放"><br>
-<input type="button" onclick="" value="组合动作"><br>
+<input type="button" onclick="move0()" value="匀速移动0"><br>
+<input type="button" onclick="move1()" value="变速移动1"><br>
+<input type="button" onclick="move2()" value="变速移动2"><br>
+<input type="button" onclick="move3()" value="变速移动3"><br>
+<input type="button" onclick="falpha()" value="透明"><br>
+<input type="button" onclick="fblink()" value="闪烁"><br>
+<input type="button" onclick="fRotate()" value="旋转"><br>
+<input type="button" onclick="fScale()" value="缩放"><br>
+<input type="button" onclick="fAll()" value="组合动作"><br>
+<div style="width:80%; margin:2px;height:50px;border:groove;text-align:center;">
+<p id="myText">当前没有动作</p>
+</div>
 </div>
 
 <script type="text/javascript">
 
+var repeatTimes = 1;
+var spriteStartTime = 0;
+var spriteEndTime = 2000;
+var actionStartTime = 500;
+var actionEndTime = 1500;
+var hotspotX = 0.5;
+var hotspotY = 0.5;
+
+function setVARs()
+{
+	repeatTimes = WGE.ID('repeatTimes').value;
+	spriteStartTime = WGE.ID('spriteStartTime').value;
+	spriteEndTime = WGE.ID('spriteEndTime').value;
+	actionStartTime = WGE.ID('actionStartTime').value;
+	actionEndTime = WGE.ID('actionEndTime').value;
+	hotspotX = WGE.ID('hotspotX').value;
+	hotspotY = WGE.ID('hotspotY').value;
+}
+
 function move0()
 {
-	var sprite = new mySprite(200, 4000, img, -1);
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(200, 200);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.UniformLinearMoveAction([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);	
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+function move1()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(200, 200);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.NatureMoveAction([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);	
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+var move2Action = WGE.Class(WGE.UniformLinearMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		var y = Math.sin(Math.PI * 10 * t) * 100;
+		this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + y);
+	},
+
+	actionStop : function()
+	{
+
+	}
+});
+
+function move2()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(200, 200);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new move2Action([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+
+var move3Action = WGE.Class(WGE.UniformLinearMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t *= Math.PI * 2;
+		var x = 200 * Math.cos(t) + this.fromX;
+		var y = 100 * Math.sin(t) + this.fromY;
+		this.bindObj.moveTo(x, y);
+	},
+
+	actionStop : function()
+	{
+
+	}
+});
+
+function move3()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
 	sprite.moveTo(500, 500);
-	sprite.setHotspot2Center();
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.UniformScaleAction([0, 3500], [1.3, 1.3], [0.5, 0.5], 5);
-	var action2 = new WGE.BlinkAlphaAction([500, 3500], 0, 1, 3);
+	var action = new move3Action([0, actionEndTime], [500, 300], [800, 500], repeatTimes);	
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
 
-	//sprite.push(action);
+function falpha()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(500, 300);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.UniformAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+function fblink()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(500, 300);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.BlinkAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+function fRotate()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(500, 300);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+function fScale()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(500, 300);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
+	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+function fAll()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(500, 300);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
+	var action2 = new WGE.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
+	var action3 = new WGE.BlinkAlphaAction([0, actionEndTime], 1, 0.6, repeatTimes);
+	var action4 = new move2Action([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);
+
+	sprite.push(action);
 	sprite.push(action2);
+	sprite.push(action3);
+	sprite.push(action4);
 
 	timeline.push(sprite);
 	timeline.start(0);
+	gui.start();
 }
 
 </script>

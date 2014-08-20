@@ -122,7 +122,7 @@ WGE.Sprite = WGE.Class(
 
 	rotateTo : function(rot)
 	{
-		this.rotation = dRot;
+		this.rotation = rot;
 	},
 
 	//将sprite渲染到指定的context
