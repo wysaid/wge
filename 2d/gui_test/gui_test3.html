@@ -491,10 +491,10 @@ function fSlides()
 
 	// return;
 
-	var pos = [[0, 0], [800, 0], [0, 300], [800, 300], [0, 600], [800, 600]];
+	var pos = [[200, 50], [800, 50], [200, 300], [800, 300], [200, 600], [800, 600]];
 
 	var sprite0 = new mySprite(0, spriteStartTime+1000, canvas, -1);
-	var action = new WGE.NatureMoveAction([0, spriteStartTime + 1000], [0, 0], [300, 200]);
+	var action = new WGE.NatureMoveAction([0, spriteStartTime + 1000], [0, 0], [500, 300]);
 
 	sprite0.push(action);
 	timeline.push(sprite0);
@@ -505,7 +505,11 @@ function fSlides()
 		var sprite = new mySprite(spriteStartTime+1000, spriteEndTime + 100000, tmpImg, -1);
 		sprite.setHotspot(0, 0);
 
-		var action = new MoveBackAction([actionStartTime, actionEndTime + 1000], [tmpImg.clipleft + 300, tmpImg.cliptop + 200], [pos[i][0], pos[i][1]], repeatTimes);
+		var action = new MoveBackAction([actionStartTime, actionEndTime + 1000], [tmpImg.clipleft + 500, tmpImg.cliptop + 300], [pos[i][0], pos[i][1]], repeatTimes);
+
+		var actionxx = new WGE.UniformRotateAction([actionStartTime, actionEndTime + Math.random() * 1000], 0, 2 * Math.PI * (Math.random() > 0.5 ? 1 : -1), repeatTimes);
+
+		sprite.push(actionxx);
 		sprite.push(action);
 		timeline.push(sprite);
 	}
