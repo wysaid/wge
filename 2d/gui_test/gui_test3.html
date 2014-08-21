@@ -16,7 +16,7 @@ input {
 <body onload="isOK = true; window.img = WGE.ID('test0');">
 <script type="text/javascript">
 
-var timeline = new WGE.TimeLine(10000000); //给bendemo足够长时间。。。
+var timeline = new WGE.TimeLine(10000000); //给本demo足够长时间。。。
 var isOK = false;
 
 var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
@@ -108,6 +108,8 @@ y重心：<input type="number" value="0.5" id="hotspotY"><br>
 <input type="button" onclick="fRotate()" value="旋转"><br>
 <input type="button" onclick="fScale()" value="缩放"><br>
 <input type="button" onclick="fAll()" value="组合动作"><br>
+<input type="button" onclick="onBurst()" value="Burst"><br>
+<input type="button" onclick="fSlides()" value="Slides"><br>
 <div style="width:80%; margin:2px;height:50px;border:groove;text-align:center;">
 <p id="myText">当前没有动作</p>
 </div>
@@ -125,13 +127,13 @@ var hotspotY = 0.5;
 
 function setVARs()
 {
-	repeatTimes = WGE.ID('repeatTimes').value;
-	spriteStartTime = WGE.ID('spriteStartTime').value;
-	spriteEndTime = WGE.ID('spriteEndTime').value;
-	actionStartTime = WGE.ID('actionStartTime').value;
-	actionEndTime = WGE.ID('actionEndTime').value;
-	hotspotX = WGE.ID('hotspotX').value;
-	hotspotY = WGE.ID('hotspotY').value;
+	repeatTimes = parseFloat(WGE.ID('repeatTimes').value);
+	spriteStartTime = parseFloat(WGE.ID('spriteStartTime').value);
+	spriteEndTime = parseFloat(WGE.ID('spriteEndTime').value);
+	actionStartTime = parseFloat(WGE.ID('actionStartTime').value);
+	actionEndTime = parseFloat(WGE.ID('actionEndTime').value);
+	hotspotX = parseFloat(WGE.ID('hotspotX').value);
+	hotspotY = parseFloat(WGE.ID('hotspotY').value);
 }
 
 function move0()
@@ -340,8 +342,190 @@ function fAll()
 	gui.start();
 }
 
+WGE.jumpAction= WGE.Class(WGE.TimeActionInterface,
+{
+	endX: 0,
+	endY: 0,
+
+	initialize : function(time, jumpPos)
+	{	
+		this.tStart = time;
+		this.tEnd = time;
+		
+		if(jumpPos instanceof Array)
+		{
+			this.endX = jumpPos[0];
+			this.endY = jumpPos[1];
+		}
+		else if(jumpPos instanceof WGE.Vec2)
+		{
+			this.endX = jumpPos.data[0];
+			this.endY = jumpPos.data[1];
+		}
+	},
+
+	act : function(percent)
+	{
+		this.bindObj.moveTo(this.bindObj.pos.data[0] + this.endX, this.bindObj.pos.data[1]+this.endY);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.moveTo(this.bindObj.pos.data[0] + this.endX, this.bindObj.pos.data[1]+this.endY);
+	}
+});
+
+
+function onBurst()
+{
+    if (!isOK)
+        return;
+    setVARs();
+    timeline.clear();
+    gui.stop();
+    var sprite = new mySprite(spriteStartTime, 100000, img, -1);
+    sprite.moveTo(500, 300);
+    sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+    //var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);
+
+    var functionGroup = ["UniformScaleAction", "UniformRotateAction", "jumpAction"];
+    var index = [
+    		[0, 1, 2],
+    		[0,3,4],
+    		[1],
+    		[2],
+    		[2]
+    	];
+ 
+    var endTime1 = 1000;
+    var action1 = new WGE[functionGroup[index[0][0]]]([0, endTime1], [1.0, 1.0], [1.8, 1.8], 1);
+    var action2 = new WGE[functionGroup[index[1][0]]]([endTime1, endTime1], [1.8, 1.8], [1.0, 1.0], 1);
+    var action3 = new WGE[functionGroup[index[2]]]([endTime1, endTime1+40], 0, 1/3*Math.PI, 1);
+    var action4 = new WGE[functionGroup[index[3]]](endTime1+200, [0,100]);
+    var action5 = new WGE[functionGroup[index[4]]](endTime1+300,[0,-100]);
+
+
+    var startTime1 = 3000;
+    var action6 = new WGE.UniformScaleAction([endTime1, endTime1], [1.8, 1.8], [1.0, 1.0], 1);
+
+    //var action2 = new WGE.
+
+    sprite.push(action1);
+    sprite.push(action2);
+    sprite.push(action3);
+    sprite.push(action4);
+    sprite.push(action5);
+
+
+    timeline.push(sprite);
+    timeline.start(0);
+    gui.start();
+}
+
+
+
+function clipSlideSprite(img, nx, ny)
+{
+	var w = img.width;
+	var h = img.height;
+	var clipX = w / nx;
+	var clipY = h / ny;
+	var imgArr = [];
+
+	for(var i = 0; i != ny; ++i)
+	{
+		for(var j = 0; j != nx; ++j)
+		{
+			var c = WGE.CE('canvas');
+			c.width = clipX;
+			c.height = clipY;
+			c.getContext('2d').drawImage(img, j * clipX, i * clipY, clipX, clipY, 0, 0, c.width, c.height);
+			c.clipleft = j * clipX;
+			c.cliptop = i * clipY;
+			imgArr.push(c);
+		}
+	}
+	return imgArr;
+}
+
+var MoveBackAction = WGE.Class(WGE.NatureMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = (t * 2) - 1;
+		t = 1.0 - t * t;
+		t = t * t * (3 - 2 * t);
+		this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.moveTo(this.fromX, this.fromY);
+	}
+});
+
+function fSlides()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+
+	var canvas = WGE.CE('canvas');
+	var scale = Math.min(img.width / 400, img.height / 300);
+	canvas.width = img.width / scale;
+	canvas.height = img.height / scale;
+	canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+	var imgArr = clipSlideSprite(canvas, 2, 3);
+
+	// gui.context.drawImage(imgArr[0], 200, 0);
+	// gui.context.drawImage(imgArr[1], 500, 0);
+	// gui.context.drawImage(imgArr[2], 200, 200);
+	// gui.context.drawImage(imgArr[3], 500, 200);
+	// gui.context.drawImage(imgArr[4], 200, 400);
+	// gui.context.drawImage(imgArr[5], 500, 400);
+
+	// return;
+
+	var pos = [[0, 0], [800, 0], [0, 300], [800, 300], [0, 600], [800, 600]];
+
+	var sprite0 = new mySprite(0, spriteStartTime+1000, canvas, -1);
+	var action = new WGE.NatureMoveAction([0, spriteStartTime + 1000], [0, 0], [300, 200]);
+
+	sprite0.push(action);
+	timeline.push(sprite0);
+
+	for(var i in imgArr)
+	{
+		var tmpImg = imgArr[i];
+		var sprite = new mySprite(spriteStartTime+1000, spriteEndTime + 100000, tmpImg, -1);
+		sprite.setHotspot(0, 0);
+
+		var action = new MoveBackAction([actionStartTime, actionEndTime + 1000], [tmpImg.clipleft + 300, tmpImg.cliptop + 200], [pos[i][0], pos[i][1]], repeatTimes);
+		sprite.push(action);
+		timeline.push(sprite);
+	}
+
+	// var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	// sprite.moveTo(500, 300);
+	// sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	// var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
+	// sprite.push(action);
+
+	timeline.start(0);
+	gui.start();
+}
+
 </script>
 
-<div style="display:none"><img src="../../res/png/0.png" id="test0"></div>
+<div style="display:none">
+<img src="../../res/comic7.jpg" id="test0">
+
+</div>
 </body>
 </html>

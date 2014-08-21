@@ -312,14 +312,25 @@ WGE.AnimationInterface = WGE.Class(
 
 	setAttrib : function(tStart, tEnd)
 	{
-		this.startTime = tStart;
-		this.endTime = tEnd;
+		this.startTime = parseFloat(tStart);
+		this.endTime = parseFloat(tEnd);
 	},
 
 	push : function(action)
 	{
-		action.bind(this);
+		if(action.bind)
+			action.bind(this);
 		this.timeActions.push(action);
+	},
+
+	pushArr : function(actions)
+	{
+		for(var i in actions)
+		{
+			if(actions[i].bind)
+				actions[i].bind(this);
+			this.timeActions.push(actions[i]);
+		}
 	},
 
 	clear : function()
@@ -433,21 +444,26 @@ WGE.TimeLine = WGE.Class(
 
 	initialize : function(totalTime)
 	{
-		this.totalTime = totalTime;
+		this.totalTime = parseFloat(totalTime);
 		this.timeObjects = [];
 	},
 
-	push : function(attrib)
+	push : function()
 	{
-		this.timeObjects.push(attrib);
+		this.timeObjects.push.apply(this.timeObjects, arguments);
+		
+		if(this.isStarted)
+		{
+			this.timeObjects.sort(function(a, b){
+				return a.startTime - b.startTime;
+			});
+		}
 	},
 
 	pushArr : function(attribArr)
 	{
-		for(var i = 0; i != attribArr.length; ++i)
-		{
-			this.timeObjects.push(attribArr[i]);
-		}
+		this.timeObjects.push.apply(this.timeObjects, attribArr);
+
 		if(this.isStarted)
 		{
 			this.timeObjects.sort(function(a, b){
@@ -465,7 +481,7 @@ WGE.TimeLine = WGE.Class(
 	start : function(startTime)
 	{
 		this.isStarted = true;
-		this.currentTime = startTime ? startTime : 0;
+		this.currentTime = parseFloat(startTime ? startTime : 0);
 
 		this.timeObjects.sort(function(a, b){
 			return a.startTime - b.startTime;
@@ -512,7 +528,9 @@ WGE.TimeLine = WGE.Class(
 			if(time >= anim.endTime)
 			{
 				anim.timeUp();
-				this.Objects2Render.push(anim);
+				//并不是所有的动作都需要渲染
+				if(anim.render)
+					this.Objects2Render.push(anim);
 				delete this.ObjectsWait2Render[i];
 				hasDelete = true;
 			}
