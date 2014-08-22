@@ -1,32 +1,18 @@
-# WGE #
-Web Graphics Engine" 正在编写中
-
-访问网站主页： <a href="http://wge.wysaid.org" target="_blank">wge.wysaid.org</a>
+# **Web Graphics Engine 正在编写中** #
 
 ## 2d Version ##
 
-<div style="border:groove">
-<h3><a href="http://wge.wysaid.org/2d/gui_test/gui_test2.html" target="_blank">2d gui test2</a></h3>
-<img src="http://wge.wysaid.org/screenshots/2d_gui_test2.jpg">
-</div>
+![2d_gui_test2.jpg](https://bitbucket.org/repo/9ogo57/images/4240713957-2d_gui_test2.jpg)
 
 ## WebGL Version ##
-<div style="border:groove">
-<h3><a href="http://wge.wysaid.org/webgl/simple_demos/gui_test.html" target="_blank">webgl gui test1</a></h3>
-<img src="http://wge.wysaid.org/screenshots/webgl_gui_test1.jpg">
-</div>
+### [WebGL GUI测试1](http://wge.wysaid.org/webgl/simple_demos/gui_test.html) ###
+![webgl_gui_test1.jpg](https://bitbucket.org/repo/9ogo57/images/1163803753-webgl_gui_test1.jpg)
 
-<div style="border:groove">
-<h3><a href="http://wge.wysaid.org/webgl/simple_demos/gui_test2.html" target="_blank">webgl gui test2</a></h3>
-<img src="http://wge.wysaid.org/screenshots/webgl_gui_test2.jpg">
-</div>
+[WebGL GUI测试2](http://wge.wysaid.org/webgl/simple_demos/gui_test2.html)
+![webgl_gui_test2.jpg](https://bitbucket.org/repo/9ogo57/images/3422931145-webgl_gui_test2.jpg)
 
-<div style="border:groove">
-<h3><a href="http://wge.wysaid.org/webgl/simple_demos/gui_test3.html" target="_blank">webgl gui test3</a></h3>
-<img src="http://wge.wysaid.org/screenshots/webgl_gui_test3.jpg">
-</div>
+[WebGL GUI测试3](http://wge.wysaid.org/webgl/simple_demos/gui_test3.html)
+![webgl_gui_test3.jpg](https://bitbucket.org/repo/9ogo57/images/2372308325-webgl_gui_test3.jpg)
 
-<div style="border:groove">
-<h3><a href="http://wge.wysaid.org/webgl/simple_demos/gui_test4.html" target="_blank">webgl gui test4</a></h3>
-<img src="http://wge.wysaid.org/screenshots/webgl_gui_test4.jpg">
-</div>
+[WebGL GUI测试4](http://wge.wysaid.org/webgl/simple_demos/gui_test4.html)
+![webgl_gui_test4.jpg](https://bitbucket.org/repo/9ogo57/images/24661603-webgl_gui_test4.jpg)
