@@ -538,8 +538,7 @@ function fRelativeMove()
 		var sprite2 = new mySprite(spriteStartTime, spriteEndTime, imgArr[0], -1);
 		sprite2.scaleTo(0.1, 0.1);
 		sprite2.push(new WGE.UniformRotateAction([actionStartTime, actionEndTime - 1000], 0, 2 * Math.PI, 1));
-		sprite.appendChild(sprite2);
-		//timeline.push(sprite2);
+		sprite.addChild(sprite2);
 		timeline.start(0);
 		gui.start();
 	});

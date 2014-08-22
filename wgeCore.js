@@ -219,6 +219,7 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 	for(var i = 0; i != imageURLArr.length; ++i)
 	{
 		var img = new Image();
+		imgArr.push(img);
 		img.src = imageURLArr[i];
 		if(img.complete)
 		{
@@ -229,7 +230,6 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 			img.onload = F;
 			img.onerror = E;
 		}
-		imgArr.push(img);
 	}
 }
 
@@ -277,7 +277,7 @@ WGE.SpriteInterface2d = WGE.Class(
 	},
 
 	//给sprite 添加子节点。
-	appendChild : function()
+	addChild : function()
 	{
 		if(!(this.childSprites instanceof Array))
 			this.childSprites = [];
