@@ -1,0 +1,55 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>代码格式化工具</title>
+</head>
+<body>
+
+<div style="width:800px;height:620px;margin:auto; border:groove;">
+<textarea id="src" style="width:100%;height:250px; border:solid;position:relative"></textarea>
+<div style="width:350px;height:50px;margin:10px auto;">
+<input type="button" style="width:130px; height:40px; margin:5px" value="压缩" onclick="packSrc()">
+<input type="button" style="width:130px; height:40px; margin:5px" value="格式化" onclick="formatSrc()">
+</div>
+<textarea id="dst" style="width:100%;height:300px;position:relative;border:solid"></textarea>
+<div>
+<script type="text/javascript">
+
+var formater =
+{
+	format: function (s)
+	{
+		s = s.replace(/\s*([\{\}\:\;\,])\s*/g, "$1");
+		s = s.replace(/;\s*;/g, ";");
+		s = s.replace(/\,[\s\.\#\d]*{/g, "{");
+		s = s.replace(/([^\s])\{([^\s])/g, "$1 {\n\t$2");
+		s = s.replace(/([^\s])\}([^\n]*)/g, "$1\n}\n$2");
+		s = s.replace(/([^\s]);([^\s\}])/g, "$1;\n\t$2");
+		return s;
+	},
+	pack: function (s) {
+		s = s.replace(/\/\*(.|\n)*?\*\//g, "");
+		s = s.replace(/\s*([\{\}\:\;\,])\s*/g, "$1");
+		s = s.replace(/\,[\s\.\#\d]*\{/g, "{");
+		s = s.replace(/;\s*;/g, ";");
+		s = s.match(/^\s*(\S+(\s+\S+)*)\s*$/);
+		return (s == null) ? "" : s[1];
+	}
+};
+
+var src = document.getElementById('src');
+var dst = document.getElementById('dst');
+
+function formatSrc()
+{
+	dst.value = formater.format(src.value);
+}
+
+function packSrc()
+{
+	dst.value = formater.pack(src.value);
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+
+<body >
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeAnimation.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
+<script type="text/javascript" src="../wgeFilters.js"></script>
+<script type="text/javascript" src="photoFrames.js"></script>
+
+<canvas id="photoFrames" width='800' height='600' style="border:groove;background-color:#000">你的浏览器不支持html5，换一个再来！(推荐：Chrome, Firefox, Safari)</canvas><br>
+<input type="button" value="MUTE or not" onclick="var snd = WGE.ID('bgSound'); snd.muted=!snd.muted">
+<input type="button" value="点击查看另一个版本" onclick="window.location='demo2.html'">
+<br>
+<p>本页面使用WebGL编写，如果您使用的是IE，请保证IE版本>=11。如果图片过多导致加载失败，请刷新界面</p>
+
+<script type="text/javascript">
+"use strict";
+var timeline = new WGE.TimeLine(60000);
+var cvs = WGE.ID('photoFrames');
+var ctx = cvs.getContext('2d');//cvs.getContext('experimental-webgl');
+var totalImages = 17;
+var loadedImages = 0;
+var lastTime = 0;
+
+//WGE.webgl = ctx;
+
+ctx.font = "50px Aria";
+
+ctx.fillStyle = "#0f0";
+
+if(!window.requestAnimationFrame)
+{
+	window.requestAnimationFrame = window.mozRequestAnimationFrame ||
+							window.webkitRequestAnimationFrame ||
+							window.msRequestAnimationFrame ||
+							window.oRequestAnimationFrame ||
+							function(callback) {
+								setTimeout(callback, 1000 / 60);
+							};
+}
+
+function scaleImage(img)
+{
+	if(!img.width)
+	{
+		img.width = 800;
+		img.height = 600;
+	}
+
+	var c = WGE.CE('canvas');
+	c.width = img.width * (720.0 / img.height);
+	c.height = 720;
+	var t = c.getContext('2d');
+	t.save();
+	t.scale(c.width / img.width, c.height / img.height);
+	t.drawImage(img, 0, 0);
+	t.restore();
+	var image = new Image();
+	image.src = c.toDataURL("image/png");
+	image.width = c.width;
+	image.height = c.height;
+	return image;
+}
+
+function main()
+{
+	ctx.fillStyle = "#000";
+	ctx.strokeStyle = "#fff";
+	ctx.lineWidth = 6;
+
+	var imgArray = [];
+	for(var i = 0; i != totalImages; ++i)
+	{
+		var img = scaleImage(WGE.ID("test" + i));
+		imgArray.push(img);
+	}
+
+	var timeStamp = 0, stillTime = 17000, globalZ = 0;
+	for (var i = 0; i < totalImages; i += 20)
+	{
+	    for (var j = 0; j != 4; ++j)
+	    {
+	        var scene = FTPhotoFrame.initScene(imgArray, 800, 600, globalZ, timeStamp, stillTime);
+	        timeline.pushArr(scene);
+	        globalZ += 10000;
+	        timeStamp += 15000;
+	    }
+	}
+
+	timeline.start(0);
+	lastTime = Date.now();
+	WGE.ID('bgSound').play();
+	mainloop();
+}
+
+function endloop()
+{
+	ctx.fillRect(0,0, 800, 600);
+	ctx.globalAlpha += 0.01;
+	if(ctx.globalAlpha >= 0.99)
+	{
+		ctx.fillStyle = "#fff";
+		ctx.fillText("The End.", 200, cvs.height / 2);
+		ctx.font = "30px Aria";
+		ctx.fillText("By wysaid", 400, 400);
+		WGE.ID('bgSound').pause();
+		return ;
+	}
+	requestAnimationFrame(endloop);
+}
+
+function mainloop()
+{
+	var timeNow = Date.now();
+    
+	if(!timeline.update(timeNow - lastTime))
+	{
+	    console.log('PhotoFrames End');
+	    ctx.globalAlpha = 0.001;
+	    ctx.fillStyle = "#000";
+	    requestAnimationFrame(endloop);
+		return ;
+	}
+	lastTime = timeNow;
+	ctx.clearRect(0,0, 800, 600);
+	timeline.render(ctx);
+	requestAnimationFrame(mainloop);
+}
+
+function loadingDone()
+{
+	++loadedImages;
+	if(loadedImages == totalImages)
+	{
+		ctx.clearRect(0,0, 800, 600);
+		ctx.fillText("WebGL 版本尚未完成", 10, cvs.height / 2);
+		//setTimeout("main()", 100);
+		return ;
+	}
+
+	var loadedRate = loadedImages / totalImages * 100;
+
+	ctx.clearRect(0,0, 800, 600);
+	ctx.fillText("LoadingImages: " + loadedRate.toFixed(2) + "%", 10, cvs.height / 2);
+}
+
+</script>
+
+
+<div style="display:none">
+<img src="../../res/comic0.jpg" id="test0" onload="loadingDone()">
+<img src="../../res/comic1.jpg" id="test1" onload="loadingDone()">
+<img src="../../res/comic2.jpg" id="test2" onload="loadingDone()">
+<img src="../../res/comic3.jpg" id="test3" onload="loadingDone()">
+<img src="../../res/comic4.jpg" id="test4" onload="loadingDone()">
+<img src="../../res/comic5.jpg" id="test5" onload="loadingDone()">
+<img src="../../res/comic6.jpg" id="test6" onload="loadingDone()">
+<img src="../../res/comic7.jpg" id="test7" onload="loadingDone()">
+<img src="../../res/comic8.jpg" id="test8" onload="loadingDone()">
+<img src="../../res/comic9.jpg" id="test9" onload="loadingDone()">
+<img src="../../res/comic10.jpg" id="test10" onload="loadingDone()">
+<img src="../../res/comic11.jpg" id="test11" onload="loadingDone()">
+<img src="../../res/comic12.jpg" id="test12" onload="loadingDone()">
+<img src="../../res/comic13.jpg" id="test13" onload="loadingDone()">
+<img src="../../res/comic14.jpg" id="test14" onload="loadingDone()">
+<img src="../../res/comic15.jpg" id="test15" onload="loadingDone()">
+<img src="../../res/comic16.jpg" id="test16" onload="loadingDone()">
+<audio src="../../res/snd1.mp3" id="bgSound"></audio>
+</div>
+
+<div style="display:none;" id="trackingCodes">
+
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-41296769-1', 'wysaid.org');
+  ga('send', 'pageview');
+</script>
+<script type="text/javascript">
+var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fb1b964c80dff2a1af1bb8b1ee3e9a7d1' type='text/javascript'%3E%3C/script%3E"));
+
+document.write(unescape("%3Cscript src='" + _bdhmProtocol + "tajs.qq.com/stats?sId=23413950' type='text/javascript'%3E%3C/script%3E"));
+  (function(){if(console && console.log){  var ____tmp = 
+"                       ::\n"+
+"                      :;J7, :,                        ::;7:\n"+
+"                      ,ivYi, ,                       ;LLLFS:\n"+
+"                      :iv7Yi                       :7ri;j5PL\n"+
+"                     ,:ivYLvr                    ,ivrrirrY2X,\n"+
+"                     :;r#Wwz.7r:                :ivu#kexianli.\n"+
+"                    :iL7::,:::iiirii:ii;::::,,irvF7rvvLujL7ur\n"+
+"                   ri::,:,::i:iiiiiii:i:irrv177JX7rYXqZEkvv17\n"+
+"                ;i:, , ::::iirrririi:i:::iiir2XXvii;L8OGJr71i\n"+
+"              :,, ,,:   ,::ir#mingyi.irii:i:::j1jri7ZBOS7ivv,\n"+
+"                 ,::,    ::rv77iiiriii:iii:i::,rvLq#huhao.Li\n"+
+"             ,,      ,, ,:ir7ir::,:::i;ir:::i:i::rSGGYri712:\n"+
+"           :::  ,v7r:: ::rrv77:, ,, ,:i7rrii:::::, ir7ri7Lri\n"+
+"          ,     2OBBOi,iiir;r::        ,irriiii::,, ,iv7Luur:\n"+
+"        ,,     i78MBBi,:,:::,:,  :7FSL: ,iriii:::i::,,:rLqXv::\n"+
+"        :      iuMMP: :,:::,:ii;2GY7OBB0viiii:i:iii:i:::iJqL;::\n"+
+"       ,     ::::i   ,,,,, ::LuBBu BBBBBErii:i:i:i:i:i:i:r77ii\n"+
+"      ,       :       , ,,:::rruBZ1MBBqi, :,,,:::,::::::iiriri:\n"+
+"     ,               ,,,,::::i:  #arqiao.       ,:,, ,:::ii;i7:\n"+
+"    :,       rjujLYLi   ,,:::::,:::::::::,,   ,:i,:,,,,,::i:iii\n"+
+"    ::      BBBBBBBBB0,    ,,::: , ,:::::: ,      ,,,, ,,:::::::\n"+
+"    i,  ,  ,8BMMBBBBBBi     ,,:,,     ,,, , ,   , , , :,::ii::i::\n"+
+"    :      iZMOMOMBBM2::::::::::,,,,     ,,,,,,:,,,::::i:irr:i:::,\n"+
+"    i   ,,:;u0MBMOG1L:::i::::::  ,,,::,   ,,, ::::::i:i:iirii:i:i:\n"+
+"    :    ,iuUuuXUkFu7i:iii:i:::, :,:,: ::::::::i:i:::::iirr7iiri::\n"+
+"    :     :rk#Yizero.i:::::, ,:ii:::::::i:::::i::,::::iirrriiiri::,\n"+
+"     :      5BMBBBBBBSr:,::rv2kuii:::iii::,:i:,, , ,,:,:i#petermu.,\n"+
+"          , :r50EZ8MBBBBGOBBBZP7::::i::,:::::,: :,:,::i;rrririiii::\n"+
+"              :jujYY7LS0ujJL7r::,::i::,::::::::::::::iirirrrrrrr:ii:\n"+
+"           ,:  :#kevensun.:,:,,,::::i:i:::::,,::::::iir;ii;7v77;ii;i,\n"+
+"           ,,,     ,,:,::::::i:iiiii:i::::,, ::::iiiir#xingjief.r;7:i,\n"+
+"        , , ,,,:,,::::::::iiiiiiiiii:,:,:::::::::iiir;ri7vL77rrirri::\n"+
+"         :,, , ::::::::i:::i:::i:i::,,,,,:,::i:i:::iir;#Secbone.ii:::\n";
+  console.log(____tmp);
+  console.log("呵呵，你这么屌你爸妈知道吗？");
+}})();
+</script>
+
+</div>
+</body>
+</html>

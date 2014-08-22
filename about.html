@@ -1,0 +1,74 @@
+<meta charset="utf-8">
+<style type="text/css">
+#wge_about {
+	border: none;
+}
+
+#wge_about div {
+	border: none;
+}
+
+#wge_about b {
+	color: #00f;
+	font: 20px arial, 宋体;
+	margin: 5px;
+}
+
+</style>
+
+<center><h1>WGE 简介</h1></center><hr>
+<div id="wge_about">
+
+<h2>WGE 主要目录结构及其文件简介:</h2>
+<div style="margin:10px 15px">
+<p><h3>公共文件:</h3>
+<b>wgeCore.js</b> WGE核心组件，提供了一些公用功能，必须引用，若要分开引用，则需要把它放在第一位。<br>
+<b>wgeAlgorithm.js</b>
+WGE核心组件， 提供了所有矩阵向量运算。必须引用。<br>
+<b>wgeAnimation.js</b>
+WGE扩展组件，提供了动画，时间轴，动作等功能的接口。如果未使用，则不需要引用。(<b>例:<a href="./2d/demo_photoFrames/index.html" target="_blank">photoframe</a></b>)<br>
+<b>wgeGUI.js</b>
+WGE扩展组件(不是必须)，提供了独立的UI控制，封装了一些界面操作，比如鼠标、键盘事件等，同时对窗口事件如全局resize事件进行了处理，使得canvas能够适应分辨率。 WGE的所有demo均使用此组件完成操作。所以就算你不使用，也请稍微了解一下其运行过程<br>
+<b>wgeParticleSystem.js</b>
+WGE扩展组件，提供了粒子系统接口（暂未实现），如未使用，则不需要引用。<br>
+<b>wgeFont.js</b>
+WGE扩展组件，主要提供webgl版的字体渲染接口（暂未实现）。
+</p>
+<p><h3>canvas-2d版:</h3>
+<b>wgeSprite.js</b>
+提供sprite渲染，支持基于自定义重心点的旋转、缩放、平移等，支持伪3d旋转。<br>
+<b>wgeFilters.js</b>
+提供2d版的滤镜操作，CPU滤镜性能较低，不建议大量、频繁地使用。<br>
+<b>wgeSlideshow.js</b>
+提供slideshow的功能接口，为所有的slideshow提供统一的对外接口。
+</p>
+<p><h3>canvas-webgl版:</h3>
+<b>wgeWebGL.js</b>
+webgl版的核心组件，对WebGL的功能进行了轻量的封装以减少代码量，webgl版必须引用。<br>
+<b>wgeSprite2d.js</b>
+webgl版的平面sprite，兼容2d版的sprite所有操作（同时兼容2d版的坐标系，默认使用屏幕坐标系），并支持更多的功能，如绕任意点，任意轴旋转。shader代码可自行定制，如加入光照，混合等。<br>
+<b>wgeSprite3d.js</b>
+webgl版的3d sprite，默认支持直接导入模型的position，面索引以及纹理坐标等，直接简单绘制模型。提供绕重心点的旋转缩放平移，同时支持绕任意点，任意轴旋转等。shader代码可自行定制，如加入光照、环境贴图顶。<br>
+<b>wgeScene.js</b>
+为webgl版提供了较全面的场景漫游，支持类似于网游的场景漫游操作，可于wgeGUI一起使用，提供方便操作的场景漫游。详情请查看webgl版的 <a target="_blank" href="./webgl/simple_demos/gui_test5.html">gui_test5</a><br>
+<b>wgeFilter.js</b>
+与2d版功能、名字相同，分属于webgl目录下，提供GPU加速的图像后处理操作，由于GPU性能有限，对于某些耗时的滤镜(如大半径模糊操作) 依然不建议每一帧大量使用。
+</p>
+</div>
+<h2>WGE Animation基本概念</h2>
+<div style="margin:10px 15px">
+<h3><font color="red">时间轴->动画精灵(动画接口+带render方法的精灵)->精灵动作</font></h3>
+<p><b>时间轴(TimeLine)</b>WGE Animation使用时间轴驱动方式完成动画场景。<br>
+每一个单独的动画都必须有一个时间轴，时间轴提供进度管理，更新，以及进度跳转等功能。
+由时间轴管理动画精灵，动画精灵自身需要提供精灵需要出现的起始时间、结束时间，update方法和render方法以供时间轴使用<br>
+</p>
+<p><b>动画精灵(AnimationSprite)</b>动画精灵为包含动画接口的精灵，通常由一个普通精灵和动画接口多重继承而来。动画精灵一般直接交由时间轴总体控制。
+</p>
+<p><b>动画接口(AnimationInterface)</b>动画接口主要提供对于多个动作的管理，提供了外部向动画精灵添加动作以及动作的管理。同时也管理了精灵的时间属性，包括出现时间，结束时间等。
+</p>
+<p><b>精灵(sprite)</b>普通精灵提供与时间轴无关的公共渲染方法以及一些自身属性，如重心设置、旋转、平移、缩放等。动画精灵继承这些方法，当精灵被绑定到一个动作上时，由该动作来设定这些属性。
+</p>
+<p><b>精灵动作(spriteAction)</b>精灵动作提供了单个动作，这个动作包含属性包括：相对于sprite出现时间的开始时间、结束时间、重复次数等。具体行为可自己设定。公共文件仅提供简单的旋转平移缩放以及渐进渐出等。具体可参见: <a href="./2d/gui_test/gui_test3.html" target="_blank">gui_test3</a>
+</p>
+</div>
+</div>

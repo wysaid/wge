@@ -1,0 +1,240 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../wgeSprite2d.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+"use strict";
+
+var maxSpriteNum = 500;
+var runningSpriteNum = 50;
+
+WGE.Sprite2d.ShaderDir = "../";
+
+var MySprite = WGE.Class(WGE.Sprite2d,
+{
+	dx : 0,
+	dy : 0,
+	drz : 0,
+
+	randomize : function()
+	{
+		var w = this.canvas.width, h = this.canvas.height;
+
+		this.pos.data[0] = Math.random() * w;
+		this.pos.data[1] = Math.random() * h;
+		this.dx = Math.random() * 0.5 + 0.01;
+		this.dy = Math.random() * 0.5 + 0.01;
+		this.drz = Math.random() * 0.005 + 0.001;
+	},
+
+	update : function(dt, boundingX, boundingY)
+	{
+		var d = this.pos.data;
+		d[0] += this.dx * dt;
+		d[1] += this.dy * dt;
+		this.rotate(this.drz * dt);
+
+		if(d[0] < 0)
+		{
+			d[0] = 0;
+			this.dx = -this.dx;
+		}
+		else if(d[0] > boundingX)
+		{
+			d[0] = boundingX;
+			this.dx = -this.dx;
+		}
+
+		if(d[1] < 0)
+		{
+			d[1] = 0;
+			this.dy = -this.dy;
+		}
+		else if(d[1] > boundingY)
+		{
+			d[1] = boundingY;
+			this.dy = -this.dy;
+		}
+
+	}
+
+});
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
+{
+	context : undefined,
+	isMouseDown : false,
+	sprites : null,
+	deltaTime : 10,
+	x : 0,
+	y : 0,
+
+	bindFather : function(fatherObj)
+	{
+		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+		{
+			var context = this.canvas.getContext('experimental-webgl');
+			if(!context)
+			{
+				alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+			}
+			this.context = context;
+			context.enable(context.BLEND);
+			context.blendFunc(context.ONE, context.ONE);
+			return !!this.context;
+		}
+		return false;
+	},
+
+	initSprites : function()
+	{
+		var sprites = [];
+		var textures = [];
+		var context = this.context;
+		this.sprites = sprites;
+		for(var i = 0; i != 14; ++i)
+		{
+			var img = WGE.ID('test' + i);
+			var tex = new WGE.Texture2D(context);
+			tex.initWithImg(img);
+			textures.push(tex);
+		}
+
+		for(var i = 0; i != maxSpriteNum; ++i)
+		{
+			var sprite = new MySprite(this.canvas, this.context);
+			sprite.initSprite(textures[parseInt(Math.random() * textures.length)]);
+			sprite.setAlpha(1.0 / maxSpriteNum + Math.random() * 0.2 + 0.1);
+			sprite.randomize();
+			sprites.push(sprite);
+		}
+
+		sprites[0].setAlpha(1.0);
+
+		this.context.clearColor(0.0, 0.0, 0.0, 1.0);
+	},
+
+	spritesAlphaPlus : function(value)
+	{
+		var sprites = this.sprites;
+		for(var i = 0; i < runningSpriteNum; ++i)
+		{
+			var alpha = Math.max(Math.min(sprites[i]._alpha + value, 1.0), 0.001);
+			sprites[i].setAlpha(alpha);
+		}
+	},
+
+	update : function(dt)
+	{
+		this.deltaTime = dt;
+		var w = this.canvas.width, h = this.canvas.height;
+		var sprites = this.sprites;
+		for(var i = 1; i < runningSpriteNum; ++i)
+		{
+			sprites[i].update(dt, w, h);
+		}
+
+		sprites[0].moveTo(this.x, this.y);
+		sprites[0].rotate(sprites[0].drz * dt);
+	},
+
+	render : function()
+	{
+		this.context.clear(this.context.COLOR_BUFFER_BIT);
+		var sprites = this.sprites;
+		for(var i = 1; i < runningSpriteNum; ++i)
+		{
+			sprites[i].render();
+		}
+		sprites[0].render();
+		this.context.finish();
+	},
+
+	mouseMoveEvent : function(e, x, y)
+	{
+		this.x = x;
+		this.y = y;
+	},
+
+	resizeEvent : function()
+	{
+		if(this.context)
+		{
+			this.context.viewport(0, 0, this.canvas.width, this.canvas.height);
+			var sprites = this.sprites;
+			for(var i in sprites)
+			{
+				sprites[i].onCanvasResize();
+			}
+		}
+	}
+});
+
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+var gui = new MyGUI(div);
+
+function updateSpritesAndFPS()
+{
+	WGE.ID('totalSprites').innerHTML = "Total Sprites: " + runningSpriteNum + "<br>" + "FPS " + (1000/gui.deltaTime).toFixed(1);
+}
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(updateSpritesAndFPS, 1000);");
+
+</script>
+
+<div style="position:absolute;left:10px;top:10px;width:170px;height:auto;">
+<div style="width:100%;height:45px;background-color:#f00" id="totalSprites">
+ Initializing...
+</div>
+<script type="text/javascript">
+function setBlend(mode)
+{
+	gui.context.enable(gui.context.BLEND);
+	gui.context.blendFunc(gui.context.ONE, gui.context[mode]);
+}
+
+</script>
+<input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
+<input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 1) runningSpriteNum = 1;"><br>
+<input type="button" value="No blend" style="width:100px" onclick="gui.context.disable(gui.context.BLEND);"><br>
+<input type="button" value="add" style="width:100px" onclick="setBlend('ONE');"><br>
+<input type="button" value="1 - src_alpha" style="width:100px" onclick="setBlend('ONE_MINUS_SRC_ALPHA');"><br>
+<input type="button" value="1 - dst_alpha" style="width:100px" onclick="setBlend('ONE_MINUS_DST_ALPHA');"><br>
+<input type="button" value="1 - src_color" style="width:100px" onclick="setBlend('ONE_MINUS_SRC_COLOR');"><br>
+<input type="button" value="1 - dst_color" style="width:100px" onclick="setBlend('ONE_MINUS_DST_COLOR');"><br><br>
+<input type="button" value="sprite alpha+" style="width:100px" onclick="gui.spritesAlphaPlus(0.05);"><br>
+<input type="button" value="sprite alpha-" style="width:100px" onclick="gui.spritesAlphaPlus(-0.05);"><br><br>
+<input type="button" value="Y Rotation" style="width:100px" onclick="window.location='gui_test2.html'">
+</div>
+
+<div style="display:none">
+<img src="../../res/png/0.png" id="test0">
+<img src="../../res/png/1.png" id="test1">
+<img src="../../res/png/2.png" id="test2">
+<img src="../../res/png/3.png" id="test3">
+<img src="../../res/png/4.png" id="test4">
+<img src="../../res/png/5.png" id="test5">
+<img src="../../res/png/6.png" id="test6">
+<img src="../../res/png/7.png" id="test7">
+<img src="../../res/png/8.png" id="test8">
+<img src="../../res/png/9.png" id="test9">
+<img src="../../res/png/10.png" id="test10">
+<img src="../../res/png/11.png" id="test11">
+<img src="../../res/png/12.png" id="test12">
+<img src="../../res/png/13.png" id="test13">
+</div>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../wgeSprite3d.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../models/cube.js"></script>
+</head>
+
+<body>
+
+<script type="text/javascript">
+"use strict";
+
+document.body.oncontextmenu=function(){ return false;} 
+
+var maxSpriteNum = 500;
+var runningSpriteNum = 5;
+
+WGE.Sprite3d.ShaderDir = "../";
+
+var MySprite = WGE.Class(WGE.Sprite3d,
+{
+	x : 0,
+	y : 0,
+	z : 0,
+	dx : 0,
+	dy : 0,
+	dz : 0,
+
+	drx : 1,
+	drz : 1,
+	dry : 1,
+	rot : 0,
+	dRot : 0,
+
+	scaling : 1,
+
+	randomize : function()
+	{
+		this.x = Math.random() * 2.0 - 1.0;
+		this.y = Math.random() * 2.0 - 1.0;
+		this.z = Math.random() * 2.0 - 1.0;
+		this.dx = (Math.random() - 0.5) * 0.5 + 0.001;
+		this.dy = (Math.random() - 0.5) * 0.5 + 0.001;
+		this.dz = (Math.random() - 0.5) * 0.5 + 0.001;
+
+		this.drx = (Math.random() - 0.5) * 10 + 0.1;
+		this.dry = (Math.random() - 0.5) * 10 + 0.1;
+		this.drz = (Math.random() - 0.5) * 10 + 0.1;
+		this.dRot = Math.PI * Math.random() * 0.01 + 0.001;
+
+		this.scaling = Math.random() * 5 + 1;
+	},
+
+	update : function(dt, boundingX, boundingY, boundingZ)
+	{
+		this.x += this.dx;
+		this.y += this.dy;
+		this.z += this.dz;
+
+		if(this.x < -boundingX || this.x > boundingX)
+			this.dx = -this.dx;
+		if(this.y < -boundingY || this.y > boundingY)
+			this.dy = -this.dy;
+		if(this.z < -boundingZ || this.z > boundingZ)
+			this.dz = -this.dz;
+		this.rot += this.dRot;
+
+		// this._modelMatrix = WGE.mat4Rotation(this.rot, this.drx, this.dry, this.drz);
+		// var mat = this._modelMatrix;
+		// this.scale(this.scaling, this.scaling, this.scaling);
+		// this.translate(this.x, this.y, this.z);
+
+		this._modelMatrix = WGE.mat4Translation(this.x, this.y, this.z);
+		this.scale(this.scaling, this.scaling, this.scaling);
+		this.rotate(this.rot, this.drx, this.dry, this.drz);
+
+	}
+
+});
+
+var MyBoundingBox = WGE.Class(WGE.Sprite3d,
+{
+	vshBoundingBox : "varying vec2 vTextureCoord;attribute vec4 aPosition;attribute vec2 aTexCoord;uniform mat4 mvp;void main(){gl_Position = mvp * aPosition;vTextureCoord = aTexCoord;}",
+
+	fshBoundingBox : "precision mediump float;varying vec2 vTextureCoord;uniform sampler2D sTexture;uniform float alpha;void main(){gl_FragColor = texture2D(sTexture,vTextureCoord) * alpha;}",
+
+	alphaName : "alpha",
+	alpha : 1.0,
+
+	initialize : function(canvas, ctx)
+	{
+		WGE.Sprite3d.initialize.call(this, canvas, ctx, this.vshBoundingBox, this.fshBoundingBox);
+		this.setAlpha(this.alpha);
+	},
+
+	setAlpha : function(alpha)
+	{
+		var program = this._program;
+		program.bind();
+		program.sendUniform1f(this.alphaName, alpha);
+		this.alpha = alpha;
+	}
+});
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
+{
+	context : undefined,
+	isMouseDown : false,
+	sprites : null,
+	boundingBox : null, 
+	deltaTime : 10,
+
+	lookDir : null,
+	myPosition : null,
+	farAway : 1000,
+
+	modelViewMatrix : null, //mat4x4
+	projectionMatrix : null, //mat4x4
+
+	useBlend : true,
+
+	initialize : function()
+	{
+		WGE.GUIInterface.initialize.apply(this, arguments);
+
+		var w = this.canvas.width, h = this.canvas.height;
+		this.projectionMatrix = WGE.makePerspective(Math.PI / 3, w / h, 1, 10000.0);
+		this.lookDir = new WGE.Vec3(0, this.farAway, 0); //观察方向
+		this.myPosition = new WGE.Vec3(0, -20, 0); //观察位置。
+		
+		this.updateView();
+		
+		var gl = this.context;
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);		
+		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+	},
+
+	bindFather : function(fatherObj)
+	{
+		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+		{
+			var context = this.canvas.getContext('experimental-webgl');
+			if(!context)
+			{
+				alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+			}
+			this.context = context;
+			return !!this.context;
+		}
+		return false;
+	},
+
+	initSprites : function()
+	{
+		var boundingBox = new MyBoundingBox(this.canvas, this.context);
+		boundingBox.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, WGE.ID('test6'));
+		boundingBox.setAlpha(0.5);
+		boundingBox.scale(30, 30, 30);
+		this.boundingBox = boundingBox;
+
+		var sprites = [];
+		var textures = [];
+		var context = this.context;
+		this.sprites = sprites;
+		for(var i = 0; i != 7; ++i)
+		{
+			var img = WGE.ID('test' + i);
+			var tex = new WGE.Texture2D(context);
+			tex.initWithImg(img);
+			textures.push(tex);
+		}
+
+		for(var i = 0; i != maxSpriteNum; ++i)
+		{
+			var sprite = new MySprite(this.canvas, this.context);
+			sprite.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, textures[parseInt(Math.random() * textures.length)]);
+
+			sprite.randomize();
+			sprites.push(sprite);
+		}
+	},
+
+	boundingBoxAlphaPlus : function(value)
+	{
+		var b = this.boundingBox;
+		var alpha = Math.max(Math.min(b.alpha + value, 1.0), 0.001);
+		b.setAlpha(alpha);
+	},
+
+	update : function(dt)
+	{
+		this.deltaTime = dt;
+		var sprites = this.sprites;
+		for(var i = 0; i < runningSpriteNum; ++i)
+		{
+			sprites[i].update(dt, 20, 20, 20);
+		}
+	},
+
+	render : function()
+	{
+		var mvp = WGE.mat4Mul(this.projectionMatrix, this.modelViewMatrix);
+		var gl = this.context;
+		gl.clear(this.context.COLOR_BUFFER_BIT);
+
+		gl.enable(gl.DEPTH_TEST);
+		gl.disable(gl.BLEND);
+		var sprites = this.sprites;
+		for(var i = 0; i < runningSpriteNum; ++i)
+		{
+			sprites[i].render(mvp);
+		}
+
+		if(this.useBlend)
+		{
+			gl.disable(gl.DEPTH_TEST);
+			gl.enable(gl.BLEND);
+		}
+		this.boundingBox.render(mvp);
+	},
+
+	updateView : function()
+	{
+		var dirX = this.myPosition.data[0] + this.lookDir.data[0];
+		var dirY = this.myPosition.data[1] + this.lookDir.data[1];
+		var len = Math.sqrt(dirX * dirX + dirY * dirY);
+		var tmp = -this.lookDir.data[2] / len;
+		var dirBackX = dirX * tmp;
+		var dirBackY = dirY * tmp;
+		this.modelViewMatrix = WGE.makeLookAt(this.myPosition.data[0], this.myPosition.data[1], this.myPosition.data[2], dirX, dirY, this.lookDir.data[2], dirBackX, dirBackY, len);
+	},
+
+	mouseDownEvent : function(e, x, y)
+	{
+		this.isMouseDown = true;
+		this.x = x;
+		this.y = y;
+	},
+
+	mouseUpEvent : function(e, x, y)
+	{
+		this.isMouseDown = false;
+	},
+
+	mouseMoveEvent : function(e, x, y)
+	{
+		if(this.isMouseDown)
+		{
+			var lookDir = this.lookDir.data;
+			var rad = (x - this.x) / 180.0;
+			var v2 = WGE.mat2MulVec2(WGE.mat2Rotation(rad), this.lookDir);
+			lookDir[0] = v2.data[0];
+			lookDir[1] = v2.data[1];
+			lookDir[2] += (y - this.y) * this.farAway / 200;
+
+			if(lookDir[2] < -this.farAway)
+				lookDir[2] = -this.farAway;
+			else if(lookDir[2] > this.farAway * 2.0)
+				lookDir[2] = this.farAway * 2.0;
+
+			this.updateView();
+
+			this.x = x;
+			this.y = y;
+		}		
+	},
+
+	_helpFunc : function(data, dis)
+	{
+		var len = Math.sqrt(data[0]*data[0] + data[1]*data[1]);
+		return [dis * data[0] / len, dis * data[1] / len];
+	},
+
+	goForward : function(dis)
+	{
+		var h = this._helpFunc(this.lookDir.data, dis)
+		this.myPosition.data[0] += h[0];
+		this.myPosition.data[1] += h[1]
+	},
+
+	goBack : function(dis)
+	{
+		var h = this._helpFunc(this.lookDir.data, dis)
+		this.myPosition.data[0] -= h[0];
+		this.myPosition.data[1] -= h[1]
+	},
+
+	goLeft : function(dis)
+	{
+		var h = this._helpFunc(this.lookDir.data, dis)
+		this.myPosition.data[0] -= h[1];
+		this.myPosition.data[1] += h[0]
+	},
+
+	goRight : function(dis)
+	{
+		var h = this._helpFunc(this.lookDir.data, dis)
+		this.myPosition.data[0] += h[1];
+		this.myPosition.data[1] -= h[0]
+	},
+
+	keypressEvent : function(e)
+	{
+		var charCode = e.which || e.keyCode;
+		if(charCode < 97)
+			charCode += 32; //大写转小写
+
+		var motion = 2;
+		switch(charCode)
+		{			
+		case 119: //'w'
+			this.goForward(motion);
+			break;			
+		case 97: //'a'
+			this.goLeft(motion);
+			break;
+		case 115: //'s'
+			this.goBack(motion);
+			break;
+		case 100: //'d'
+			this.goRight(motion);
+			break;
+		default:
+			;
+		}
+		this.updateView();
+	},
+
+	// wheelEvent : function(e)
+	// {
+	// 	this.farAway += e.deltaY / 100
+	// 	this.modelViewMatrix = WGE.makeLookAt(0, 0, this.farAway, 0, 0, -10000, 0, 1, 0);
+	// },
+
+	resizeEvent : function()
+	{
+		if(this.context)
+		{
+			var w = this.canvas.width, h = this.canvas.height;
+			this.projectionMatrix = WGE.makePerspective(Math.PI / 3, w / h, 1, 10000.0);
+
+			this.context.viewport(0, 0, this.canvas.width, this.canvas.height);
+		}
+	}
+});
+
+
+
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+div.setAttribute('tabindex', '0');
+var gui = new MyGUI(div);
+
+function updateSpritesAndFPS()
+{
+	WGE.ID('totalSprites').innerHTML = "Total Sprites: " + runningSpriteNum + "<br>" + "FPS " + (1000/gui.deltaTime).toFixed(1);
+}
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(updateSpritesAndFPS, 1000);");
+
+</script>
+
+<div style="position:absolute;left:10px;top:10px;width:170px;height:auto;">
+<div style="width:100%;height:45px;background-color:#f00" id="totalSprites">
+ Initializing...
+</div>
+<div style="width:100%;height:70px;background-color:#f00">
+使用鼠标可拖动视角，使用键盘w,a,s,d控制简单场景漫游。
+</div>
+<script type="text/javascript">
+function setBlend(mode)
+{
+	gui.context.enable(gui.context.BLEND);
+	gui.context.blendFunc(gui.context.ONE, gui.context[mode]);
+}
+
+</script>
+<input type="button" value="Sprite +10" style="width:100px" onclick="runningSpriteNum+=10; if(runningSpriteNum > maxSpriteNum) runningSpriteNum = maxSpriteNum;"><br>
+<input type="button" value="Sprite -10" style="width:100px" onclick="runningSpriteNum-=10; if(runningSpriteNum < 1) runningSpriteNum = 1;"><br>
+<input type="button" value="box alpha+" style="width:100px" onclick="gui.boundingBoxAlphaPlus(0.05);"><br>
+<input type="button" value="box alpha-" style="width:100px" onclick="gui.boundingBoxAlphaPlus(-0.05);"><br><br>
+
+<input type="button" value="No Blend" style="width:100px" onclick="gui.useBlend = false;"><br>
+<input type="button" value="Use Blend" style="width:100px" onclick="gui.useBlend = true;"><br>
+</div>
+
+<div style="display:none">
+<img src="../../res/materials/0.jpg" id="test0">
+<img src="../../res/materials/1.jpg" id="test1">
+<img src="../../res/materials/2.jpg" id="test2">
+<img src="../../res/materials/3.jpg" id="test3">
+<img src="../../res/materials/4.jpg" id="test4">
+<img src="../../res/materials/5.jpg" id="test5">
+<img src="../../res/materials/6.jpg" id="test6">
+</div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>js validation test</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeFilters.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
+
+</head>
+<body >
+<script type="text/javascript">
+var myGUI = WGE.Class(WGE.GUIInterface, 
+{
+	context : undefined,
+	x : 0,
+	y : 0,
+	isMouseDown : false,
+
+	bindFather : function(fatherObj)
+	{
+		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+		{
+			this.context = this.canvas.getContext('2d');
+			if(!this.context)
+			{
+				alert('你的浏览器不支持html5啊，坟蛋！换一个好吗？');
+			}
+			return !!this.context;
+		}
+		return false;
+	},
+
+	update : function()
+	{
+		if(!this.isMouseDown)
+		{
+			this.x = Math.random() * this.canvas.width;
+			this.y = Math.random() * this.canvas.height;
+		}
+	},
+
+	render : function()
+	{
+		var ctx = this.context;
+		var cvs = this.canvas;
+		ctx.clearRect(0, 0, cvs.width, cvs.height);
+		this.context.fillStyle = "#f00";
+		ctx.fillRect(this.x, this.y, 100, 100);
+		ctx.fillText("click me!", 10, 10);
+	},
+
+	mouseDownEvent : function(e)
+	{
+		this.isMouseDown = true;
+		this.x = e.offsetX || e.layerX;
+		this.y = e.offsetY || e.layerY;
+	},
+
+	mouseUpEvent : function(e)
+	{
+		this.isMouseDown = false;
+	},
+
+	mouseMoveEvent : function(e)
+	{
+		if(this.isMouseDown)
+		{
+			this.x = e.offsetX || e.layerX;
+			this.y = e.offsetY || e.layerY;
+		}
+	}
+});
+
+var gui = new myGUI(document.body);
+
+//下面两句都是使整个ui大小跟随父元素变化，推荐前者。嫌麻烦或者跟已有代码有冲突（比如body的onresize有别的代码会随时更改）写成后者也没关系。
+document.body.setAttribute("onresize", "gui.onresize(event);"); //较好
+//gui.forceAutoResize(true); //这一句和上一句功能类似，这种方法可保证正确性
+
+gui.start();
+</script>
+</body>
+</html>

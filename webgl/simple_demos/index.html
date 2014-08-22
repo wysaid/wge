@@ -1,0 +1,46 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8" />
+<title>WGE - Slideshow demos</title>
+<script type="text/javascript">
+var gFrameHeight = "100%";
+
+function bodyResize()
+{
+	var frame = document.getElementById("itemView");
+	var father = document.getElementById("__father");
+	frame.setAttribute("style", "position:absolute;background-color:#d0d0d0;border:groove;top:0px;left:220px;width:" + (father.clientWidth - 230) + "px;height:" + father.clientHeight + "px;");
+}
+</script>
+</head>
+<body onload="bodyResize()" onresize="bodyResize()">
+<div id="__father" style="width:100%; height:100%; position:relative;">
+
+<div style="width:200px;border:groove;" id="demoView">
+<h1>WGE GUI测试</h1>
+<script type="text/javascript">
+var testNames = 
+[
+'gui_test1', 'gui_test2', 'gui_test3',
+'gui_test4', 'gui_test5'
+];
+var demoView = document.getElementById("demoView");
+for(var i = 0; i < testNames.length; ++i)
+{
+    var item = document.createElement("p");
+    var text = "<h2><a href = './" + testNames[i] + ".html' target='demos'>" + testNames[i] + "</a></h2>";
+    item.setAttribute("style", "margin:10px;text-align:center;background-color: #abcdef; margin 10px;");
+    item.innerHTML = text;
+    demoView.appendChild(item);
+}
+</script>
+</div>
+<div id="itemView">
+<iframe src="README.html" style="border:none;width:100%;height:100%;" name="demos">
+Your browser is too old. Please use another one instead.
+</iframe>
+</div>
+
+</div>
+</body>
+</html>
