@@ -12,7 +12,7 @@
 // 请考虑场景综合选择。
 //
 
-WGE.Sprite = WGE.Class(
+WGE.Sprite = WGE.Class(WGE.SpriteInterface2d,
 {
 	pos : undefined,
 	hotspot : undefined,

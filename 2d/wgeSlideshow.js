@@ -8,10 +8,8 @@
 */
 
 /*
-
-
-
-
+简介：主要提供与网站界面兼容的接口设计，
+      以及提供对于json配置文件的解析接口。
 */
 
 
@@ -33,7 +31,7 @@ WGE.SlideshowSettings =
 //     图片分辨率为 768 * 768， 则将等比缩放为 1024 * 1024
 //     图片分辨率为 1024 * 500， 则将等比缩放为 1573 * 768
 // 后两个参数表示将分辨率缩小至这个尺寸， 可根据实际需求设定。
-WGE.fitSlideImages = function(imgs, w, h)
+WGE.slideshowFitImages = function(imgs, w, h)
 {
 	if(!(w && h))
 	{
@@ -93,7 +91,7 @@ WGE.SlideshowInterface = WGE.Class(
 	{
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
-			this.srcImages = self.fitSlideImages(imgArr);
+			this.srcImages = self.slideshowFitImages(imgArr);
 			if(finishCallback)
 				finishCallback();
 		});
@@ -134,9 +132,7 @@ WGE.SlideshowInterface = WGE.Class(
 	jump : function(time)
 	{
 
-	},
+	}
 
 	
-
-
 });
