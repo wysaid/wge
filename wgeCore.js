@@ -228,6 +228,99 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 	}
 }
 
+//简介： 所有需要提供给Animation使用的sprite 
+//       都必须实现 wgeSpriteInterface2d 里面涉及到的方法。
+//       为了保证公共方法正常使用，pos等类成员名必须有效。
+
+WGE.SpriteInterface2d = WGE.Class(
+{
+	pos : null,           //sprite 所在位置, 类型: WGE.Vec2
+	scaling : null,       //sprite 缩放, 类型: WGE.Vec2
+	rotation : 0,         //sprite 旋转(弧度)
+	alpha : 1,            //sprite 透明度(范围0~1)
+	zIndex : 0,           //sprite 的z值
+	childSprites : null,  //sprite 的子节点
+
+	initialize : function()
+	{
+		console.warn("This should never be called!");
+	},
+
+	getPosition : function()
+	{
+		return this.pos;
+	},
+
+	getScaling : function()
+	{
+		return this.scaling;
+	},
+
+	getRotation : function()
+	{
+		return this.rotation;
+	},
+
+	getAlpha : function()
+	{
+		return this.alpha;
+	},
+
+	getZ : function()
+	{
+		return this.zIndex;
+	},
+
+	//给sprite 添加子节点。
+	push : function()
+	{
+		if(!(this.childSprites instanceof Array))
+			this.childSprites = [];
+		this.childSprites.push.apply(this.childSprites, arguments);
+	},
+
+	//要操作子节点，可直接获取，并按js的数组操作。
+	getChildren : function()
+	{
+		return this.childSprites;
+	},
+
+	//设置sprite的重心, (0,0)表示中心，(-1, -1)表示左上角(1,1) 表示右下角
+	setHotspot : function(hx, hy) {},
+
+	//将sprite重心设置为纹理正中心。
+	setHotspot2Center : function() {},
+
+	//将sprite重心设置为相对于纹理实际像素的某个点(相对于纹理左上角)
+	setHotspotWithPixel : function() {},
+
+	//将sprite移动到相对于当前位置位移(dx, dy) 的某个位置。
+	move : function(dx, dy) {},
+
+	//将sprite移动到指定位置。
+	moveTo : function(x, y) {},
+
+	//将sprite相对于当前缩放值缩放
+	scale : function(sx, sy) {},
+
+	//将sprite相对于正常大小缩放
+	scaleTo : function(sx, sy) {},
+
+	//将sprite相对于当前旋转值旋转 (顺时针)
+	rotate : function(dRot) {},
+
+	//将sprite从0旋转至给定值 (顺时针)
+	rotateTo : function(rot) {},
+
+	//将sprite渲染到给定的context之上
+	render : function(ctx) {},
+
+	//将子节点渲染到给定的context之上
+	//注意，根据实现方式的不同，renderChildren的参数请根据自己sprite的需要填写。
+	_renderChildren : function(ctx) {},
+
+});
+
 if(!window.requestAnimationFrame)
 {
 	// window.requestAnimationFrame = window.mozRequestAnimationFrame ||

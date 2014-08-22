@@ -19,7 +19,7 @@ WGE.Sprite = WGE.Class(
 	size : undefined,
 	scaling : undefined, // 缩放
 	rotation : 0, // 旋转(弧度)
-	alpha : undefined, //透明度
+	alpha : 1, //透明度
 	blendMode : undefined, //混合模式
 	img : null,  // Sprite自身图像。
 	zIndex : 0, // 由于canvas本身并不支持z值，所以这里的zIndex仅用作排序依据。
@@ -75,8 +75,8 @@ WGE.Sprite = WGE.Class(
 
 	setHotspot : function(hx, hy)
 	{
-		this.hotspot.data[0] = hx;
-		this.hotspot.data[1] = hy;
+		this.hotspot.data[0] = this.size.data[0] * (0.5 - hx/2);
+		this.hotspot.data[1] = this.size.data[1] * (0.5 - hy/2);
 	},
 
 	setHotspot2Center : function()
@@ -89,6 +89,13 @@ WGE.Sprite = WGE.Class(
 	{
 		this.hotspot.data[0] = this.size.data[0] * rx;
 		this.hotspot.data[1] = this.size.data[1] * ry;
+	},
+
+	//相对于本sprite纹理坐标
+	setHotspotWithPixel : function(px, py)
+	{
+		this.hotspot.data[0] = hx;
+		this.hotspot.data[1] = hy;
 	},
 
 	move : function(dx, dy)
@@ -134,12 +141,17 @@ WGE.Sprite = WGE.Class(
 			ctx.rotate(this.rotation);
 
 		ctx.scale(this.scaling.data[0], this.scaling.data[1]);
-		if(this.alpha != undefined)
-			ctx.globalAlpha = this.alpha;		
+
+		ctx.globalAlpha = this.alpha;		
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
+
 		ctx.drawImage(this.img, -this.hotspot.data[0], -this.hotspot.data[1]);
 
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
 		ctx.restore();
 	},
 
@@ -151,11 +163,15 @@ WGE.Sprite = WGE.Class(
 			ctx.rotate(rot);
 
 		ctx.scale(scaling.data[0], scaling.data[1]);
-		if(this.alpha != undefined)
-			ctx.globalAlpha = alpha;
+		ctx.globalAlpha = alpha;
 		if(blendmode)
 			ctx.globalCompositeOperation = blendmode;
-		ctx.drawImage(this.img, pos.data[0] - this.hotspot.data[0], pos.data[1] - this.hotspot.data[1]);
+		ctx.drawImage(this.img, -this.hotspot.data[0], pos.data[1] -this.hotspot.data[1]);
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
 		ctx.restore();
 	}
 
@@ -168,45 +184,51 @@ WGE.Sprite = WGE.Class(
 //建议需要旋转，但并非每一帧都需要旋转的情况下使用。
 WGE.SpriteExt = WGE.Class(WGE.Sprite,
 {
-	rotation : null, //2x2矩阵
+	rot : null, //2x2矩阵
+	rotation : 0, //特别注意, rotation 仅对旋转作一个记录，本身不影响旋转值！
 
 	initialize : function(img, w, h)
 	{
 		this.initSprite(img, w, h);
-		this.rotation = new WGE.mat2Identity();
+		this.rot = new WGE.mat2Identity();
 	},
 
 	//将旋转平移缩放和到一次 transform 操作，渲染速度较快。
 	render : function(ctx)
 	{
 		ctx.save();
-		var m = this.rotation.data;
+		var m = this.rot.data;
 		ctx.transform(m[0] * this.scaling.data[0], m[1], m[2] * this.scaling.data[1], m[3], this.pos.data[0], this.pos.data[1]);
-
-		if(this.alpha != undefined)
-			ctx.globalAlpha = this.alpha;		
+		ctx.globalAlpha = this.alpha;		
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
 
 		ctx.drawImage(this.img, -this.hotspot.data[0], -this.hotspot.data[1]);
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
 		ctx.restore();
 	},
 
 	rotate : function(dRot)
 	{
-		this.rotation.rotate(dRot);
+		this.rot.rotate(dRot);
+		this.rotation += dRot;
 	},
 
 	rotateTo : function(rot)
 	{
-		this.rotation = WGE.mat2Rotation(rot);
+		this.rot = WGE.mat2Rotation(rot);
+		this.rotation = rot;
 	}
 
 });
 
 
 //延后实现，使用2d canvas模拟3d
-//主要运用wgeMatrix 计算出渲染点坐标，配合canvas自带的 transform 转换
+//主要运用矩阵运算计算出渲染点坐标，配合canvas自带的 transform 转换
 WGE.SpriteExt3d = WGE.Class(WGE.Sprite,
 {
 
