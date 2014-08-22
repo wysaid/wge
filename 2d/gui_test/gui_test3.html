@@ -27,7 +27,7 @@ var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
 		this.timeActions = [];
 		if(img)
 		{
-			this.initSprite(img, w, h);
+			WGE.Sprite.initialize.call(this, img, w, h);
 		}
 	}
 });
@@ -502,8 +502,8 @@ function fSlides()
 	for(var i in imgArr)
 	{
 		var tmpImg = imgArr[i];
-		var sprite = new mySprite(spriteStartTime+1000, spriteEndTime + 100000, tmpImg, -1);
-		sprite.setHotspot(0, 0);
+		var sprite = new mySprite(spriteStartTime+1000, spriteEndTime + 10000, tmpImg, -1);
+		sprite.setHotspotWithRatio(0, 0);
 
 		var action = new MoveBackAction([actionStartTime, actionEndTime + 1000], [tmpImg.clipleft + 500, tmpImg.cliptop + 300], [pos[i][0], pos[i][1]], repeatTimes);
 
