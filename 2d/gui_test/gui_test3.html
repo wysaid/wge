@@ -19,7 +19,7 @@ input {
 var timeline = new WGE.TimeLine(10000000); //给本demo足够长时间。。。
 var isOK = false;
 
-var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
+var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationWithChildrenInterface2d,
 {
 	initialize : function(startTime, endTime, img, w, h)
 	{
@@ -110,6 +110,7 @@ y重心：<input type="number" value="0.5" id="hotspotY"><br>
 <input type="button" onclick="fAll()" value="组合动作"><br>
 <input type="button" onclick="onBurst()" value="Burst"><br>
 <input type="button" onclick="fSlides()" value="Slides"><br>
+<input type="button" onclick="fRelativeMove()" value="相对运动"><br>
 <div style="width:80%; margin:2px;height:50px;border:groove;text-align:center;">
 <p id="myText">当前没有动作</p>
 </div>
@@ -482,15 +483,6 @@ function fSlides()
 	canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
 	var imgArr = clipSlideSprite(canvas, 2, 3);
 
-	// gui.context.drawImage(imgArr[0], 200, 0);
-	// gui.context.drawImage(imgArr[1], 500, 0);
-	// gui.context.drawImage(imgArr[2], 200, 200);
-	// gui.context.drawImage(imgArr[3], 500, 200);
-	// gui.context.drawImage(imgArr[4], 200, 400);
-	// gui.context.drawImage(imgArr[5], 500, 400);
-
-	// return;
-
 	var pos = [[200, 50], [800, 50], [200, 300], [800, 300], [200, 600], [800, 600]];
 
 	var sprite0 = new mySprite(0, spriteStartTime+1000, canvas, -1);
@@ -514,15 +506,43 @@ function fSlides()
 		timeline.push(sprite);
 	}
 
-	// var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
-	// sprite.moveTo(500, 300);
-	// sprite.setHotspotWithRatio(hotspotX, hotspotY);
-
-	// var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
-	// sprite.push(action);
-
 	timeline.start(0);
 	gui.start();
+}
+
+
+function fRelativeMove()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+	sprite.moveTo(500, 300);
+	sprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [0.5, 0.5], repeatTimes);	
+	var action2 = new WGE.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
+	var action3 = new WGE.BlinkAlphaAction([0, actionEndTime], 1, 0.6, repeatTimes);
+	var action4 = new move2Action([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);
+
+	sprite.push(action);
+	sprite.push(action2);
+	sprite.push(action3);
+	sprite.push(action4);
+
+	timeline.push(sprite);
+
+	WGE.loadImages(["../../res/comic8.jpg"], function(imgArr){
+		var sprite2 = new mySprite(spriteStartTime, spriteEndTime, imgArr[0], -1);
+		sprite2.scaleTo(0.1, 0.1);
+		sprite2.push(new WGE.UniformRotateAction([actionStartTime, actionEndTime - 1000], 0, 2 * Math.PI, 1));
+		sprite.appendChild(sprite2);
+		//timeline.push(sprite2);
+		timeline.start(0);
+		gui.start();
+	});
 }
 
 </script>
