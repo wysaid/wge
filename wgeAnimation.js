@@ -296,8 +296,7 @@ WGE.UniformRotateAction = WGE.Class(WGE.UniformLinearMoveAction,
 
 });
 
-
-WGE.AnimationInterface = WGE.Class(
+WGE.AnimationInterface2d = WGE.Class(
 {
 	startTime : undefined,
 	endTime : undefined,
@@ -408,6 +407,51 @@ WGE.AnimationInterface = WGE.Class(
 	}
 });
 
+WGE.AnimationWithChildrenInterface2d = WGE.Class(WGE.AnimationInterface2d,
+{
+	childSprites : null, //js特殊用法，扩展了对action的更新。
+
+	run : function(totalTime)
+	{
+		WGE.AnimationInterface2d.run.call(this, totalTime);
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].run(totalTime);
+		}
+	},
+
+	//进度跳转
+	runTo : function(time)
+	{
+		WGE.AnimationInterface2d.runTo.call(this, time);
+		for(var i in childSprites)
+		{
+			this.childSprites[i].runTo(time);
+		}
+	},
+
+	//启动时将action复位。
+	timeStart : function()
+	{
+		WGE.AnimationInterface2d.timeStart.call(this);
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].timeStart();
+		}
+	},
+
+	//结束时将action设置为结束状态
+	timeUp : function()
+	{
+		WGE.AnimationInterface2d.timeUp.call(this);
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].timeUp();
+		}
+	}
+
+});
 
 /*
 // AnimationSprite 定义了某个时间段的动作。
@@ -416,7 +460,7 @@ WGE.AnimationInterface = WGE.Class(
 // AnimationSprite 及其子类 根据action起始时间，计算动作开始或者结束
 
 //以下为AnimationSprite 实现原型，本身是一个完整的sprite
-WGE.AnimationSprite = WGE.Class(WGE.Sprite*, WGE.AnimationInterface,
+WGE.AnimationSprite = WGE.Class(WGE.Sprite*, WGE.AnimationInterface2d,
 {
 	initialize : function(startTime, endTime, img, w, h)
 	{

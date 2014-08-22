@@ -284,7 +284,7 @@ FTPhotoFrame.PointMoveSpeedupAndSlowdown = WGE.Class(FTPhotoFrame.PointMoveActio
 //每个场景同时只存在一个 PointAnimationManager 实例。
 //预先根据所有点划分好zone并分配给sprites，
 //所有的点的更新均在 PointAnimationManager 中完成
-FTPhotoFrame.PointAnimationManager = WGE.Class(WGE.AnimationInterface,
+FTPhotoFrame.PointAnimationManager = WGE.Class(WGE.AnimationInterface2d,
 {
 	zIndex : -10000,
 
@@ -312,7 +312,7 @@ FTPhotoFrame.PointAnimationManager = WGE.Class(WGE.AnimationInterface,
 
 
 
-FTPhotoFrame.PhotoFrameSprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface,
+FTPhotoFrame.PhotoFrameSprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface2d,
 {
 	initialize : function(startTime, endTime, img, w, h)
 	{
