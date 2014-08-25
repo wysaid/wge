@@ -28,18 +28,22 @@ for(var i = 0; i != 16; ++i)
 var len = imageArr.length;
 
 
-var slideshow = new WGE.PhotoFrame(div, imageArr, function(imgArr)
+var slideshow = new WGE.PhotoFrame(div, imageArr, finishLoadAll, finishLoadOne);
+
+// 加载完全部
+function finishLoadAll(imgArr)
 {
 	slideshow.context.clearRect(0, 0, slideshow.canvas.width, slideshow.canvas.height);
 	slideshow.context.fillText("图片加载完毕，初始场景...", 10, slideshow.canvas.height / 2);
 	slideshow.play();
-},
+}
+
 //加载完单张
-function(img, n)
+function finishLoadOne(img, n)
 {	
 	slideshow.context.clearRect(0, 0, slideshow.canvas.width, slideshow.canvas.height);
 	slideshow.context.fillText("加载图片: 第" + n + "张，共" + len + "张", 10, slideshow.canvas.height / 2);
-});
+}
 
 slideshow.context.font = "32px Aria";
 slideshow.context.fillText("初始化中", 10, slideshow.canvas.height / 2);
