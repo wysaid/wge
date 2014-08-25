@@ -1,11 +1,51 @@
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>WGE-Slideshow - Burst</title>
+<meta charset="utf-8">
+<title>js validation test</title>
+<script type="text/javascript" src="../../3rdparty/soundmanager2.js"></script>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeFilters.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
+<script type="text/javascript" src="../wgeSlideshow.js"></script>
+<script type="text/javascript" src="Burst.js"></script>
 </head>
-<body style="font:bold;font-size:large;">
-    
-    Burst
+<body >
+<script type="text/javascript">
 
+var div = WGE.CE("div");
+div.setAttribute("style", "width:" + WGE.SlideshowSettings.width + "px;height:" + WGE.SlideshowSettings.height + "px;");
+div.id = "demoContent";
+document.body.appendChild(div);
+
+//加载所需资源图片。
+var imageArr = [];
+
+for(var i = 0; i != 16; ++i)
+	imageArr.push("../../res/comic" + i + ".jpg");
+
+var len = imageArr.length;
+
+
+var burstSlideShow = new WGE.Burst(div, imageArr, function(imgArr)
+{
+	burstSlideShow.context.clearRect(0, 0, burstSlideShow.canvas.width, burstSlideShow.canvas.height);
+	burstSlideShow.context.fillText("图片加载完毕，初始场景...", 10, burstSlideShow.canvas.height / 2);
+	burstSlideShow.play();
+},
+//加载完单张
+function(img, n)
+{
+	burstSlideShow.context.font = "32px Aria";
+	burstSlideShow.context.clearRect(0, 0, burstSlideShow.canvas.width, burstSlideShow.canvas.height);
+	burstSlideShow.context.fillText("加载图片: 第" + n + "张，共" + len + "张", 10, burstSlideShow.canvas.height / 2);
+});
+
+
+burstSlideShow.context.fillText("初始化中", 10, slideshow.canvas.height / 2);
+
+
+</script>
 </body>
 </html>
