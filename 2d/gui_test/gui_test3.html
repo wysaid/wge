@@ -536,7 +536,7 @@ function fRelativeMove()
 
 	WGE.loadImages(["../../res/comic8.jpg"], function(imgArr){
 		var sprite2 = new mySprite(spriteStartTime, spriteEndTime, imgArr[0], -1);
-		sprite2.scaleTo(0.1, 0.1);
+		sprite2.scaleTo(0.3, 0.3);
 		sprite2.push(new WGE.UniformRotateAction([actionStartTime, actionEndTime - 1000], 0, 2 * Math.PI, 1));
 		sprite.addChild(sprite2);
 		timeline.start(0);

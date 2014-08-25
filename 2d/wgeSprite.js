@@ -12,7 +12,7 @@
 // 请考虑场景综合选择。
 //
 
-WGE.Sprite = WGE.Class(WGE.SpriteInterface2d,
+WGE.LogicSprite = WGE.Class(WGE.SpriteInterface2d,
 {
 	pos : undefined,
 	hotspot : undefined,
@@ -21,56 +21,14 @@ WGE.Sprite = WGE.Class(WGE.SpriteInterface2d,
 	rotation : 0, // 旋转(弧度)
 	alpha : 1, //透明度
 	blendMode : undefined, //混合模式
-	img : null,  // Sprite自身图像。
 	zIndex : 0, // 由于canvas本身并不支持z值，所以这里的zIndex仅用作排序依据。
 
 	initialize : function(img, w, h)
-	{
-		this.initSprite(img, w, h);
-	},
-
-	// 当 img直接使用image或者canvas对象时，
-	// 将w设置为负值 可使Sprite仅引用此对象，减少内存占用。
-	initSprite : function(img, w, h)
 	{
 		this.pos = new WGE.Vec2(0, 0);
 		this.hotspot = new WGE.Vec2(0, 0);
 		this.size = new WGE.Vec2(0, 0);
 		this.scaling = new WGE.Vec2(1, 1);
-
-		if(typeof img == 'string')
-		{
-			img = WGE.ID(img);
-		}
-		else if(w < 0 && typeof img == 'object')
-		{
-			this.img = img;
-			this.size.data[0] = img.width;
-			this.size.data[1] = img.height;
-			return;
-		}
-
-		this.img = WGE.CE('canvas');
-		if(img)
-		{
-			if(w && h)
-			{
-				this.size.data[0] = w;
-				this.size.data[1] = h;
-				this.img.width = w;
-				this.img.height = h;
-			}
-			else
-			{
-				this.size.data[0] = img.width;
-				this.size.data[1] = img.height;
-				this.img.width = img.width;
-				this.img.height = img.height;
-			}
-
-			var ctx = this.img.getContext('2d');
-			ctx.drawImage(img, 0, 0, this.img.width, this.img.height, 0, 0, img.width, img.height);
-		}
 	},
 
 	setHotspot : function(hx, hy)
@@ -146,6 +104,102 @@ WGE.Sprite = WGE.Class(WGE.SpriteInterface2d,
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
 
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
+		ctx.restore();
+	},
+
+	renderTo : function(ctx, pos, rot, scaling, alpha, blendmode)
+	{		
+		ctx.save();
+		ctx.translate(pos.data[0], pos.data[1]);
+		if(rot)
+			ctx.rotate(rot);
+
+		ctx.scale(scaling.data[0], scaling.data[1]);
+		ctx.globalAlpha = alpha;
+		if(blendmode)
+			ctx.globalCompositeOperation = blendmode;
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
+		ctx.restore();
+	}
+
+
+});
+
+
+WGE.Sprite = WGE.Class(WGE.LogicSprite,
+{
+	img : null,  // Sprite自身图像。
+
+	initialize : function(img, w, h)
+	{
+		this.pos = new WGE.Vec2(0, 0);
+		this.hotspot = new WGE.Vec2(0, 0);
+		this.size = new WGE.Vec2(0, 0);
+		this.scaling = new WGE.Vec2(1, 1);
+		this.initSprite(img, w, h);
+	},
+
+	// 当 img直接使用image或者canvas对象时，
+	// 将w设置为负值 可使Sprite仅引用此对象，减少内存占用。
+	initSprite : function(img, w, h)
+	{
+		if(typeof img == 'string')
+		{
+			img = WGE.ID(img);
+		}
+		else if(w < 0 && typeof img == 'object')
+		{
+			this.img = img;
+			this.size.data[0] = img.width;
+			this.size.data[1] = img.height;
+			return;
+		}
+
+		this.img = WGE.CE('canvas');
+		if(img)
+		{
+			if(w && h)
+			{
+				this.size.data[0] = w;
+				this.size.data[1] = h;
+				this.img.width = w;
+				this.img.height = h;
+			}
+			else
+			{
+				this.size.data[0] = img.width;
+				this.size.data[1] = img.height;
+				this.img.width = img.width;
+				this.img.height = img.height;
+			}
+
+			var ctx = this.img.getContext('2d');
+			ctx.drawImage(img, 0, 0, this.img.width, this.img.height, 0, 0, img.width, img.height);
+		}
+	},
+
+	//将sprite渲染到指定的context
+	render : function(ctx)
+	{
+		ctx.save();
+		ctx.translate(this.pos.data[0], this.pos.data[1]);
+		if(this.rotation)
+			ctx.rotate(this.rotation);
+
+		ctx.scale(this.scaling.data[0], this.scaling.data[1]);
+
+		ctx.globalAlpha = this.alpha;		
+		if(this.blendMode)
+			ctx.globalCompositeOperation = this.blendMode;
+
 		ctx.drawImage(this.img, -this.hotspot.data[0], -this.hotspot.data[1]);
 
 		for(var i in this.childSprites)
@@ -174,8 +228,6 @@ WGE.Sprite = WGE.Class(WGE.SpriteInterface2d,
 		}
 		ctx.restore();
 	}
-
-
 });
 
 
@@ -189,7 +241,7 @@ WGE.SpriteExt = WGE.Class(WGE.Sprite,
 
 	initialize : function(img, w, h)
 	{
-		this.initSprite(img, w, h);
+		WGE.Sprite.apply(this, arguments);
 		this.rot = new WGE.mat2Identity();
 	},
 
