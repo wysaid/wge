@@ -30,8 +30,11 @@ var A = WGE.Actions;
 // 适用于某些离散操作
 A.SetAttribAction = WGE.Class(WGE.TimeActionInterface,
 {
+	originAttribValue : null,
+	attribName : null,
+	attribValue : null,
 
-	initialize : function(time, attribName, attribValue)
+	initialize : function(time, attribName, attribValue, bindObj)
 	{
 		if(time instanceof Array)
 		{
@@ -43,17 +46,26 @@ A.SetAttribAction = WGE.Class(WGE.TimeActionInterface,
 			this.tStart = time.data[0];
 			this.tEnd = time.data[1];			
 		}
-		this[attribName] = attribValue;
+		this.attribName = attribName;
+		this.attribValue = attribValue;
+		this.originAttribValue = attribValue;
+		this.bindObj = bindObj;
+	},
+
+	//当timeline重新开始时，对属性进行复位。
+	actionStart : function()
+	{
+		this.bindObj[this.attribName] = this.originAttribValue;
 	},
 
 	act : function(percent)
 	{
-		this.bindObj.zone = this.zone;
+		this.bindObj[this.attribName] = this.attribValue;
 	},
 
 	actionStop : function()
 	{
-		this.bindObj.zone = this.zone;
+		this.bindObj[this.attribName] = this.attribValue
 	}
 });
 
