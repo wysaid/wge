@@ -19,6 +19,7 @@
 
 WGE.SlideshowSettings = 
 {
+	assetsDir : "",  //音乐等资源所在文件夹
 	width : 1024,
 	height : 768,
 	style : "width:100%;height:100%"
@@ -56,7 +57,7 @@ WGE.slideshowFitImages = function(imgs, w, h)
 
 WGE.SlideshowInterface = WGE.Class(
 {
-	assetsDir : "",
+	audioName : "", //音乐文件名
 	musicDuration : 60000, //音乐文件的总时长
 	audio : null,
 	timeline : null, //整个slideshow的时间轴.
@@ -69,33 +70,34 @@ WGE.SlideshowInterface = WGE.Class(
 
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
-	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于测试)
-	initialize : function(fatherDOM, imgURLs, finishCallback, canvas, context)
+	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, canvas, context)
 	{
 		this.father = fatherDOM;
-		this.canvas = canvas;
-		if(!this.canvas)
-		{
-			this.canvas = WGE.CE('canvas');
-		}
+		this.canvas = canvas || WGE.CE('canvas');
 		this.canvas.width = WGE.SlideshowSettings.width;
-		this.canvas.width = WGE.SlideshowSettings.height;
+		this.canvas.height = WGE.SlideshowSettings.height;
 		this.canvas.setAttribute("style", WGE.SlideshowSettings.style);
 
 		this.context = context || this.canvas.getContext('2d');
 
-		this._loadImages(imgURLs, finishCallback);
+		this._loadImages(imgURLs, finishCallback, eachCallback);
 	},
 
-	_loadImages : function(imgURLs, finishCallback)
+	_loadImages : function(imgURLs, finishCallback, eachCallback)
 	{
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
-			this.srcImages = self.slideshowFitImages(imgArr);
+			self.srcImages = WGE.slideshowFitImages(imgArr);
 			if(finishCallback)
 				finishCallback();
-		});
-	}
+		}, eachCallback);
+	},
+
+	_initAudio : function()
+	{
+
+	},
 
 	//释放内存，在移动设备上效果比较明显。
 	release : function()

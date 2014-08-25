@@ -1,11 +1,101 @@
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>WGE-Slideshow Piano</title>
+<meta charset="utf-8">
+<title>js validation test</title>
+<script type="text/javascript" src="../../3rdparty/soundmanager2.js"></script>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeFilters.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
+<script type="text/javascript" src="../wgeSlideshow.js"></script>
+<script type="text/javascript" src="piano.js"></script>
 </head>
-<body style="font:bold;font-size:large;">
-    
-    Piano
+<body >
+<script type="text/javascript">
 
+
+
+var myGUI = WGE.Class(WGE.GUIInterface, 
+{
+	context : undefined,
+	x : 0,
+	y : 0,
+	isMouseDown : false,
+	slideshow : null,
+
+	bindFather : function(fatherObj)
+	{
+		if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+		{
+			this.context = this.canvas.getContext('2d');
+			if(!this.context)
+			{
+				alert('你的浏览器不支持html5');
+			}
+			return !!this.context;
+		}
+		return false;
+	},
+
+	initSlideshow : function(fatherDOM, imgURLs, finishCallback, eachCallback, canvas, context)
+	{
+		this.slideshow = new WGE.PhotoFrame(fatherDOM, imgURLs, finishCallback, eachCallback, canvas, context);
+	},
+
+	update : function()
+	{
+		if(!this.isMouseDown)
+		{
+			this.x = Math.random() * this.canvas.width;
+			this.y = Math.random() * this.canvas.height;
+		}
+	},
+
+	render : function()
+	{
+		var ctx = this.context;
+		var cvs = this.canvas;
+		ctx.clearRect(0, 0, cvs.width, cvs.height);
+		this.context.fillStyle = "#f00";
+		ctx.fillRect(this.x, this.y, 100, 100);
+		ctx.fillText("click me!", 10, 10);
+	}
+});
+
+var div = WGE.CE("div");
+div.setAttribute("style", "width:" + WGE.SlideshowSettings.width + "px;height:" + WGE.SlideshowSettings.height + "px;");
+div.id = "demoContent";
+document.body.appendChild(div);
+
+var gui = new myGUI(div);
+
+
+gui.context.fillText("初始化中", 10, gui.canvas.height / 2);
+
+//加载所需资源图片。
+var imageArr = [];
+
+for(var i = 0; i != 16; ++i)
+	imageArr.push("../../res/comic" + i + ".jpg");
+
+var len = imageArr.length;
+
+gui.initSlideshow(gui.father, imageArr, function(imgArr)
+{
+	gui.context.clearRect(0, 0, gui.canvas.width, gui.canvas.height);
+	gui.context.fillText("图片加载完毕，初始场景...", 10, gui.canvas.height / 2);
+	gui.start();
+},
+//加载完单张
+function(img, n)
+{
+	gui.context.font = "32px Aria";
+	gui.context.clearRect(0, 0, gui.canvas.width, gui.canvas.height);
+	gui.context.fillText("加载图片: 第" + n + "张，共" + len + "张", 10, gui.canvas.height / 2);
+}, gui.canvas, gui.context);
+
+
+</script>
 </body>
 </html>
