@@ -7,11 +7,7 @@
 *        Blog: http://blog.wysaid.org
 */
 
-//
-// 下方提供渲染速度较快的 SpriteExt, 但是旋转操作需要进行矩阵运算，较慢。
-// 请考虑场景综合选择。
-//
-
+//LogicSprite 本身不包含绘制方法，但是可为其child结点提供相对位置
 WGE.LogicSprite = WGE.Class(WGE.SpriteInterface2d,
 {
 	pos : undefined,
@@ -133,7 +129,10 @@ WGE.LogicSprite = WGE.Class(WGE.SpriteInterface2d,
 
 });
 
-
+//
+// 下方提供渲染速度较快的 SpriteExt, 但是旋转操作需要进行矩阵运算，较慢。
+// 请考虑场景综合选择。
+//
 WGE.Sprite = WGE.Class(WGE.LogicSprite,
 {
 	img : null,  // Sprite自身图像。

@@ -16,7 +16,7 @@ WGE.TimeActionInterface = WGE.Class(
 	// 为了方便统一计算， percent 值域范围必须为[0, 1]， 内部计算时请自行转换。
 	act : function(percent) {},
 
-	// 为Action开始做准备工作，比如对一些属性进行复位。
+	// 为Action开始做准备工作，比如对一些属性进行复位。(非必须)
 	actionStart : function() {},
 
 	// Action结束之后的扫尾工作，比如将某物体设置运动结束之后的状态。
@@ -452,6 +452,32 @@ WGE.AnimationWithChildrenInterface2d = WGE.Class(WGE.AnimationInterface2d,
 	}
 
 });
+
+
+//特殊用法, 不包含sprite的任何功能，仅仅作为管理那些特殊单独存在的action的容器。
+
+WGE.AnimationActionManager = WGE.Class(WGE.AnimationInterface2d,
+{
+	zIndex : -10000,
+
+	initialize : function(startTime, endTime)
+	{
+		this.setAttrib(startTime, endTime);
+		this.timeActions = [];
+	},
+
+	push : function()
+	{
+		this.timeActions.push.apply(this, arguments);
+	},
+
+	pushArr : function(arr)
+	{
+		this.timeActions.push.call(this.timeActions, arr);
+	}
+
+});
+
 
 /*
 // AnimationSprite 定义了某个时间段的动作。

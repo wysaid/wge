@@ -57,5 +57,138 @@ A.SetAttribAction = WGE.Class(WGE.TimeActionInterface,
 	}
 });
 
+A.PointIntersectionAction = WGE.Class(WGE.TimeActionInterface,
+{
+	pnts : undefined,
+
+	initialize : function(time, pnts, bindObj)
+	{
+		if(time instanceof Array)
+		{
+			this.tStart = time[0];
+			this.tEnd = time[1];
+		}
+		else if(time instanceof WGE.Vec2)
+		{
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];			
+		}
+
+		this.bindObj = bindObj;
+		this.pnts = pnts;
+	},
+
+
+	act : function(percent)
+	{
+		var pnt = FTPhotoFrame.intersection(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
+		this.bindObj.data[0] = pnt.data[0];
+		this.bindObj.data[1] = pnt.data[1];
+	},
+
+	actionStop : function()
+	{
+		var pnt = FTPhotoFrame.intersection(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
+		this.bindObj.data[0] = pnt.data[0];
+		this.bindObj.data[1] = pnt.data[1];
+	}
+
+});
+
+A.PointMoveAction = WGE.Class(WGE.TimeActionInterface,
+{
+	fromX : 0,
+	fromY : 0,
+	toX : 1,
+	toY : 1,
+	disX : 1,
+	disY : 1,
+
+	initialize : function(time, from, to, bindObj)
+	{
+		if(time instanceof Array)
+		{
+			this.tStart = time[0];
+			this.tEnd = time[1];
+		}
+		else if(time instanceof WGE.Vec2)
+		{
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];			
+		}
+
+		if(from instanceof Array)
+		{
+			this.fromX = from[0];
+			this.fromY = from[1];						
+		}
+		else
+		{
+			this.fromX = from.data[0];
+			this.fromY = from.data[1];
+			
+		}
+
+		if(to instanceof Array)
+		{
+			this.toX = to[0];
+			this.toY = to[1];
+		}
+		else
+		{
+			this.toX = to.data[0];
+			this.toY = to.data[1];
+		}
+
+		this.disX = this.toX - this.fromX;
+		this.disY = this.toY - this.fromY;
+		this.bindObj = bindObj;
+	},
+
+	act : function(percent)
+	{
+		var t = percent;
+		try
+		{
+			this.bindObj.data[0] = this.fromX + this.disX * t;
+			this.bindObj.data[1] = this.fromY + this.disY * t;
+		}catch(e)
+		{
+			console.error("Invalid Binding Object!");
+		}
+
+		this.act = function(percent)
+		{
+			var t = percent;
+			this.bindObj.data[0] = this.fromX + this.disX * t;
+			this.bindObj.data[1] = this.fromY + this.disY * t;
+		};
+	},
+
+	// 为Action开始做准备工作，比如对一些属性进行复位。
+	actionStart : function()
+	{
+		// this.bindObj.data[0] = this.fromX;
+		// this.bindObj.data[1] = this.fromY;
+	},
+
+	// Action结束之后的扫尾工作，比如将某物体设置运动结束之后的状态。
+	actionStop : function()
+	{
+		this.bindObj.data[0] = this.toX;
+		this.bindObj.data[1] = this.toY;
+	}
+});
+
+A.PointMoveSlowDown3X = WGE.Class(A.PointMoveAction,
+{
+	act : function(percent)
+	{
+		var t = percent * percent * (3 - 2 * percent);
+		this.bindObj.data[0] = this.fromX + this.disX * t;
+		this.bindObj.data[1] = this.fromY + this.disY * t;
+	}
+});
+
 
 })();
