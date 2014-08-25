@@ -83,7 +83,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, timelineConfig, canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -99,7 +99,14 @@ WGE.SlideshowInterface = WGE.Class(
 		this.context = context || this.canvas.getContext('2d');
 
 		this._loadImages(imgURLs, finishCallback, eachCallback);
-		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName)
+		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
+		this.initTimeline(timelineConfig);
+	},
+
+	//config 为json配置文件
+	initTimeline : function(config)
+	{
+
 	},
 
 	_loadImages : function(imgURLs, finishCallback, eachCallback)
@@ -171,16 +178,22 @@ WGE.SlideshowInterface = WGE.Class(
 
 	play : function()
 	{
-		if(this._animationRequest)
+		if(this._animationRequest || !this.timeline)
 		{
-			console.warn("重复请求， slideshow 已经正在播放中!");
+			if(this._animationRequest)
+				console.warn("重复请求， slideshow 已经正在播放中!");
+			if(!this.timeline)
+				console.error("时间轴不存在！");
 			return ;
 		}
+
 		if(this.audio)
 			this.audio.play();
+		
 		this._lastFrameTime = Date.now();
 		this._loopFunc = this.mainloop.bind(this);
 		this._animationRequest = requestAnimationFrame(this._loopFunc);
+
 	},
 
 	isPlaying : function()
@@ -195,6 +208,11 @@ WGE.SlideshowInterface = WGE.Class(
 			cancelAnimationFrame(this._animationRequest);
 			this._animationRequest = null;
 		}
+
+		if(this.audio)
+		{
+			this.audio.stop();
+		}
 	},
 
 	pause : function()
@@ -204,11 +222,24 @@ WGE.SlideshowInterface = WGE.Class(
 			cancelAnimationFrame(this._animationRequest);
 			this._animationRequest = null;
 		}
+
+		if(this.audio)
+		{
+			this.audio.pause();
+		}
 	},
 
 	resume : function()
 	{
-		requestAnimationFrame(this._loopFunc);
+		if(!this._animationRequest && this.timeline)
+		{
+			requestAnimationFrame(this._loopFunc);
+		}
+
+		if(this.audio)
+		{
+			this.audio.resume();
+		}
 	},
 
 	setVolume : function(v)
@@ -226,7 +257,21 @@ WGE.SlideshowInterface = WGE.Class(
 
 	endloop : function()
 	{
+		if(this._animationRequest)
+			return;
+		var time = Date.now();
 
+		if(time > this._lastFrameTime + 3000)
+		{
+			console.log("Slideshow endloop finished.");
+		}
+		this.context.save();
+		this.context.globalAlpha = 0.04;
+		this.context.fillStyle = "#000";
+		this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+		this.context.restore();
+		//保证淡出执行间隔。(淡出不需要太高的帧率，和大量运算)
+		setTimeout(this.endloop.bind(this), 20);
 	},
 
 	// slideshow主循环
@@ -234,16 +279,14 @@ WGE.SlideshowInterface = WGE.Class(
 	{
 		var timeNow = Date.now();
 
-		// if(!this.timeline.update(timeNow - this._lastFrameTime))
-		// {
-		// 	console.log("Slideshow End");
-		// 	this.endloop();
-		// }
+		if(!this.timeline.update(timeNow - this._lastFrameTime))
+		{
+			console.log("Slideshow End");
+			this.endloop();
+		}
 
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		this.context.fillStyle="#000";
-		this.context.fillRect(100, 100, 500, 500);
-//		timeline.render(this.context);
+		timeline.render(this.context);
 		this._animationRequest = requestAnimationFrame(this._loopFunc);
 		this._lastFrameTime = timeNow;
 	}
