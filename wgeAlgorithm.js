@@ -3,10 +3,11 @@
 	Author: wysaid
 	Blog: blog.wysaid.org
 	Mail: wysaid@gmail.com OR admin@wysaid.org
+	Description: 本文件里面的方法可能涉及到频繁调用, 必须注意执行效率问题！
+	             为了提升效率. 本文件里面的所有算法, 均不考虑容错问题。
 */
 
 //本文件部分算法参考自: http://opengl.org/
-
 
 WGE.Vec2 = WGE.Class(
 {
@@ -15,6 +16,78 @@ WGE.Vec2 = WGE.Class(
 	initialize : function(x, y)
 	{
 		this.data = new Float32Array([x, y]);
+	},
+
+	dot : function(v2)
+	{
+		return this.data[0] * v2.data[0] + this.data[1] * v2.data[1];
+	},
+
+	dotSelf : function()
+	{
+		return this.data[0] * this.data[0] + this.data[1] * this.data[1];
+	},
+
+	add : function(v2)
+	{
+		this.data[0] += v2.data[0];
+		this.data[1] += v2.data[1];
+		return this;
+	},
+
+	sub : function(v2)
+	{
+		this.data[0] -= v2.data[0];
+		this.data[1] -= v2.data[1];
+		return this;
+	},
+
+	mul : function(v2)
+	{
+		this.data[0] *= v2.data[0];
+		this.data[1] *= v2.data[1];
+		return this;
+	},
+
+	div : function(v2)
+	{
+		this.data[0] /= v2.data[0];
+		this.data[1] /= v2.data[1];
+		return this;
+	},
+
+	normalize : function()
+	{
+		var scale = 1.0 / Math.sqrt(this.data[0]*this.data[0] + this.data[1]*this.data[1]);
+		this.data[0] *= scale;
+		this.data[1] *= scale;
+		return this;
+	},
+
+	//////////////////////////////////////////////////
+
+	subFloat : function(fValue)
+	{
+		this.data[0] -= fValue;
+		this.data[1] -= fValue;
+	},
+
+	addFloat : function(fValue)
+	{
+		this.data[0] += fValue;
+		this.data[1] += fValue;
+	},
+
+	mulFloat : function(fValue)
+	{
+		this.data[0] *= fValue;
+        this.data[1] *= fValue;
+	},
+
+	divFloat : function(fValue)
+	{
+        this.data[0] /= fValue;
+        this.data[1] /= fValue;
 	}
 });
 
@@ -743,3 +816,35 @@ WGE.projectMat4 = function(obj, modelViewMat, projMat, viewport, winCoord)
 		winCoord.data[2] = (1.0 + result.data[2]) / 2.0;
 	return true;
 };
+
+
+///////////////////////////////////////////////////
+//
+//    以下是一些与矩阵向量无关的数学计算
+//    每一个方法都必须写上它的用法、参数意义
+//
+///////////////////////////////////////////////////
+
+
+/////////////////////////////////////
+
+//lineIntersectionV 和 lineIntersectionA 均为计算两直线交点的函数
+//P0, p1 为第一条直线上的两个点, p2, p3 为第二条直线上的两个点。
+
+WGE.lineIntersectionV = function(p0, p1, p2, p3)
+{
+	var D = (p0.data[1] - p1.data[1]) * (p3.data[0] - p2.data[0]) + (p0.data[0] - p1.data[0]) * (p2.data[1] - p3.data[1]);
+    var Dx = (p1.data[0] * p0.data[1] - p0.data[0] * p1.data[1]) * (p3.data[0] - p2.data[0]) + (p0.data[0] - p1.data[0]) * (p3.data[0] * p2.data[1] - p2.data[0] * p3.data[1]);
+    var Dy = (p0.data[1] - p1.data[1]) * (p3.data[0] * p2.data[1] - p2.data[0] * p3.data[1]) + (p3.data[1] - p2.data[1]) * (p1.data[0] * p0.data[1] - p0.data[0] * p1.data[1]);
+    return new WGE.Vec2(Dx / D, Dy / D);
+};
+
+WGE.lineIntersectionA = function(p0, p1, p2, p3)
+{
+	var D = (p0[1] - p1[1]) * (p3[0] - p2[0]) + (p0[0] - p1[0]) * (p2[1] - p3[1]);
+    var Dx = (p1[0] * p0[1] - p0[0] * p1[1]) * (p3[0] - p2[0]) + (p0[0] - p1[0]) * (p3[0] * p2[1] - p2[0] * p3[1]);
+    var Dy = (p0[1] - p1[1]) * (p3[0] * p2[1] - p2[0] * p3[1]) + (p3[1] - p2[1]) * (p1[0] * p0[1] - p0[0] * p1[1]);
+    return [Dx / D, Dy / D];
+};
+
+//////////////////////////////////////
