@@ -20,6 +20,8 @@ window.WGE =
 
 };
 
+WGE.isMobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+
 WGE.clone = function(myObj)
 { 
 	if(!myObj)

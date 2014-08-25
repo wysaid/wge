@@ -25,6 +25,10 @@ WGE.SlideshowSettings =
 	style : "width:100%;height:100%"
 };
 
+if(soundManager && soundManager.ondready)
+{
+	soundManager.ondready(function(){WGE.soundManagerReady = true;});
+}
 
 //如果不添加后两个参数， 则默认统一规范，slideshow使用分辨率为 1024*768
 //本函数将等比缩放图片，将使图片宽或者高满足这个分辨率并且另一边大于等于这个分辨率。
@@ -60,6 +64,7 @@ WGE.SlideshowInterface = WGE.Class(
 	audioName : "", //音乐文件名
 	musicDuration : 60000, //音乐文件的总时长
 	audio : null,
+	audioPlayedTimes : 0, //音乐被重复播放次数
 	timeline : null, //整个slideshow的时间轴.
 
 	father : null, //绘制目标所在的DOM
@@ -94,7 +99,48 @@ WGE.SlideshowInterface = WGE.Class(
 		}, eachCallback);
 	},
 
-	_initAudio : function()
+	//需要第三方 soundManager
+	_initAudio : function(url)
+	{
+		var self = this;
+		var arg = {url : url};
+
+		if(typeof this._audioFinish == "function")
+			arg.onfinish = this._audioFinish.bind(this);
+
+		if(typeof this._audioplaying == "function")
+			arg.whileplaying = this._audioplaying.bind(this);
+
+		if(typeof this._audiosuspend == "function")
+			arg.onsuspend = this._audiosuspend.bind(this);
+
+		var tryInitAudio = function() {
+			if(WGE.soundManagerReady)
+			{
+				this.audio = soundManager.createSound(arg);
+			}
+			else
+			{
+				setTimeout(tryInitAudio.bind(this), 100);
+			}
+		};
+
+		tryInitAudio();
+	},
+
+	_audioFinish : function()
+	{
+		//默认音乐循环播放
+		++this.audioPlayedTimes;
+		this.audio.play();
+	},
+
+	_audioplaying : function()
+	{
+
+	},
+
+	_audiosuspend : function()
 	{
 
 	},
@@ -125,9 +171,10 @@ WGE.SlideshowInterface = WGE.Class(
 
 	},
 
-	setVolume : function()
+	setVolume : function(v)
 	{
-
+		if(this.audio)
+			this.audio.setVolume(v);
 	},
 
 	//进度跳转
