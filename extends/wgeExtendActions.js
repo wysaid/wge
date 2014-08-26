@@ -25,6 +25,268 @@ WGE.Actions = {};
 
 var A = WGE.Actions;
 
+//动态改变透明度
+A.UniformAlphaAction = WGE.Class(WGE.TimeActionInterface,
+{
+	fromAlpha : 1,
+	toAlpha : 1,
+	dis : 0,
+
+	initialize : function(time, from, to, repeatTimes)
+	{
+		if(time instanceof Array)
+		{
+			this.tStart = time[0];
+			this.tEnd = time[1];
+		}
+		else if(time instanceof WGE.Vec2)
+		{
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];
+		}
+		this.fromAlpha = from;
+		this.toAlpha = to;
+		this.dis = to - from;
+		this.repeatTimes = repeatTimes ? repeatTimes : 1;
+	},
+
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		try
+		{
+			this.bindObj.alpha = this.fromAlpha + this.dis * t;
+		}catch(e)
+		{
+			console.error("Invalid Binding Object!");
+		}
+
+		this.act = function(percent)
+		{
+			var t = this.repeatTimes * percent;
+			t -= Math.floor(t);
+			this.bindObj.alpha = this.fromAlpha + this.dis * t;
+		};
+	},
+
+	actionStart : function()
+	{
+		this.bindObj.alpha = this.fromAlpha;
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.alpha = this.toAlpha;
+	}
+});
+
+A.BlinkAlphaAction = WGE.Class(A.UniformAlphaAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t = (t - Math.floor(t)) * 2.0;
+		if(t > 1.0)
+			t = 2.0 - t;
+		t = t * t * (3.0 - 2.0 * t);
+		try
+		{
+			this.bindObj.alpha = this.fromAlpha + this.dis * t;
+		}catch(e)
+		{
+			console.error("Invalid Binding Object!");
+		}
+
+		this.act = function(percent)
+		{
+			var t = this.repeatTimes * percent;
+			t = (t - Math.floor(t)) * 2.0;
+			if(t > 1.0)
+				t = 2.0 - t;
+			t = t * t * (3.0 - 2.0 * t);
+			this.bindObj.alpha = this.fromAlpha + this.dis * t;
+		};
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.alpha = this.fromAlpha;
+	}
+});
+
+//匀速直线运动
+A.UniformLinearMoveAction = WGE.Class(WGE.TimeActionInterface,
+{
+	//为了效率，此类计算不使用前面封装的对象
+	fromX : 0,
+	fromY : 0,
+	toX : 1,
+	toY : 1,
+	disX : 1,
+	disY : 1,
+
+	initialize : function(time, from, to, repeatTimes)
+	{
+		if(time instanceof Array)
+		{
+			this.tStart = time[0];
+			this.tEnd = time[1];
+		}
+		else
+		{
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];
+		}
+
+		if(from instanceof Array)
+		{
+			this.fromX = from[0];
+			this.fromY = from[1];
+		}
+		else
+		{
+			this.fromX = from.data[0];
+			this.fromY = from.data[1];
+		}
+
+		if(to instanceof Array)
+		{
+			this.toX = to[0];
+			this.toY = to[1];
+		}
+		else
+		{
+			this.toX = to.data[0];
+			this.toY = to.data[1];
+		}		
+
+		this.disX = this.toX - this.fromX;
+		this.disY = this.toY - this.fromY;
+
+		this.repeatTimes = repeatTimes ? repeatTimes : 1;
+	},
+
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		try
+		{
+			this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
+		}catch(e)
+		{
+			console.error("Invalid Binding Object!");
+		}
+
+		this.act = function(percent)
+		{
+			var t = this.repeatTimes * percent;
+			t -= Math.floor(t);
+			this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
+		};
+	},
+
+	actionStart : function()
+	{
+		this.bindObj.moveTo(this.fromX, this.fromY);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.moveTo(this.toX, this.toY);
+	}
+});
+
+A.NatureMoveAction = WGE.Class(A.UniformLinearMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
+	}
+});
+
+A.UniformScaleAction = WGE.Class(A.UniformLinearMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		try
+		{
+			this.bindObj.scaleTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
+		}catch(e)
+		{
+			console.error("Invalid Binding Object!");
+		}
+
+		this.act = function(percent)
+		{
+			var t = this.repeatTimes * percent;
+			t -= Math.floor(t);
+			this.bindObj.scaleTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
+		};
+	},
+
+	actionStart : function()
+	{
+		this.bindObj.scaleTo(this.fromX, this.fromY);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.scaleTo(this.toX, this.toY);
+	}
+});
+
+//简单适用实现，兼容2d版sprite和webgl版sprite2d
+A.UniformRotateAction = WGE.Class(A.UniformLinearMoveAction,
+{
+	fromRot : 0,
+	toRot : 0,
+	disRot : 0,
+
+	initialize : function(time, from, to, repeatTimes)
+	{
+		if(time instanceof Array)
+		{
+			this.tStart = time[0];
+			this.tEnd = time[1];
+		}
+		else
+		{
+			this.tStart = time.data[0];
+			this.tEnd = time.data[1];
+		}
+
+		this.fromRot = from;
+		this.toRot = to;
+		this.disRot = to - from;
+
+		this.repeatTimes = repeatTimes ? repeatTimes : 1;
+	},
+
+	actionStart : function()
+	{
+		this.bindObj.rotateTo(this.fromRot);
+	},
+
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		this.bindObj.rotateTo(this.fromRot + t * this.disRot);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.rotateTo(this.toRot);
+	}
+
+});
 
 // 将绑定的 AnimationSprite的某个属性，在给定的时间点设置为给定的值。
 // 适用于某些离散操作
@@ -93,14 +355,14 @@ A.PointIntersectionAction = WGE.Class(WGE.TimeActionInterface,
 
 	act : function(percent)
 	{
-		var pnt = FTPhotoFrame.intersection(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
+		var pnt = WGE.lineIntersectionV(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
 		this.bindObj.data[0] = pnt.data[0];
 		this.bindObj.data[1] = pnt.data[1];
 	},
 
 	actionStop : function()
 	{
-		var pnt = FTPhotoFrame.intersection(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
+		var pnt = WGE.lineIntersectionV(this.pnts[0], this.pnts[1], this.pnts[2], this.pnts[3]);
 		this.bindObj.data[0] = pnt.data[0];
 		this.bindObj.data[1] = pnt.data[1];
 	}
