@@ -345,7 +345,7 @@ WGE.SlideshowParsingEngine =
 		return parser.call(this, config, slideshow);
 	},
 
-	_parseScene : function(scene, imgArr)
+	_parseSceneDefault : function(scene, imgArr)
 	{
 		var spriteClass = WGE[scene.name] || WGE.SlideshowAnimationSprite;
 		var sprite = new spriteClass(WGE.ClassInitWithArr, scene.initArgs);
@@ -413,7 +413,7 @@ WGE.SlideshowParsingEngine =
 		var childNodes = scene.childNodes;
 		for(var childIndex in childNodes)
 		{
-			sprite.addChild(this._parseScene(childNodes[childIndex], imgArr));
+			sprite.addChild(this._parseSceneDefault(childNodes[childIndex], imgArr));
 		}
 		return sprite;
 	},
@@ -440,7 +440,7 @@ WGE.SlideshowParsingEngine =
 		var sceneArr = config.sceneArr;
 		for(var sceneIndex in sceneArr)
 		{
-			timeline.push(this._parseScene(sceneArr[sceneIndex], slideshow.srcImages));
+			timeline.push(this._parseSceneDefault(sceneArr[sceneIndex], slideshow.srcImages));
 		}
 	}
 };
