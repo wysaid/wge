@@ -143,8 +143,8 @@ WGE.SlideshowInterface = WGE.Class(
 		WGE.loadImages(imgURLs, function(imgArr) {
 			self.srcImages = WGE.slideshowFitImages(imgArr);
 
-			if(this.config)
-				initTimeline(this.config);
+			if(self.config)
+				initTimeline(self.config);
 
 			if(finishCallback)
 				finishCallback();
