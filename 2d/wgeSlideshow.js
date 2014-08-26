@@ -146,7 +146,7 @@ WGE.SlideshowInterface = WGE.Class(
 			self.srcImages = WGE.slideshowFitImages(imgArr);
 
 			if(self.config)
-				initTimeline(self.config);
+				self.initTimeline(self.config);
 			if(finishCallback)
 				finishCallback();
 
