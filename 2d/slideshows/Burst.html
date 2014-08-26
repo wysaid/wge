@@ -10,6 +10,8 @@
 <script type="text/javascript" src="../wgeSprite.js"></script>
 <script type="text/javascript" src="../wgeSlideshow.js"></script>
 <script type="text/javascript" src="../../wgeAnimation.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendActions.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendFunctions.js"></script>
 <script type="text/javascript" src="Burst.js"></script>
 </head>
 <body >
@@ -54,6 +56,7 @@ function loadAllDown(imgArr)
 	burstSlideShow.context.fillStyle = "#0f0";
 	burstSlideShow.context.clearRect(0, 0, burstSlideShow.canvas.width, burstSlideShow.canvas.height);
 	burstSlideShow.context.fillText("图片加载完毕，初始场景...", 10, burstSlideShow.canvas.height / 2);
+	burstSlideShow.initTimeline();
 	burstSlideShow.play();
 
 }
