@@ -147,7 +147,7 @@ WGE.SlideshowInterface = WGE.Class(
 			if(finishCallback)
 				finishCallback();
 			
-			this.config = null;
+			self.config = null;
 		}, eachCallback);
 	},
 
