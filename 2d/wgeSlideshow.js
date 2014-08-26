@@ -360,7 +360,7 @@ WGE.SlideshowParsingEngine =
 			slideshow.musicDuration = parseFloat(config.musicDuration);
 		}
 
-		var totalTime = Math.ceil(config.loopImageNum / 5) * config.loopTime;
+		var totalTime = Math.ceil(slideshow.srcImages.length / config.loopImageNum) * config.loopTime;
 		slideshow.timeline = new WGE.TimeLine(totalTime);
 
 		var timeline = slideshow.timeline;
