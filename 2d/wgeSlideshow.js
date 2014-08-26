@@ -70,7 +70,7 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 	{
 		initialize : function(startTime, endTime, img, w, h)
 		{
-			WGE.AnimationWithChildrenInterface2d.call(this, startTime, endTime);
+			WGE.AnimationWithChildrenInterface2d.initialize.call(this, startTime, endTime);
 
 			if(img)
 			{
@@ -125,7 +125,9 @@ WGE.SlideshowInterface = WGE.Class(
 		}		
 
 		this.context = context || this.canvas.getContext('2d');
-		this.config = config;
+		
+		if(config)
+			this.config = config;
 
 		this._loadImages(imgURLs, finishCallback, eachCallback);
 		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
@@ -149,7 +151,7 @@ WGE.SlideshowInterface = WGE.Class(
 			if(finishCallback)
 				finishCallback();
 
-			this.config = null;
+			self.config = null;
 		}, eachCallback);
 	},
 
