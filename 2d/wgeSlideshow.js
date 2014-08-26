@@ -147,7 +147,6 @@ WGE.SlideshowInterface = WGE.Class(
 
 			if(self.config)
 				initTimeline(self.config);
-
 			if(finishCallback)
 				finishCallback();
 
