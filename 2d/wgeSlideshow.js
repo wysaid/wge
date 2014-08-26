@@ -108,6 +108,8 @@ WGE.SlideshowInterface = WGE.Class(
 
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
+	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
+	//请重写自己的实现
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
 	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, config, canvas, context)
 	{
@@ -146,7 +148,7 @@ WGE.SlideshowInterface = WGE.Class(
 
 			if(finishCallback)
 				finishCallback();
-			
+
 			this.config = null;
 		}, eachCallback);
 	},
