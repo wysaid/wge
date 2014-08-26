@@ -392,7 +392,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 	if(globalZ == undefined)
 		globalZ = 0;
 
-//	var filterBW = new WGE.FilterBW();
+//	var filterBW = new WGE.Filter.Monochrome();
 
 	//时间按每秒30帧计算
 	//0:5:25~0:8:20 [0, 2800]

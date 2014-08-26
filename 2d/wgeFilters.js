@@ -80,7 +80,9 @@ WGE.FilterInterface = WGE.Class(
 
 });
 
-WGE.FilterBW = WGE.Class(WGE.FilterInterface,
+WGE.Filter = {};
+
+WGE.Filter.Monochrome = WGE.Class(WGE.FilterInterface,
 {
 	_run : function(dst, src, w, h)
 	{
@@ -94,7 +96,7 @@ WGE.FilterBW = WGE.Class(WGE.FilterInterface,
 	}
 });
 
-WGE.FilterEdge = WGE.Class(WGE.FilterInterface,
+WGE.Filter.Edge = WGE.Class(WGE.FilterInterface,
 {
 	_run : function(dst, src, w, h)
 	{

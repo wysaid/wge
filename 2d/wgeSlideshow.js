@@ -71,11 +71,7 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 		initialize : function(startTime, endTime, img, w, h)
 		{
 			WGE.AnimationWithChildrenInterface2d.initialize.call(this, startTime, endTime);
-
-			if(img)
-			{
-				WGE.Sprite.initialize.call(this, img, w, h);
-			}
+			WGE.Sprite.initialize.call(this, img, w, h);
 		}
 	});
 }
@@ -130,7 +126,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//config 为json配置文件
 	initTimeline : function(config)
 	{
-
+		WGE.SlideshowParsingEngine.parse(config, this);
 	},
 
 	_loadImages : function(imgURLs, finishCallback, eachCallback)
@@ -221,8 +217,8 @@ WGE.SlideshowInterface = WGE.Class(
 		
 		this._lastFrameTime = Date.now();
 		this._loopFunc = this.mainloop.bind(this);
+		this.timeline.start(0);
 		this._animationRequest = requestAnimationFrame(this._loopFunc);
-
 	},
 
 	isPlaying : function()
@@ -351,7 +347,13 @@ WGE.SlideshowParsingEngine =
 
 	// 默认解析器
 	defaultParser : function(config, slideshow)
-	{		
+	{
+		if(!slideshow)
+		{
+			console.error("Invalid Params in WGE.SlideshowParsingEngine");
+			return;
+		}
+		
 		if(config.audioFileName)
 		{
 			slideshow.audioFileName = config.audioFileName;
@@ -361,14 +363,59 @@ WGE.SlideshowParsingEngine =
 		var totalTime = Math.ceil(config.loopImageNum / 5) * config.loopTime;
 		slideshow.timeline = new WGE.TimeLine(totalTime);
 
+		var timeline = slideshow.timeline;
 		var sceneArr = config.sceneArr;
 		for(var sceneIndex in sceneArr)
 		{
 			var scene = sceneArr[sceneIndex];
 			var spriteClass = WGE[scene.name] || WGE.SlideshowAnimationSprite;
-			var sprite = new spriteClass(WGE.ClassInitWithArr);
-			sprite.initialize.apply(sprite, scene.initArgs);
+			var sprite = new spriteClass(WGE.ClassInitWithArr, scene.initArgs);
+			var spriteInitFunc = sprite[scene.spriteConfig.name] || sprite.initSprite;
+			var img = slideshow.srcImages[scene.imageindex % slideshow.srcImages.length];
+
+			/////////////////////////////
+
+			if(scene.spriteConfig.filter)
+			{
+				try
+				{
+					var filter = new WGE.Filter[scene.spriteConfig.filter](WGE.ClassInitWithArr, scene.spriteConfig.filterArgs);
+					img = filter.bind(img).run();
+				}catch(e) {
+					console.error("when doing filter, defaultParser : ", e);
+				}
+			}
+
+			spriteInitFunc.call(sprite, img, scene.spriteConfig.width, scene.spriteConfig.height);
+
+			/////////////////////////////
+
+			var execFunc = scene.execFunc;
+			for(var funcIndex in execFunc)
+			{
+				var funcConfig = execFunc[funcIndex];
+				var func = sprite[funcConfig.name];
+				if(func instanceof Function)
+				{
+					func.apply(sprite, funcConfig.arg);
+				}
+			}
+
+			/////////////////////////////
+
+			var actions = scene.actions;
+			for(var actionIndex in actions)
+			{
+				var actionConfig = actions[actionIndex];
+				var actionClass = WGE.Actions[actionConfig.name];
+				if(actionClass instanceof Function)
+				{
+					var action = new actionClass(WGE.ClassInitWithArr, actionConfig.arg);
+					sprite.push(action);
+				}				
+			}
+			timeline.push(sprite);
 		}
 
-	},
+	}
 };

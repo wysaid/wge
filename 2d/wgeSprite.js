@@ -64,6 +64,18 @@ WGE.LogicSprite = WGE.Class(WGE.SpriteInterface2d,
 		this.pos.data[1] = y;
 	},
 
+	moveWithRatio : function(rdx, rdy)
+	{
+		this.pos.data[0] += rdx * this.size.data[0];
+		this.pos.data[1] += rdy * this.size.data[1];
+	},
+
+	moveToWithRatio : function(rx, ry)
+	{
+		this.pos.data[0] = rx * this.size.data[0];
+		this.pos.data[1] = ry * this.size.data[1];
+	},
+
 	scale : function(sx, sy)
 	{
 		this.scaling.data[0] *= sx;
@@ -150,6 +162,9 @@ WGE.Sprite = WGE.Class(WGE.LogicSprite,
 	// 将w设置为负值 可使Sprite仅引用此对象，减少内存占用。
 	initSprite : function(img, w, h)
 	{
+		if(!img)
+			return false;
+
 		if(typeof img == 'string')
 		{
 			img = WGE.ID(img);
