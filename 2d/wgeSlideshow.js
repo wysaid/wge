@@ -397,7 +397,17 @@ WGE.SlideshowParsingEngine =
 				var func = sprite[funcConfig.name];
 				if(func instanceof Function)
 				{
-					func.apply(sprite, funcConfig.arg);
+					var arg = WGE.clone(funcConfig.arg);
+					if(funcConfig.relativeResolution)
+					{
+						//相对分辨率参数是一个0~1之间的浮点数。
+						if(arg[funcConfig.relativeWidth] && arg[funcConfig.relativeHeight])
+						{
+							arg[funcConfig.relativeWidth] *= WGE.SlideshowSettings.width;
+							arg[funcConfig.relativeHeight] *= WGE.SlideshowSettings.height;
+						}
+					}
+					func.apply(sprite, arg);
 				}
 			}
 

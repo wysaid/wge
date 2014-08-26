@@ -48,7 +48,10 @@ var photoFrameConfig =
 				},
 				{
 					"name" : "moveTo",
-					"arg" : [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/10],
+					"arg" : [0.5, 0.1],
+					"relativeResolution" : true,
+					"relativeWidth" : 0,
+					"relativeHeight" : 1
 				}
 			],
 
