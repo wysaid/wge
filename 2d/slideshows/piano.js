@@ -7,20 +7,34 @@
 *        Blog: http://blog.wysaid.org
 */
 
+var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationWithChildrenInterface2d,
+{
+	initialize : function(startTime, endTime, img, w, h)
+	{
+		this.setAttrib(startTime, endTime);
+		this.timeActions = [];
+		if(img)
+		{
+			WGE.Sprite.initialize.call(this, img, w, h);
+		}
+	}
+});
+
 WGE.PhotoFrame = WGE.Class(WGE.SlideshowInterface,
 {
 	audioFileName : "piano.mp3", //不包含路径
 
 	initTimeline : function(config)
 	{
-		// var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
-		// sprite.moveTo(500, 300);
-		// sprite.setHotspotWithRatio(hotspotX, hotspotY);
+		this.timeline = new WGE.TimeLine(5000);
+		var sprite = new mySprite(0, 5000, this.srcImages[0], -1);
+		sprite.moveTo(500, 300);
+		sprite.setHotspotWithRatio(0.5, 0.5);
 
-		// var action = new WGE.BlinkAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
-		// sprite.push(action);
-		// timeline.push(sprite);
-		// timeline.start(0);
+		var action = new WGE.UniformLinearMoveAction([0, 4000], [200, 200], [800, 500], 1);
+		sprite.push(action);
+		this.timeline.push(sprite);
+		this.timeline.start(0);
 	},
 
 });

@@ -62,6 +62,19 @@ WGE.slideshowFitImages = function(imgs, w, h)
 	return fitImgs;
 };
 
+WGE.SlideshowAnimationSprite = WGE.Class(WGE.Sprite, WGE.AnimationWithChildrenInterface2d,
+{
+	initialize : function(startTime, endTime, img, w, h)
+	{
+		this.setAttrib(startTime, endTime);
+		this.timeActions = [];
+		if(img)
+		{
+			WGE.Sprite.initialize.call(this, img, w, h);
+		}
+	}
+});
+
 WGE.SlideshowInterface = WGE.Class(
 {
 	audioFileName : "", //音乐文件名
@@ -100,7 +113,6 @@ WGE.SlideshowInterface = WGE.Class(
 
 		this._loadImages(imgURLs, finishCallback, eachCallback);
 		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
-		this.initTimeline(timelineConfig);
 	},
 
 	//config 为json配置文件
@@ -264,6 +276,7 @@ WGE.SlideshowInterface = WGE.Class(
 		if(time > this._lastFrameTime + 3000)
 		{
 			console.log("Slideshow endloop finished.");
+			return ;
 		}
 		this.context.save();
 		this.context.globalAlpha = 0.04;
@@ -282,11 +295,14 @@ WGE.SlideshowInterface = WGE.Class(
 		if(!this.timeline.update(timeNow - this._lastFrameTime))
 		{
 			console.log("Slideshow End");
+			this._lastFrameTime = timeNow;
+			this._animationRequest = null;
 			this.endloop();
+			return ;
 		}
 
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		timeline.render(this.context);
+		this.timeline.render(this.context);
 		this._animationRequest = requestAnimationFrame(this._loopFunc);
 		this._lastFrameTime = timeNow;
 	}

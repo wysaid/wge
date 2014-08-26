@@ -7,20 +7,20 @@
 */
 
 /*
-	简介： 公用的function 列表库， 列举一些可能被重用的方法。
+	简介： 公用的扩展方法库， 列举一些可能被重用的方法。
 	       如果你觉得全部写到一个文件里面不方便，也可以自己新添加一个文件。
 
 	特别注意: 如果该方法涉及到某个特定环境下(比如必须要context-2d支持), 请务必标注出来。
 */
 
-// 将本文件内所有方法添加至 WGE.Functions 类名下，防止命名冲突
+// 将本文件内所有方法添加至 WGE.ExtendFunc 类名下，防止命名冲突
 
-WGE.Functions = {};
+WGE.ExtendFunc = {};
 
 (function()
 {
 
-var F = WGE.Functions;
+var F = WGE.ExtendFunc;
 
 
 //注: clipZone和fillZone选择其中一个使用即可。
