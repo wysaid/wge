@@ -464,5 +464,74 @@ A.PointMoveSlowDown3X = WGE.Class(A.PointMoveAction,
 	}
 });
 
+//一个非连续的跳跃移动动作，参数移动的时间和移动的和相对于当前位置移动的距离
+A.jumpMoveAction = WGE.Class(WGE.TimeActionInterface,
+{
+	endX: 0,
+	endY: 0,
+
+	initialize : function(time, jumpPos)
+	{	
+		this.tStart = time;
+		this.tEnd = time;
+		
+		if(jumpPos instanceof Array)
+		{
+			this.endX = jumpPos[0];
+			this.endY = jumpPos[1];
+		}
+		else if(jumpPos instanceof WGE.Vec2)
+		{
+			this.endX = jumpPos.data[0];
+			this.endY = jumpPos.data[1];
+		}
+	},
+
+	act : function(percent)
+	{
+		this.bindObj.moveTo(this.bindObj.pos.data[0] + this.endX, this.bindObj.pos.data[1]+this.endY);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.moveTo(this.bindObj.pos.data[0] + this.endX, this.bindObj.pos.data[1]+this.endY);
+	}
+});
+
+//非连续的瞬间缩放动作
+A.jumpScaleAction = WGE.Class(WGE.TimeActionInterface,
+{
+	scaleX: 0,
+	scaleY: 0,
+
+	initialize : function(time, endScale)
+	{	
+		this.tStart = time;
+		this.tEnd = time;
+		
+		if(endScale instanceof Array)
+		{
+			this.scaleX = endScale[0];
+			this.scaleY = endScale[1];
+		}
+		else if(endScale instanceof WGE.Vec2)
+		{
+			this.scaleX = endScale.data[0];
+			this.scaleY = endScale.data[1];
+		}
+	},
+
+	act : function(percent)
+	{
+		this.bindObj.scaleTo(this.scaleX, this.scaleY);
+	},
+
+	actionStop : function()
+	{
+		this.bindObj.scaleTo(this.scaleX, this.scaleY);
+	}
+});
+
+
 
 })();
