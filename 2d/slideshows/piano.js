@@ -7,6 +7,33 @@
 *        Blog: http://blog.wysaid.org
 */
 
+WGE.PhotoFrameSprite = WGE.Class(WGE.SlideshowAnimationSprite,
+{
+	//这里的zone 应该由 WGE.AnimationActionManager 维护。
+	zone : null, // WGE.ExtendFunc.Zone2d
+
+	render : function(ctx)
+	{
+		ctx.save();
+
+		if(this.alpha != undefined)
+			ctx.globalAlpha = this.alpha;
+		if(this.zone)
+			this.zone.clipZone(ctx, true);//, '#fff', 10);
+
+		ctx.translate(this.pos.data[0], this.pos.data[1]);
+		if(this.rotation)
+			ctx.rotate(this.rotation);		
+		if(this.scaling)
+			ctx.scale(this.scaling.data[0], this.scaling.data[1]);
+		
+		if(this.blendMode)
+			ctx.globalCompositeOperation = this.blendMode;
+		ctx.drawImage(this.img, -this.hotspot.data[0], -this.hotspot.data[1]);
+		ctx.restore();
+	}
+});
+
 WGE.PhotoFrame = WGE.Class(WGE.SlideshowInterface,
 {
 	audioFileName : "piano.mp3", //不包含路径
@@ -22,7 +49,7 @@ WGE.PhotoFrame = WGE.Class(WGE.SlideshowInterface,
 		sprite.push(action);
 		this.timeline.push(sprite);
 		this.timeline.start(0);
-	},
+	}
 
 });
 
