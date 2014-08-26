@@ -13,14 +13,15 @@ WGE.PhotoFrame = WGE.Class(WGE.SlideshowInterface,
 
 	initTimeline : function(config)
 	{
-		// var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
-		// sprite.moveTo(500, 300);
-		// sprite.setHotspotWithRatio(hotspotX, hotspotY);
+		this.timeline = new WGE.TimeLine(5000);
+		var sprite = new WGE.SlideshowAnimationSprite(0, 5000, this.srcImages[0], -1);
+		sprite.moveTo(500, 300);
+		sprite.setHotspotWithRatio(0.5, 0.5);
 
-		// var action = new WGE.BlinkAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
-		// sprite.push(action);
-		// timeline.push(sprite);
-		// timeline.start(0);
+		var action = new WGE.Actions.UniformLinearMoveAction([0, 4000], [200, 200], [800, 500], 1);
+		sprite.push(action);
+		this.timeline.push(sprite);
+		this.timeline.start(0);
 	},
 
 });

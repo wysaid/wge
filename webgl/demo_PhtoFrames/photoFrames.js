@@ -412,8 +412,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame2.setHotspot2Center();
 		frame2.moveTo(w / 2, h / 2);
 
-		var frame1Action = new WGE.UniformScaleAction([0, 6000], [1.3, 1.3], [1, 1]);
-		var frame2Action = new WGE.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
+		var frame1Action = new WGE.Actions.UniformScaleAction([0, 6000], [1.3, 1.3], [1, 1]);
+		var frame2Action = new WGE.Actions.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
 
 		frame1.push(frame1Action);
 		frame2.push(frame2Action);
@@ -487,8 +487,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame3.moveTo(w / 2, h / 2);
 		frame4.moveTo(w / 2, h / 2);
 
-		var frame3Action = new WGE.UniformScaleAction([0, 5000], [1.0, 1.0], [1.3, 1.3]);
-		var frame4Action = new WGE.UniformScaleAction([0, 5000], [1.2, 1.2], [1.0, 1.0]);
+		var frame3Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.0, 1.0], [1.3, 1.3]);
+		var frame4Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.2, 1.2], [1.0, 1.0]);
 		
 		frame3.push(frame3Action);
 		frame4.push(frame4Action);
@@ -505,8 +505,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame5.moveTo(w / 2, h / 2 - 5);
 		frame6.moveTo(w / 2, h / 2);
 
-		var frame5Action = new WGE.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
-		var frame6Action = new WGE.UniformScaleAction([0, 5000], [1.2, 1.2], [1.0, 1.0]);
+		var frame5Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
+		var frame6Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.2, 1.2], [1.0, 1.0]);
 
 		frame5.push(frame5Action);
 		frame6.push(frame6Action);
@@ -597,8 +597,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame1.moveTo(w/2, h/2);
 		frame1.zone = fs[0].zone;
 
-		var frame1Action = new WGE.UniformAlphaAction([0, 1000], 0, 1);
-		var frame1Action2 = new WGE.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
+		var frame1Action = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
+		var frame1Action2 = new WGE.Actions.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
 		frame1.push(frame1Action);
 		frame1.push(frame1Action2);
 
@@ -619,7 +619,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame2.moveTo(w / 2 - 10, h / 2);
 		frame2.zIndex = globalZ;
 
-		var frame2Action = new WGE.UniformScaleAction([0, 6000], [1.3, 1.3], [1.0, 1.0]);
+		var frame2Action = new WGE.Actions.UniformScaleAction([0, 6000], [1.3, 1.3], [1.0, 1.0]);
 		frame2.push(frame2Action);
 
 		var pnts = [P(0, 0), P(0, h)];
@@ -649,10 +649,10 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame4.moveTo(w / 2, h / 2);
 		frame4.zIndex = globalZ + 2;
 
-		var frame3Action = new WGE.UniformScaleAction([0, 5000], [1.3, 1.3], [1.0, 1.0]);
+		var frame3Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.3, 1.3], [1.0, 1.0]);
 		frame3.push(frame3Action);
 
-		var frame4Action = new WGE.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
+		var frame4Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
 		frame4.push(frame4Action);
 
 		var pnts2 = [P(0, 0), P(0, h), P(w, 0), P(w, h)];
@@ -686,7 +686,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame5.moveTo(w / 2, h / 2);
 		frame5.zIndex = frame3.zIndex - 0.5;
 
-		var frame5Action = new WGE.UniformScaleAction([0, 2000], [1.3, 1.3], [1.0, 1.0]);
+		var frame5Action = new WGE.Actions.UniformScaleAction([0, 2000], [1.3, 1.3], [1.0, 1.0]);
 		frame5.push(frame5Action);
 
 		scene.push(actionManager2, frame3, frame4, frame5);

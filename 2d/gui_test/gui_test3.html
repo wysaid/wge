@@ -6,6 +6,8 @@
 <script type="text/javascript" src="../../wgeAlgorithm.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
 <script type="text/javascript" src="../../wgeAnimation.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendActions.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendFunctions.js"></script>
 <script type="text/javascript" src="../wgeSprite.js"></script>
 <style type="text/css">
 input {
@@ -148,7 +150,7 @@ function move0()
 	sprite.moveTo(200, 200);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.UniformLinearMoveAction([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);	
+	var action = new WGE.Actions.UniformLinearMoveAction([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);	
 	sprite.push(action);
 	timeline.push(sprite);
 	timeline.start(0);
@@ -166,14 +168,14 @@ function move1()
 	sprite.moveTo(200, 200);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.NatureMoveAction([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);	
+	var action = new WGE.Actions.NatureMoveAction([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);	
 	sprite.push(action);
 	timeline.push(sprite);
 	timeline.start(0);
 	gui.start();
 }
 
-var move2Action = WGE.Class(WGE.UniformLinearMoveAction,
+var move2Action = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
 	act : function(percent)
 	{
@@ -209,7 +211,7 @@ function move2()
 }
 
 
-var move3Action = WGE.Class(WGE.UniformLinearMoveAction,
+var move3Action = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
 	act : function(percent)
 	{
@@ -256,7 +258,7 @@ function falpha()
 	sprite.moveTo(500, 300);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.UniformAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
+	var action = new WGE.Actions.UniformAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
 	sprite.push(action);
 	timeline.push(sprite);
 	timeline.start(0);
@@ -274,7 +276,7 @@ function fblink()
 	sprite.moveTo(500, 300);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.BlinkAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
+	var action = new WGE.Actions.BlinkAlphaAction([0, actionEndTime], 0, 1, repeatTimes);	
 	sprite.push(action);
 	timeline.push(sprite);
 	timeline.start(0);
@@ -292,7 +294,7 @@ function fRotate()
 	sprite.moveTo(500, 300);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
+	var action = new WGE.Actions.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
 	sprite.push(action);
 	timeline.push(sprite);
 	timeline.start(0);
@@ -310,7 +312,7 @@ function fScale()
 	sprite.moveTo(500, 300);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
+	var action = new WGE.Actions.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
 	sprite.push(action);
 	timeline.push(sprite);
 	timeline.start(0);
@@ -328,9 +330,9 @@ function fAll()
 	sprite.moveTo(500, 300);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
-	var action2 = new WGE.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
-	var action3 = new WGE.BlinkAlphaAction([0, actionEndTime], 1, 0.6, repeatTimes);
+	var action = new WGE.Actions.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
+	var action2 = new WGE.Actions.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
+	var action3 = new WGE.Actions.BlinkAlphaAction([0, actionEndTime], 1, 0.6, repeatTimes);
 	var action4 = new move2Action([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);
 
 	sprite.push(action);
@@ -343,7 +345,7 @@ function fAll()
 	gui.start();
 }
 
-WGE.jumpAction= WGE.Class(WGE.TimeActionInterface,
+WGE.Actions.jumpAction = WGE.Class(WGE.TimeActionInterface,
 {
 	endX: 0,
 	endY: 0,
@@ -388,7 +390,7 @@ function onBurst()
     sprite.moveTo(500, 300);
     sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-    //var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);
+    //var action = new WGE.Actions.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);
 
     var functionGroup = ["UniformScaleAction", "UniformRotateAction", "jumpAction"];
     var index = [
@@ -400,15 +402,15 @@ function onBurst()
     	];
  
     var endTime1 = 1000;
-    var action1 = new WGE[functionGroup[index[0][0]]]([0, endTime1], [1.0, 1.0], [1.8, 1.8], 1);
-    var action2 = new WGE[functionGroup[index[1][0]]]([endTime1, endTime1], [1.8, 1.8], [1.0, 1.0], 1);
-    var action3 = new WGE[functionGroup[index[2]]]([endTime1, endTime1+40], 0, 1/3*Math.PI, 1);
-    var action4 = new WGE[functionGroup[index[3]]](endTime1+200, [0,100]);
-    var action5 = new WGE[functionGroup[index[4]]](endTime1+300,[0,-100]);
+    var action1 = new WGE.Actions[functionGroup[index[0][0]]]([0, endTime1], [1.0, 1.0], [1.8, 1.8], 1);
+    var action2 = new WGE.Actions[functionGroup[index[1][0]]]([endTime1, endTime1], [1.8, 1.8], [1.0, 1.0], 1);
+    var action3 = new WGE.Actions[functionGroup[index[2][0]]]([endTime1, endTime1 + 40], 0, 1 / 3 * Math.PI, 1);
+    var action4 = new WGE.Actions[functionGroup[index[3][0]]](endTime1 + 200, [0, 100]);
+    var action5 = new WGE.Actions[functionGroup[index[4][0]]](endTime1 + 300, [0, -100]);
 
 
     var startTime1 = 3000;
-    var action6 = new WGE.UniformScaleAction([endTime1, endTime1], [1.8, 1.8], [1.0, 1.0], 1);
+    var action6 = new WGE.Actions.UniformScaleAction([endTime1, endTime1], [1.8, 1.8], [1.0, 1.0], 1);
 
     //var action2 = new WGE.
 
@@ -450,7 +452,7 @@ function clipSlideSprite(img, nx, ny)
 	return imgArr;
 }
 
-var MoveBackAction = WGE.Class(WGE.NatureMoveAction,
+var MoveBackAction = WGE.Class(WGE.Actions.NatureMoveAction,
 {
 	act : function(percent)
 	{
@@ -486,7 +488,7 @@ function fSlides()
 	var pos = [[200, 50], [800, 50], [200, 300], [800, 300], [200, 600], [800, 600]];
 
 	var sprite0 = new mySprite(0, spriteStartTime+1000, canvas, -1);
-	var action = new WGE.NatureMoveAction([0, spriteStartTime + 1000], [0, 0], [500, 300]);
+	var action = new WGE.Actions.NatureMoveAction([0, spriteStartTime + 1000], [0, 0], [500, 300]);
 
 	sprite0.push(action);
 	timeline.push(sprite0);
@@ -499,7 +501,7 @@ function fSlides()
 
 		var action = new MoveBackAction([actionStartTime, actionEndTime + 1000], [tmpImg.clipleft + 500, tmpImg.cliptop + 300], [pos[i][0], pos[i][1]], repeatTimes);
 
-		var actionxx = new WGE.UniformRotateAction([actionStartTime, actionEndTime + Math.random() * 1000], 0, 2 * Math.PI * (Math.random() > 0.5 ? 1 : -1), repeatTimes);
+		var actionxx = new WGE.Actions.UniformRotateAction([actionStartTime, actionEndTime + Math.random() * 1000], 0, 2 * Math.PI * (Math.random() > 0.5 ? 1 : -1), repeatTimes);
 
 		sprite.push(actionxx);
 		sprite.push(action);
@@ -522,9 +524,9 @@ function fRelativeMove()
 	sprite.moveTo(500, 300);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-	var action = new WGE.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [0.5, 0.5], repeatTimes);	
-	var action2 = new WGE.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
-	var action3 = new WGE.BlinkAlphaAction([0, actionEndTime], 1, 0.6, repeatTimes);
+	var action = new WGE.Actions.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [0.5, 0.5], repeatTimes);	
+	var action2 = new WGE.Actions.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
+	var action3 = new WGE.Actions.BlinkAlphaAction([0, actionEndTime], 1, 0.6, repeatTimes);
 	var action4 = new move2Action([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);
 
 	sprite.push(action);
@@ -537,7 +539,7 @@ function fRelativeMove()
 	WGE.loadImages(["../../res/comic8.jpg"], function(imgArr){
 		var sprite2 = new mySprite(spriteStartTime, spriteEndTime, imgArr[0], -1);
 		sprite2.scaleTo(0.3, 0.3);
-		sprite2.push(new WGE.UniformRotateAction([actionStartTime, actionEndTime - 1000], 0, 2 * Math.PI, 1));
+		sprite2.push(new WGE.Actions.UniformRotateAction([actionStartTime, actionEndTime - 1000], 0, 2 * Math.PI, 1));
 		sprite.addChild(sprite2);
 		timeline.start(0);
 		gui.start();

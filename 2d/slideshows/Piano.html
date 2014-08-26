@@ -1,11 +1,14 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>js validation test</title>
-<script type="text/javascript" src="../../3rdparty/soundmanager2.js"></script>
+<title>Slideshow Piano</title>
+<script type="text/javascript" src="../../3rdparty/soundmanager2-nodebug.js"></script>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeAlgorithm.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../../wgeAnimation.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendActions.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendFunctions.js"></script>
 <script type="text/javascript" src="../wgeFilters.js"></script>
 <script type="text/javascript" src="../wgeSprite.js"></script>
 <script type="text/javascript" src="../wgeSlideshow.js"></script>
@@ -35,6 +38,7 @@ function finishLoadAll(imgArr)
 {
 	slideshow.context.clearRect(0, 0, slideshow.canvas.width, slideshow.canvas.height);
 	slideshow.context.fillText("图片加载完毕，初始场景...", 10, slideshow.canvas.height / 2);
+	slideshow.initTimeline();
 	slideshow.play();
 }
 

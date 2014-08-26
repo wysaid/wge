@@ -62,6 +62,31 @@ WGE.slideshowFitImages = function(imgs, w, h)
 	return fitImgs;
 };
 
+
+if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
+{
+	//注： initialize 末尾两个参数，如果 w 为-1， 表示img 不拷贝，共享使用
+	WGE.SlideshowAnimationSprite = WGE.Class(WGE.Sprite, WGE.AnimationWithChildrenInterface2d,
+	{
+		initialize : function(startTime, endTime, img, w, h)
+		{
+			WGE.AnimationWithChildrenInterface2d.call(this, startTime, endTime);
+
+			if(img)
+			{
+				WGE.Sprite.initialize.call(this, img, w, h);
+			}
+		}
+	});
+}
+
+
+WGE.SlideshowParsingEngine = 
+{
+	
+};
+
+
 WGE.SlideshowInterface = WGE.Class(
 {
 	audioFileName : "", //音乐文件名
@@ -83,7 +108,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, timelineConfig, canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -100,7 +125,6 @@ WGE.SlideshowInterface = WGE.Class(
 
 		this._loadImages(imgURLs, finishCallback, eachCallback);
 		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
-		this.initTimeline(timelineConfig);
 	},
 
 	//config 为json配置文件
@@ -264,6 +288,7 @@ WGE.SlideshowInterface = WGE.Class(
 		if(time > this._lastFrameTime + 3000)
 		{
 			console.log("Slideshow endloop finished.");
+			return ;
 		}
 		this.context.save();
 		this.context.globalAlpha = 0.04;
@@ -282,11 +307,14 @@ WGE.SlideshowInterface = WGE.Class(
 		if(!this.timeline.update(timeNow - this._lastFrameTime))
 		{
 			console.log("Slideshow End");
+			this._lastFrameTime = timeNow;
+			this._animationRequest = null;
 			this.endloop();
+			return ;
 		}
 
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		timeline.render(this.context);
+		this.timeline.render(this.context);
 		this._animationRequest = requestAnimationFrame(this._loopFunc);
 		this._lastFrameTime = timeNow;
 	}
