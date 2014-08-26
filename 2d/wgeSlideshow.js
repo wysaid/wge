@@ -100,6 +100,7 @@ WGE.SlideshowInterface = WGE.Class(
 	context : null, //绘制目标的context
 
 	srcImages : null,  //canvas类型的数组。
+	config : null, //slideshow配置(json)
 
 	_animationRequest : null,  //保存每一次的动画请求，当pause或者stop时可以及时停止。
 	_lastFrameTime : null, //保存每一帧执行完之后的时间。
@@ -108,7 +109,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, config, canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -122,6 +123,7 @@ WGE.SlideshowInterface = WGE.Class(
 		}		
 
 		this.context = context || this.canvas.getContext('2d');
+		this.config = config;
 
 		this._loadImages(imgURLs, finishCallback, eachCallback);
 		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
@@ -138,8 +140,14 @@ WGE.SlideshowInterface = WGE.Class(
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
 			self.srcImages = WGE.slideshowFitImages(imgArr);
+
+			if(this.config)
+				initTimeline(this.config);
+
 			if(finishCallback)
 				finishCallback();
+			
+			this.config = null;
 		}, eachCallback);
 	},
 
