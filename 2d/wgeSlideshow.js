@@ -342,7 +342,80 @@ WGE.SlideshowParsingEngine =
 		}catch(e) {
 			parser = this.defaultParser;
 		};
-		return parser(config, slideshow);
+		return parser.call(this, config, slideshow);
+	},
+
+	_parseScene : function(scene, imgArr)
+	{
+		var spriteClass = WGE[scene.name] || WGE.SlideshowAnimationSprite;
+		var sprite = new spriteClass(WGE.ClassInitWithArr, scene.initArgs);
+
+		if(typeof scene.imageindex == "number")
+		{
+			var img = imgArr[scene.imageindex % imgArr.length];
+
+			/////////////////////////////
+
+			if(scene.spriteConfig.filter && img)
+			{
+				try
+				{
+					var filter = new WGE.Filter[scene.spriteConfig.filter](WGE.ClassInitWithArr, scene.spriteConfig.filterArgs);
+					img = filter.bind(img).run();
+				}catch(e) {
+					console.error("when doing filter, defaultParser : ", e);
+				}
+			}
+
+			var spriteInitFunc = sprite[scene.spriteConfig.name] || sprite.initSprite;
+			spriteInitFunc.call(sprite, img, scene.spriteConfig.width, scene.spriteConfig.height);
+		}
+
+		/////////////////////////////
+
+		var execFunc = scene.execFunc;
+		for(var funcIndex in execFunc)
+		{
+			var funcConfig = execFunc[funcIndex];
+			var func = sprite[funcConfig.name];
+			if(func instanceof Function)
+			{
+				var arg = WGE.clone(funcConfig.arg);
+				if(funcConfig.relativeResolution)
+				{
+					//相对分辨率参数是一个0~1之间的浮点数。
+					if(arg[funcConfig.relativeWidth] && arg[funcConfig.relativeHeight])
+					{
+						arg[funcConfig.relativeWidth] *= WGE.SlideshowSettings.width;
+						arg[funcConfig.relativeHeight] *= WGE.SlideshowSettings.height;
+					}
+				}
+				func.apply(sprite, arg);
+			}
+		}
+
+		/////////////////////////////
+
+		var actions = scene.actions;
+		for(var actionIndex in actions)
+		{
+			var actionConfig = actions[actionIndex];
+			var actionClass = WGE.Actions[actionConfig.name];
+			if(actionClass instanceof Function)
+			{
+				var action = new actionClass(WGE.ClassInitWithArr, actionConfig.arg);
+				sprite.push(action);
+			}				
+		}
+
+		////////////////////////////
+
+		var childNodes = scene.childNodes;
+		for(var childIndex in childNodes)
+		{
+			sprite.addChild(this._parseScene(childNodes[childIndex], imgArr));
+		}
+		return sprite;
 	},
 
 	// 默认解析器
@@ -367,65 +440,7 @@ WGE.SlideshowParsingEngine =
 		var sceneArr = config.sceneArr;
 		for(var sceneIndex in sceneArr)
 		{
-			var scene = sceneArr[sceneIndex];
-			var spriteClass = WGE[scene.name] || WGE.SlideshowAnimationSprite;
-			var sprite = new spriteClass(WGE.ClassInitWithArr, scene.initArgs);
-			var spriteInitFunc = sprite[scene.spriteConfig.name] || sprite.initSprite;
-			var img = slideshow.srcImages[scene.imageindex % slideshow.srcImages.length];
-
-			/////////////////////////////
-
-			if(scene.spriteConfig.filter)
-			{
-				try
-				{
-					var filter = new WGE.Filter[scene.spriteConfig.filter](WGE.ClassInitWithArr, scene.spriteConfig.filterArgs);
-					img = filter.bind(img).run();
-				}catch(e) {
-					console.error("when doing filter, defaultParser : ", e);
-				}
-			}
-
-			spriteInitFunc.call(sprite, img, scene.spriteConfig.width, scene.spriteConfig.height);
-
-			/////////////////////////////
-
-			var execFunc = scene.execFunc;
-			for(var funcIndex in execFunc)
-			{
-				var funcConfig = execFunc[funcIndex];
-				var func = sprite[funcConfig.name];
-				if(func instanceof Function)
-				{
-					var arg = WGE.clone(funcConfig.arg);
-					if(funcConfig.relativeResolution)
-					{
-						//相对分辨率参数是一个0~1之间的浮点数。
-						if(arg[funcConfig.relativeWidth] && arg[funcConfig.relativeHeight])
-						{
-							arg[funcConfig.relativeWidth] *= WGE.SlideshowSettings.width;
-							arg[funcConfig.relativeHeight] *= WGE.SlideshowSettings.height;
-						}
-					}
-					func.apply(sprite, arg);
-				}
-			}
-
-			/////////////////////////////
-
-			var actions = scene.actions;
-			for(var actionIndex in actions)
-			{
-				var actionConfig = actions[actionIndex];
-				var actionClass = WGE.Actions[actionConfig.name];
-				if(actionClass instanceof Function)
-				{
-					var action = new actionClass(WGE.ClassInitWithArr, actionConfig.arg);
-					sprite.push(action);
-				}				
-			}
-			timeline.push(sprite);
+			timeline.push(this._parseScene(sceneArr[sceneIndex], slideshow.srcImages));
 		}
-
 	}
 };

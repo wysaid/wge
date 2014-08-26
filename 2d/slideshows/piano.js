@@ -61,6 +61,11 @@ var photoFrameConfig =
 					"name" : "UniformScaleAction",
 					"arg" : [[0, 6000], [1.3, 1.3], [1, 1]],
 				}
+			],
+
+			"childNodes" : 
+			[
+				
 			]
 		}
 	],
