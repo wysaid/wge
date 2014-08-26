@@ -81,12 +81,6 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 }
 
 
-WGE.SlideshowParsingEngine = 
-{
-	
-};
-
-
 WGE.SlideshowInterface = WGE.Class(
 {
 	audioFileName : "", //音乐文件名
@@ -331,3 +325,50 @@ WGE.SlideshowInterface = WGE.Class(
 	}
 	
 });
+
+
+WGE.SlideshowParsingEngine = 
+{
+
+	parse : function(config, slideshow)
+	{
+		if(!config)
+			return null;
+		if(config instanceof String)
+		{
+			config = JSON ? JSON.parse(config) : eval('(' + config + ')');
+		}
+
+		var parser;
+		try
+		{
+			parser = this[config.parserName] || this.defaultParser;
+		}catch(e) {
+			parser = this.defaultParser;
+		};
+		return parser(config, slideshow);
+	},
+
+	// 默认解析器
+	defaultParser : function(config, slideshow)
+	{		
+		if(config.audioFileName)
+		{
+			slideshow.audioFileName = config.audioFileName;
+			slideshow.musicDuration = parseFloat(config.musicDuration);
+		}
+
+		var totalTime = Math.ceil(config.loopImageNum / 5) * config.loopTime;
+		slideshow.timeline = new WGE.TimeLine(totalTime);
+
+		var sceneArr = config.sceneArr;
+		for(var sceneIndex in sceneArr)
+		{
+			var scene = sceneArr[sceneIndex];
+			var spriteClass = WGE[scene.name] || WGE.SlideshowAnimationSprite;
+			var sprite = new spriteClass(WGE.ClassInitWithArr);
+			sprite.initialize.apply(sprite, scene.initArgs);
+		}
+
+	},
+};

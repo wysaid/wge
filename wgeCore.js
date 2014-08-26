@@ -123,13 +123,22 @@ WGE.extend = function(dst, src)
 	return dst;
 };
 
+//特殊用法，将 WGE.ClassInitWithArr 作为第一个参数传递给一个 WGE.Class 构造时，
+//initialize 将使用第二个参数(数组) 作为整个initialize 的参数。灵活性较强。
+WGE.ClassInitWithArr = {};
+
 WGE.Class = function()
 {
-	var wge = function()
+	var wge = function(bInitWithArr, argArray)
 	{
     	//initialize 为所有类的初始化方法。
     	if(this.initialize && this.initialize.apply)
-    		this.initialize.apply(this, arguments);
+    	{
+    		if(bInitWithArr === WGE.ClassInitWithArr)
+    			this.initialize.apply(this, argArray);	
+    		else
+    			this.initialize.apply(this, arguments);
+    	}
     };
     wge.ancestors = WGE.clone(arguments);
     wge.prototype = {};
