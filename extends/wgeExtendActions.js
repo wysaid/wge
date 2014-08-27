@@ -533,6 +533,12 @@ A.jumpScaleAction = WGE.Class(WGE.TimeActionInterface,
 });
 
 
+WGE.bounceRange = 
+{
+	range : 50,
+};
+
+
 A.acceleratedMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
 	percent1 : 0,
@@ -541,7 +547,7 @@ A.acceleratedMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 		var t = this.repeatTimes * percent;
 		t -= Math.floor(t);
 		t = t * t * (3 - 2 * t);
-		var y = Math.sin(Math.PI * 2 * t) * 100;
+		var y = Math.sin(Math.PI * 2 * t) * 50;
 		// var t = this.repeatTimes * percent;
 		// t = (t - Math.floor(t)) * 2.0;
 		// if(t > 1.0)

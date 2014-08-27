@@ -43,7 +43,9 @@ var vignetteSlideShow = new WGE.Vignette(
 			vignetteSlideShow.context.font = "32px Aria";
 			vignetteSlideShow.context.clearRect(0, 0, vignetteSlideShow.canvas.width, vignetteSlideShow.canvas.height);
 			vignetteSlideShow.context.fillText("加载图片: 第" + n + "张，共" + len + "张", 10, vignetteSlideShow.canvas.height / 2);
-		}
+		},
+		1,
+		1+WGE.bounceRange.range*2/WGE.SlideshowSettings.height
 	);
 
 

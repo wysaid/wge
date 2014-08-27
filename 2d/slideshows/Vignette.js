@@ -15,6 +15,7 @@ var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationWithChildrenInterface2d,
 });
 
 
+
 WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 {
 	config: 1,
@@ -22,15 +23,17 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 	initTimeline : function(config)
 	{
 		this.timeline = new WGE.TimeLine(50000);
-		var sprite = new mySprite(0, 4000, this.srcImages[0], -1);
+		var sprite = new mySprite(0, 8000, this.srcImages[0], -1);
 		sprite.moveTo(WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2);
-		sprite.setHotspotWithRatio(0.5, 0.5);
+		sprite.setHotspot2Center();
 
 		var sprite1 = new mySprite(0, 8000, this.srcImages[1], -1);
 		sprite1.moveTo(WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2);
 
-		var action = new WGE.Actions.acceleratedMoveAction([0, 4000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+		var action = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
 			[WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+
+
 		
 		sprite.push(action);
 
