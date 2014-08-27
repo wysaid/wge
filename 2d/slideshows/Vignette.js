@@ -48,7 +48,7 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 
         var action2 = new WGE.Actions.UniformLinearMoveAction([4000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprite1.size.data[0], WGE.SlideshowSettings.height/2], 1);
         var action3 = new WGE.Actions.UniformLinearMoveAction([0, 1000], [WGE.SlideshowSettings.width/2 - sprite1.size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-        var action4 = new WGE.Actions.acceleratedMoveAction([1000, 4000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+        var action4 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
 	    
 	    [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
         sprite.push(action);
