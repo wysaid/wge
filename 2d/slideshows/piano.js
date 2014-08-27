@@ -100,7 +100,7 @@ WGE.PhotoFrameSprite = WGE.Class(WGE.SlideshowAnimationSprite,
 
 WGE.PhotoFrame = WGE.Class(WGE.SlideshowInterface,
 {
-	audioFileName : "piano.mp3", //不包含路径
+	//audioFileName : ["slideshow_photoframe.mp3", "slideshow_photoframe.ogg"], //不包含路径
 	config : photoFrameConfig,
 
 	// initTimeline : function(config)

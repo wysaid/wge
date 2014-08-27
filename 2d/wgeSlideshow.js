@@ -68,6 +68,34 @@ WGE.slideshowFitImages = function(imgs, w, h)
 };
 
 
+WGE.imagesFitSlideshow = function(imgs, w, h)
+{
+	if(!(w && h))
+	{
+		w = 1024;
+		h = 768;
+	}
+	else
+	{
+		w *= WGE.SlideshowSettings.width;
+		h *= WGE.SlideshowSettings.height;
+	}
+
+	var fitImgs = [];
+
+	for(var i = 0; i != imgs.length; ++i)
+	{
+		var img = imgs[i];
+		var canvas = WGE.CE('canvas');
+		var scale = Math.max(img.width / w, img.height / h);
+		canvas.width = img.width / scale;
+		canvas.height = img.height / scale;
+		canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+		fitImgs.push(canvas);
+	}
+	return fitImgs;
+}
+
 if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 {
 	//注： initialize 末尾两个参数，如果 w 为-1， 表示img 不拷贝，共享使用
@@ -126,13 +154,39 @@ WGE.SlideshowInterface = WGE.Class(
 			this.config = config;
 
 		this._loadImages(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY);
-		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
+
+		var audioFileNames;
+		if(this.audioFileName instanceof Array)
+		{
+			audioFileNames = [];
+			for(var i in this.audioFileName)
+				audioFileNames.push(WGE.SlideshowSettings.assetsDir + this.audioFileName[i]);
+		}
+		else if(this.audioFileName) 
+			audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
+
+		if(audioFileNames)
+			this._initAudio(audioFileNames);
 	},
 
 	//config 为json配置文件
 	initTimeline : function(config)
 	{
 		WGE.SlideshowParsingEngine.parse(config, this);
+
+		if(!this.audio)
+		{
+			var audioFileNames;
+			if(this.audioFileName instanceof Array)
+			{
+				audioFileNames = [];
+				for(var i in this.audioFileName)
+					audioFileNames.push(WGE.SlideshowSettings.assetsDir + this.audioFileName[i]);
+			}
+			else audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
+			this._initAudio(audioFileNames);
+			return ;
+		}		
 	},
 
 	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
@@ -302,6 +356,10 @@ WGE.SlideshowInterface = WGE.Class(
 
 		if(time > this._lastFrameTime + 3000)
 		{
+			this.context.save();
+			this.context.globalAlpha = 0.9;
+			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+			this.context.restore();
 			console.log("Slideshow endloop finished.");
 			this.audio.stop();
 			return ;
