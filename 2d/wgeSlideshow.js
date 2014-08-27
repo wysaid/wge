@@ -46,6 +46,11 @@ WGE.slideshowFitImages = function(imgs, w, h)
 		w = 1024;
 		h = 768;
 	}
+	else
+	{
+		w *= WGE.SlideshowSettings.width;
+		h *= WGE.SlideshowSettings.height;
+	}
 
 	var fitImgs = [];
 
@@ -101,7 +106,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
 	//请重写自己的实现
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, config, canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, config, imageRatioX, imageRatioY, canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -119,7 +124,7 @@ WGE.SlideshowInterface = WGE.Class(
 		if(config)
 			this.config = config;
 
-		this._loadImages(imgURLs, finishCallback, eachCallback);
+		this._loadImages(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY);
 		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
 	},
 
@@ -129,11 +134,11 @@ WGE.SlideshowInterface = WGE.Class(
 		WGE.SlideshowParsingEngine.parse(config, this);
 	},
 
-	_loadImages : function(imgURLs, finishCallback, eachCallback)
+	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
 	{
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
-			self.srcImages = WGE.slideshowFitImages(imgArr);
+			self.srcImages = WGE.slideshowFitImages(imgArr, imageRatioX, imageRatioY);
 
 			if(self.config)
 				self.initTimeline(self.config);
