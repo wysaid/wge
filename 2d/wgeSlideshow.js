@@ -46,6 +46,11 @@ WGE.slideshowFitImages = function(imgs, w, h)
 		w = 1024;
 		h = 768;
 	}
+	else
+	{
+		w *= WGE.SlideshowSettings.width;
+		h *= WGE.SlideshowSettings.height;
+	}
 
 	var fitImgs = [];
 
@@ -101,7 +106,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
 	//请重写自己的实现
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, config, canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, config, imageRatioX, imageRatioY, canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -119,7 +124,7 @@ WGE.SlideshowInterface = WGE.Class(
 		if(config)
 			this.config = config;
 
-		this._loadImages(imgURLs, finishCallback, eachCallback);
+		this._loadImages(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY);
 		this._initAudio(WGE.SlideshowSettings.assetsDir + this.audioFileName);
 	},
 
@@ -129,11 +134,11 @@ WGE.SlideshowInterface = WGE.Class(
 		WGE.SlideshowParsingEngine.parse(config, this);
 	},
 
-	_loadImages : function(imgURLs, finishCallback, eachCallback)
+	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
 	{
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
-			self.srcImages = WGE.slideshowFitImages(imgArr);
+			self.srcImages = WGE.slideshowFitImages(imgArr, imageRatioX, imageRatioY);
 
 			if(self.config)
 				self.initTimeline(self.config);
@@ -342,7 +347,80 @@ WGE.SlideshowParsingEngine =
 		}catch(e) {
 			parser = this.defaultParser;
 		};
-		return parser(config, slideshow);
+		return parser.call(this, config, slideshow);
+	},
+
+	_parseSceneDefault : function(scene, imgArr)
+	{
+		var spriteClass = WGE[scene.name] || WGE.SlideshowAnimationSprite;
+		var sprite = new spriteClass(WGE.ClassInitWithArr, scene.initArgs);
+
+		if(typeof scene.imageindex == "number")
+		{
+			var img = imgArr[scene.imageindex % imgArr.length];
+
+			/////////////////////////////
+
+			if(scene.spriteConfig.filter && img)
+			{
+				try
+				{
+					var filter = new WGE.Filter[scene.spriteConfig.filter](WGE.ClassInitWithArr, scene.spriteConfig.filterArgs);
+					img = filter.bind(img).run();
+				}catch(e) {
+					console.error("when doing filter, defaultParser : ", e);
+				}
+			}
+
+			var spriteInitFunc = sprite[scene.spriteConfig.name] || sprite.initSprite;
+			spriteInitFunc.call(sprite, img, scene.spriteConfig.width, scene.spriteConfig.height);
+		}
+
+		/////////////////////////////
+
+		var execFunc = scene.execFunc;
+		for(var funcIndex in execFunc)
+		{
+			var funcConfig = execFunc[funcIndex];
+			var func = sprite[funcConfig.name];
+			if(func instanceof Function)
+			{
+				var arg = WGE.clone(funcConfig.arg);
+				if(funcConfig.relativeResolution)
+				{
+					//相对分辨率参数是一个0~1之间的浮点数。
+					if(arg[funcConfig.relativeWidth] && arg[funcConfig.relativeHeight])
+					{
+						arg[funcConfig.relativeWidth] *= WGE.SlideshowSettings.width;
+						arg[funcConfig.relativeHeight] *= WGE.SlideshowSettings.height;
+					}
+				}
+				func.apply(sprite, arg);
+			}
+		}
+
+		/////////////////////////////
+
+		var actions = scene.actions;
+		for(var actionIndex in actions)
+		{
+			var actionConfig = actions[actionIndex];
+			var actionClass = WGE.Actions[actionConfig.name];
+			if(actionClass instanceof Function)
+			{
+				var action = new actionClass(WGE.ClassInitWithArr, actionConfig.arg);
+				sprite.push(action);
+			}				
+		}
+
+		////////////////////////////
+
+		var childNodes = scene.childNodes;
+		for(var childIndex in childNodes)
+		{
+			sprite.addChild(this._parseSceneDefault(childNodes[childIndex], imgArr));
+		}
+		return sprite;
 	},
 
 	// 默认解析器
@@ -367,65 +445,7 @@ WGE.SlideshowParsingEngine =
 		var sceneArr = config.sceneArr;
 		for(var sceneIndex in sceneArr)
 		{
-			var scene = sceneArr[sceneIndex];
-			var spriteClass = WGE[scene.name] || WGE.SlideshowAnimationSprite;
-			var sprite = new spriteClass(WGE.ClassInitWithArr, scene.initArgs);
-			var spriteInitFunc = sprite[scene.spriteConfig.name] || sprite.initSprite;
-			var img = slideshow.srcImages[scene.imageindex % slideshow.srcImages.length];
-
-			/////////////////////////////
-
-			if(scene.spriteConfig.filter)
-			{
-				try
-				{
-					var filter = new WGE.Filter[scene.spriteConfig.filter](WGE.ClassInitWithArr, scene.spriteConfig.filterArgs);
-					img = filter.bind(img).run();
-				}catch(e) {
-					console.error("when doing filter, defaultParser : ", e);
-				}
-			}
-
-			spriteInitFunc.call(sprite, img, scene.spriteConfig.width, scene.spriteConfig.height);
-
-			/////////////////////////////
-
-			var execFunc = scene.execFunc;
-			for(var funcIndex in execFunc)
-			{
-				var funcConfig = execFunc[funcIndex];
-				var func = sprite[funcConfig.name];
-				if(func instanceof Function)
-				{
-					var arg = WGE.clone(funcConfig.arg);
-					if(funcConfig.relativeResolution)
-					{
-						//相对分辨率参数是一个0~1之间的浮点数。
-						if(arg[funcConfig.relativeWidth] && arg[funcConfig.relativeHeight])
-						{
-							arg[funcConfig.relativeWidth] *= WGE.SlideshowSettings.width;
-							arg[funcConfig.relativeHeight] *= WGE.SlideshowSettings.height;
-						}
-					}
-					func.apply(sprite, arg);
-				}
-			}
-
-			/////////////////////////////
-
-			var actions = scene.actions;
-			for(var actionIndex in actions)
-			{
-				var actionConfig = actions[actionIndex];
-				var actionClass = WGE.Actions[actionConfig.name];
-				if(actionClass instanceof Function)
-				{
-					var action = new actionClass(WGE.ClassInitWithArr, actionConfig.arg);
-					sprite.push(action);
-				}				
-			}
-			timeline.push(sprite);
+			timeline.push(this._parseSceneDefault(sceneArr[sceneIndex], slideshow.srcImages));
 		}
-
 	}
 };
