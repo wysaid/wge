@@ -532,6 +532,40 @@ A.jumpScaleAction = WGE.Class(WGE.TimeActionInterface,
 	}
 });
 
+A.move2Action = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		var y = Math.sin(Math.PI * 10 * t) * 100;
+		this.bindObj.moveTo(this.fromX, this.fromY + y);
+	},
+
+	actionStop : function()
+	{
+
+	}
+});
+
+
+A.acceleratedMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+{
+	act : function(percent)
+	{
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		var y = Math.sin(Math.PI * 4 * t) * 100;
+		this.bindObj.moveTo(this.fromX, this.fromY + y);
+	},
+
+	actionStop : function()
+	{
+		
+	}
+});
+
 
 
 })();
