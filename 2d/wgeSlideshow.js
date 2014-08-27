@@ -100,6 +100,7 @@ WGE.SlideshowInterface = WGE.Class(
 	_animationRequest : null,  //保存每一次的动画请求，当pause或者stop时可以及时停止。
 	_lastFrameTime : null, //保存每一帧执行完之后的时间。
 	_loopFunc : null, // mainloop.bind(this)
+	_audioplayingTime : 0, //播放时间
 
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
@@ -192,12 +193,17 @@ WGE.SlideshowInterface = WGE.Class(
 
 	_audioplaying : function()
 	{
-
+		this._audioplayingTime = this.getAudioPlayingTime();
 	},
 
 	_audiosuspend : function()
 	{
 
+	},
+
+	getAudioPlayingTime : function()
+	{
+		return this.audioPlayedTimes * this.audio.duration + this.audio.position;
 	},
 
 	//释放内存，在移动设备上效果比较明显。
@@ -224,6 +230,8 @@ WGE.SlideshowInterface = WGE.Class(
 		this._loopFunc = this.mainloop.bind(this);
 		this.timeline.start(0);
 		this._animationRequest = requestAnimationFrame(this._loopFunc);
+		this.audioPlayedTimes = 0;
+		this._audioplayingTime = 0;
 	},
 
 	isPlaying : function()
@@ -237,6 +245,7 @@ WGE.SlideshowInterface = WGE.Class(
 		{
 			cancelAnimationFrame(this._animationRequest);
 			this._animationRequest = null;
+			this.endloop();
 		}
 
 		if(this.audio)
@@ -294,6 +303,7 @@ WGE.SlideshowInterface = WGE.Class(
 		if(time > this._lastFrameTime + 3000)
 		{
 			console.log("Slideshow endloop finished.");
+			this.audio.stop();
 			return ;
 		}
 		this.context.save();
@@ -309,11 +319,37 @@ WGE.SlideshowInterface = WGE.Class(
 	mainloop : function()
 	{
 		var timeNow = Date.now();
+		var asyncTime = this._audioplayingTime - this.timeline.currentTime;
 
-		if(!this.timeline.update(timeNow - this._lastFrameTime))
+		//当音乐时间与时间轴时间差异超过300毫秒时，执行同步操作
+		if(Math.abs(asyncTime) > 500)
+		{
+			console.log(asyncTime);
+			//当时间轴慢于音乐时间时，执行时间轴跳跃。
+			if(asyncTime > 500)
+			{
+				if(!this.timeline.update(asyncTime))
+				{
+					console.log("Slideshow Jump To End");
+					this._animationRequest = null;
+					this.endloop();
+					return ;
+				}
+				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+				this.timeline.render(this.context);
+			}
+
+			this._lastFrameTime = timeNow;			
+			this._animationRequest = requestAnimationFrame(this._loopFunc);
+			return ;
+		}
+
+		var deltaTime = timeNow - this._lastFrameTime;
+		this._lastFrameTime = timeNow;
+
+		if(!this.timeline.update(deltaTime))
 		{
 			console.log("Slideshow End");
-			this._lastFrameTime = timeNow;
 			this._animationRequest = null;
 			this.endloop();
 			return ;
@@ -322,7 +358,6 @@ WGE.SlideshowInterface = WGE.Class(
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		this.timeline.render(this.context);
 		this._animationRequest = requestAnimationFrame(this._loopFunc);
-		this._lastFrameTime = timeNow;
 	}
 	
 });
