@@ -541,25 +541,32 @@ WGE.bounceRange =
 
 A.acceleratedMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
-	percent1 : 0,
 	act : function(percent)
 	{
 		var t = this.repeatTimes * percent;
 		t -= Math.floor(t);
 		t = t * t * (3 - 2 * t);
 		var y = Math.sin(Math.PI * 2 * t) * 50;
-		// var t = this.repeatTimes * percent;
-		// t = (t - Math.floor(t)) * 2.0;
-		// if(t > 1.0)
-		// 	t = 2.0 - t;
-		// var y = 100*t * t * (3.0 - 2.0 * t);
 		this.bindObj.moveTo(this.fromX, this.fromY + y);
-		this.percent1 = percent;
+	},
+
+	actionStart : function()
+	{
+		
 	},
 
 	actionStop : function()
 	{
-		console.log("percent"+this.percent1);
+
+	}
+});
+
+A.MoveRightAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+{
+
+	actionStop : function()
+	{
+		
 	}
 });
 
