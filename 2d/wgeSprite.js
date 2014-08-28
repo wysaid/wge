@@ -19,7 +19,7 @@ WGE.LogicSprite = WGE.Class(WGE.SpriteInterface2d,
 	blendMode : undefined, //混合模式
 	zIndex : 0, // 由于canvas本身并不支持z值，所以这里的zIndex仅用作排序依据。
 
-	initialize : function(img, w, h)
+	initialize : function()
 	{
 		this.pos = new WGE.Vec2(0, 0);
 		this.hotspot = new WGE.Vec2(0, 0);
@@ -125,9 +125,10 @@ WGE.LogicSprite = WGE.Class(WGE.SpriteInterface2d,
 		ctx.translate(pos.data[0], pos.data[1]);
 		if(rot)
 			ctx.rotate(rot);
-
-		ctx.scale(scaling.data[0], scaling.data[1]);
-		ctx.globalAlpha = alpha;
+		if(scaling)
+			ctx.scale(scaling.data[0], scaling.data[1]);
+		if(alpha)
+			ctx.globalAlpha = alpha;
 		if(blendmode)
 			ctx.globalCompositeOperation = blendmode;
 
@@ -230,8 +231,10 @@ WGE.Sprite = WGE.Class(WGE.LogicSprite,
 		if(rot)
 			ctx.rotate(rot);
 
-		ctx.scale(scaling.data[0], scaling.data[1]);
-		ctx.globalAlpha = alpha;
+		if(scaling)
+			ctx.scale(scaling.data[0], scaling.data[1]);
+		if(alpha)
+			ctx.globalAlpha = alpha;
 		if(blendmode)
 			ctx.globalCompositeOperation = blendmode;
 		ctx.drawImage(this.img, -this.hotspot.data[0], pos.data[1] -this.hotspot.data[1]);

@@ -25,7 +25,7 @@ WGE.SlideshowSettings =
 	style : "width:100%;height:100%"
 };
 
-if(soundManager && soundManager.onready)
+if(window.soundManager && window.soundManager.onready)
 {
 	soundManager.onready(function(){
 		WGE.soundManagerReady = true;
