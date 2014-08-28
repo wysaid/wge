@@ -582,16 +582,17 @@ A.MoveRightAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	}
 });
 
-
-A.SlideUpAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+A.MoveDownAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
-
-
 	distance : 0,
-	otherSprite : null,
 	act : function(percent)
 	{
-		
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		var y = Math.sin(Math.PI/2* t) * this.distance;
+		this.bindObj.moveTo(this.fromX, this.fromY + y);
+
 	},
 
 	setDistance : function(distance)
@@ -599,5 +600,7 @@ A.SlideUpAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 		this.distance = distance;
 	}
 });
+
+
 
 })();
