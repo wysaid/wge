@@ -210,7 +210,10 @@ WGE.SlideshowInterface = WGE.Class(
 	_initAudio : function(url)
 	{
 		var self = this;
-		var arg = {url : url};
+		var arg = {url : url,
+			whileplaying : function(){
+				self._audioplayingTime = self.audioPlayedTimes * this.duration + this.position;
+			}};
 
 		if(typeof this._audioFinish == "function")
 			arg.onfinish = this._audioFinish.bind(this);
@@ -247,10 +250,10 @@ WGE.SlideshowInterface = WGE.Class(
 		this.audio.play();
 	},
 
-	_audioplaying : function()
-	{
-		this._audioplayingTime = this.getAudioPlayingTime();
-	},
+	// _audioplaying : function()
+	// {
+	// 	this._audioplayingTime = this.getAudioPlayingTime();
+	// },
 
 	_audiosuspend : function()
 	{
