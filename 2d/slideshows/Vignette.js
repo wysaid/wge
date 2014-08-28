@@ -28,7 +28,8 @@ var MyLogicSprite  = WGE.Class(WGE.LogicSprite, WGE.AnimationWithChildrenInterfa
 WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 {
     config: 1,
-    audioFileName : "slideshow_love.mp3",
+    audioFileName : ["slideshow_love.OGG","slideshow_love.mp3"]
+    ,
     blurImages : [],
     initTimeline : function(config)
     {
@@ -41,20 +42,20 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 
     handleImgs : function()
     {
-        // for (var i = 0; i < this.srcImages.length; i++) {
-        //     var srcimage = this.srcImages[i];
-        //     var blurCanvas = document.createElement('canvas');
-        //     blurCanvas.width = srcimage.width;
-        //     blurCanvas.height = srcimage.height;
-        //     var c = blurCanvas.getContext('2d');
-        //     c.clearRect(0, 0, c.width, c.height);
-        //     c.globalAlpha = (1.0 / (10.0 / 2.0));
-        //     for (var j = 0; j < 120.0; j += 2.0)
-        //         c.drawImage(srcimage, 0, j);
-        //     var dataSrc = c.getImageData(0, 0, blurCanvas.width, blurCanvas.height);
-        //     var dstCanvas = Filters.toCanvas(dataSrc);
-        //     this.blurImages.push(dstCanvas);
-        // };
+        for (var i = 0; i < this.srcImages.length; i++) {
+            var width = this.srcImages[i].width;
+            var height = this.srcImages[i].height;
+            var srcimage = this.srcImages[i];
+            var blurCanvas = document.createElement('canvas');
+            blurCanvas.width = srcimage.width;
+            blurCanvas.height = srcimage.height;
+            var c = blurCanvas.getContext('2d');
+            c.clearRect(0, 0, c.width, c.height);
+            c.globalAlpha = (1.0 / (10.0 / 2.0));
+            for (var j = 0; j < 120.0; j += 2.0)
+                c.drawImage(srcimage, 0, j);
+            this.blurImages.push(blurCanvas);
+         }
     },
 
 
@@ -126,27 +127,50 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
              var action8 = new WGE.Actions.MoveDownAction([0, 1000], [WGE.SlideshowSettings.width/2  , WGE.SlideshowSettings.height/2- ((sprite3.size.data[1]+sprite3.size.data[1])/2)], [WGE.SlideshowSettings.width/2 , WGE.SlideshowSettings.height/2], 1);
              action8.setDistance((sprite3.size.data[1]+sprite2.size.data[1])/2);
            
+
+             var action19 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+            [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
             //var action9 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
             //[WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
 
              sprite3.push(action8);
+             sprite3.push(action19);
+
             // sprite2.push(action9);
         }  
 
         //
         var sprites = [];
         var h = 0;
-        for (var i = 0; i < 20; i++) {
+        var spriteLength = 39;
+        var descDis = 300;
+        var img1 = WGE.rotateArray(this.blurImages);
+        img1 = WGE.rotateArray(this.blurImages);
+        img1 = WGE.rotateArray(this.blurImages);
+        for (var i = 0; i < spriteLength; i++) {
 
-            sprites[i] = new mySprite(18000, 24000, WGE.rotateArray(this.srcImages), -1); 
+            sprites[i] = new mySprite(18000, 24000, img1, -1); 
             //sprites[i].setHotspot2Center();
             sprites[i].moveTo(0, h);
             h += sprites[i].size.data[1];
             logicSprite.addChild(sprites[i]);
         }
+        var img =  WGE.rotateArray(this.srcImages);
+        for (var i = 0; i < 2; i++) {
+            sprites[spriteLength + i] = new mySprite(18000, 24000, img, -1); 
+            //sprites[i].setHotspot2Center();
+            sprites[spriteLength + i].moveTo(0, h);
+            h += sprites[spriteLength + i].size.data[1];
+            logicSprite.addChild(sprites[spriteLength + i]);
+        };
+
+        spriteLength += 2;
 
         var action18 = new WGE.Actions.MoveSlideAction([0, 5000], [0  , 0], [0 , 0], 1);
         logicSprite.push(action18);
+        action18.setDescDistance(descDis);
+
+        action18.setDistance(h - sprites[spriteLength - 1].size.data[1]  - sprites[spriteLength - 2].size.data[1]+ descDis );
 
 
         //向上拖动
