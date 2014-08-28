@@ -168,7 +168,10 @@ WGE.SlideshowInterface = WGE.Class(
 			audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 
 		if(audioFileNames)
+		{
 			this.audioFileName = audioFileNames;
+			this._initAudio(this.audioFileName);
+		}
 	},
 
 	//config 为json配置文件
@@ -188,7 +191,7 @@ WGE.SlideshowInterface = WGE.Class(
 			else audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 			this._initAudio(audioFileNames);
 			return ;
-		}		
+		}
 	},
 
 	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
