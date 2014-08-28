@@ -601,6 +601,25 @@ A.MoveDownAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	}
 });
 
+A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+{
+	distance : 0,
+	act : function(percent)
+	{
+		this.bindObj.move(0, -30);
+	},
+
+	actionStop : function()
+	{
+
+	},
+
+	setDistance : function(distance)
+	{
+		this.distance = distance;
+	}
+});
+
 
 
 })();
