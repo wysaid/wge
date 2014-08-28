@@ -604,9 +604,27 @@ A.MoveDownAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
 	distance : 0,
+	descDistance : 0,
+	y : 0,
+	y1 : 0,
 	act : function(percent)
 	{
-		this.bindObj.move(0, -30);
+		var proporty = 0.8;
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		var t1 = t/0.8;
+		var t2 = (t - 0.8) / 0.2;
+		
+		
+		if(t < 0.8){
+			this.y  = Math.sin(Math.PI/2* t1) * this.distance;
+			this.bindObj.moveTo(this.fromX, this.fromY - this.y);
+		}
+		else{
+			this.y1 = Math.sin(Math.PI/2* t2) * this.descDistance;
+			this.bindObj.moveTo(this.fromX, this.fromY + this.y1 - this.y);
+		}
 	},
 
 	actionStop : function()
@@ -617,6 +635,11 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	setDistance : function(distance)
 	{
 		this.distance = distance;
+	},
+
+	setDescDistance : function(descDistance)
+	{
+		this.descDistance = descDistance;
 	}
 });
 

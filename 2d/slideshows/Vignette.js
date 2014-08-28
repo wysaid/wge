@@ -28,7 +28,8 @@ var MyLogicSprite  = WGE.Class(WGE.LogicSprite, WGE.AnimationWithChildrenInterfa
 WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 {
     config: 1,
-    audioFileName : "slideshow_love.mp3",
+    audioFileName : ["slideshow_love.OGG","slideshow_love.mp3"]
+    ,
     blurImages : [],
     initTimeline : function(config)
     {
@@ -126,17 +127,24 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
              var action8 = new WGE.Actions.MoveDownAction([0, 1000], [WGE.SlideshowSettings.width/2  , WGE.SlideshowSettings.height/2- ((sprite3.size.data[1]+sprite3.size.data[1])/2)], [WGE.SlideshowSettings.width/2 , WGE.SlideshowSettings.height/2], 1);
              action8.setDistance((sprite3.size.data[1]+sprite2.size.data[1])/2);
            
+
+             var action19 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+            [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
             //var action9 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
             //[WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
 
              sprite3.push(action8);
+             sprite3.push(action19);
+
             // sprite2.push(action9);
         }  
 
         //
         var sprites = [];
         var h = 0;
-        for (var i = 0; i < 20; i++) {
+        var spriteLength = 39;
+        var descDis = 300;
+        for (var i = 0; i < spriteLength; i++) {
 
             sprites[i] = new mySprite(18000, 24000, WGE.rotateArray(this.srcImages), -1); 
             //sprites[i].setHotspot2Center();
@@ -147,6 +155,9 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 
         var action18 = new WGE.Actions.MoveSlideAction([0, 5000], [0  , 0], [0 , 0], 1);
         logicSprite.push(action18);
+        action18.setDescDistance(descDis);
+
+        action18.setDistance(h - sprites[spriteLength - 1].size.data[1]  - sprites[spriteLength - 2].size.data[1]+ descDis );
 
 
         //向上拖动
