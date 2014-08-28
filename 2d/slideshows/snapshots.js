@@ -424,6 +424,9 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 	_genBlurredImages : function(imgArr)
 	{
 		var blurredImgs = [];
+
+		// var filter = new WGE.Filter.StackBlur();
+
 		for(var i in imgArr)
 		{
 			var img = imgArr[i];
@@ -431,6 +434,8 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 			var dw = 1024 / 8, dh = 768 / 8;
 			
 			var dstData = stackBlurCanvasRGB(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, dw * 2 + 20, dh * 2 + 20, 10);
+
+			// var cvs = filter.bind(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, dw * 2 + 40, dh * 2 + 40).run([10]);
 
 			var cvs = WGE.CE('canvas');
 			cvs.width = dstData.width;
@@ -520,54 +525,6 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 		}
 		else audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 		this._initAudio(audioFileNames);
-	},
-
-	mainloop : function()
-	{
-		var timeNow = Date.now();
-		var asyncTime = this._audioplayingTime - this.timeline.currentTime;
-
-		//当音乐时间与时间轴时间差异超过300毫秒时，执行同步操作
-		if(Math.abs(asyncTime) > 500)
-		{
-			console.log(this._audioplayingTime, this.timeline.currentTime, asyncTime);
-			//当时间轴慢于音乐时间时，执行时间轴跳跃。
-			if(asyncTime > 500)
-			{
-				if(!this.timeline.update(asyncTime))
-				{
-					console.log("Slideshow Jump To End");
-					this._animationRequest = null;
-					this.endloop();
-					return ;
-				}
-				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-				this.timeline.render(this.context);
-			}
-			else
-			{
-				this.audio.resume();
-			}
-			this._lastFrameTime = timeNow;			
-			this._animationRequest = requestAnimationFrame(this._loopFunc);
-			return ;
-		}
-
-		var deltaTime = timeNow - this._lastFrameTime;
-		this._lastFrameTime = timeNow;
-
-		if(!this.timeline.update(deltaTime))
-		{
-			console.log("Slideshow End");
-			this._animationRequest = null;
-			this.endloop();
-			return ;
-		}
-		
-		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		this.timeline.render(this.context);
-		this._animationRequest = requestAnimationFrame(this._loopFunc);
-	}	
-
+	}
 });
 
