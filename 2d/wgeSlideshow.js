@@ -168,9 +168,18 @@ WGE.SlideshowInterface = WGE.Class(
 			audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 
 		if(audioFileNames)
-		{
 			this.audioFileName = audioFileNames;
-			this._initAudio(this.audioFileName);
+
+		if(this.audioFileName)
+		{
+			if(this.audioFileName instanceof Array)
+			{
+				audioFileNames = [];
+				for(var i in this.audioFileName)
+					audioFileNames.push(WGE.SlideshowSettings.assetsDir + this.audioFileName[i]);
+			}
+			else audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
+			this._initAudio(audioFileNames);
 		}
 	},
 
@@ -212,9 +221,6 @@ WGE.SlideshowInterface = WGE.Class(
 	//需要第三方 soundManager
 	_initAudio : function(url)
 	{
-		if(this.audio)
-			return; 
-
 		var self = this;
 		var arg = {url : url};
 
@@ -230,6 +236,8 @@ WGE.SlideshowInterface = WGE.Class(
 		var tryInitAudio = function() {
 			if(WGE.soundManagerReady)
 			{
+				if(self.audio)
+					return;
 				self.audio = soundManager.createSound(arg);
 				self.audio.play();
 				//初始时将音乐标记为暂停状态，而不是未播放状态。
