@@ -108,7 +108,7 @@ WGE.LogicSprite = WGE.Class(WGE.SpriteInterface2d,
 
 		ctx.scale(this.scaling.data[0], this.scaling.data[1]);
 
-		ctx.globalAlpha = this.alpha;		
+		ctx.globalAlpha *= this.alpha;		
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
 
@@ -211,7 +211,7 @@ WGE.Sprite = WGE.Class(WGE.LogicSprite,
 
 		ctx.scale(this.scaling.data[0], this.scaling.data[1]);
 
-		ctx.globalAlpha = this.alpha;		
+		ctx.globalAlpha *= this.alpha;		
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
 
@@ -268,7 +268,7 @@ WGE.SpriteExt = WGE.Class(WGE.Sprite,
 		ctx.save();
 		var m = this.rot.data;
 		ctx.transform(m[0] * this.scaling.data[0], m[1], m[2] * this.scaling.data[1], m[3], this.pos.data[0], this.pos.data[1]);
-		ctx.globalAlpha = this.alpha;		
+		ctx.globalAlpha *= this.alpha;		
 		if(this.blendMode)
 			ctx.globalCompositeOperation = this.blendMode;
 

@@ -107,6 +107,15 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 			WGE.Sprite.initialize.call(this, img, w, h);
 		}
 	});
+
+	WGE.SlideshowAnimationLogicSprite = WGE.Class(WGE.LogicSprite, WGE.AnimationWithChildrenInterface2d,
+	{
+		initialize : function(startTime, endTime)
+		{
+			WGE.AnimationWithChildrenInterface2d.initialize.call(this, startTime, endTime);
+			WGE.LogicSprite.initialize.call(this);
+		}
+	});
 }
 
 

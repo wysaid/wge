@@ -16,33 +16,48 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 	loopTime : 5000,
 	loopImageNum : 1,
 
+	_bgImage : null,
+	_bgImageURL : "memories.jpg",
+
 	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
 	{
 		var self = this;
-		WGE.loadImages(imgURLs, function(imgArr) {
-			self.srcImages = WGE.imagesFitSlideshow(imgArr, imageRatioX, imageRatioY);
 
-			if(self.config)
-				self.initTimeline(self.config);
-			if(finishCallback)
-				finishCallback();
+		WGE.loadImages([this._bgImageURL], function(imgArr) {
+			self._bgImage = imgArr[0];
 
-			self.config = null;
-		}, eachCallback);
+			WGE.loadImages(imgURLs, function(imgArr) {
+				self.srcImages = WGE.imagesFitSlideshow(imgArr, imageRatioX, imageRatioY);
+
+				if(self.config)
+					self.initTimeline(self.config);
+				if(finishCallback)
+					finishCallback();
+
+				self.config = null;
+			}, eachCallback);
+		})
 	},
 
 	_genBlurredImages : function(imgArr)
 	{
 		var blurredImgs = [];
 
-		// var filter = new WGE.Filter.StackBlur();
+		var tmpArr = [0, 1, 2, 3];
 
 		for(var i = 0; i < imgArr.length; ++i)
 		{
-			var img1 = imgArr[i % imgArr.length];
-			var img2 = imgArr[(i + 1) % imgArr.length];
-			var img3 = imgArr[(i + 2) % imgArr.length];
-			var img4 = imgArr[(i + 3) % imgArr.length];
+
+			var tmpN = parseInt(Math.round(Math.random() * 3));
+			var tmpM = parseInt(Math.round(Math.random() * 3));
+			var n = tmpArr[tmpN];
+			tmpArr[tmpN] = tmpArr[tmpM];
+			tmpArr[tmpM] = n;			
+
+			var img1 = imgArr[(tmpArr[0] + i) % imgArr.length];
+			var img2 = imgArr[(tmpArr[1] + i) % imgArr.length];
+			var img3 = imgArr[(tmpArr[2] + i) % imgArr.length];
+			var img4 = imgArr[(tmpArr[3] + i) % imgArr.length];
 
 			var dw = 1024 / 4, dh = 768 / 4;
 
@@ -56,6 +71,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			var h = ratio * cvs.height / 2;
 			ctx.fillStyle = "#000";
 			ctx.fillRect(0, 0, cvs.width, cvs.height);
+			ctx.drawImage(this._bgImage, 0, 0, this._bgImage.width, this._bgImage.height, 0, 0, cvs.width, cvs.height);
 			ctx.drawImage(img1, 0, 0, img1.width, img1.height, Math.random() * 100, Math.random() * 100, w, h);
 			ctx.drawImage(img2, 0, 0, img2.width, img2.height, cvs.width / 2 + Math.random() * 100, Math.random() * 100, w, h);
 			ctx.drawImage(img3, 0, 0, img3.width, img3.height, Math.random() * 100, cvs.height / 2 + Math.random() * 100, w, h);
@@ -108,26 +124,45 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			var rand = Math.random();
 			var img = boundingBoxes[i];
 
-			var sprite = new WGE.SlideshowAnimationSprite(t, t + 6000, img, -1);
-			sprite.setHotspot2Center();
-			sprite.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
-			sprite.zIndex = zIndex;
+			var fatherSprite = new WGE.SlideshowAnimationLogicSprite(t, t + 6000);
+
+			fatherSprite.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
+			fatherSprite.zIndex = zIndex;
+
 			var scaleAction = new WGE.Actions.UniformScaleAction([0, 6000], [0.7, 0.7], [0.95, 0.95])
 			var alphaAction = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
 			var rot1 = (Math.random() / 10 + 0.02) * (Math.random() > 0.5 ? 1 : -1);
-			var rotateAction = new WGE.Actions.UniformRotateAction([0, 3000], 0, rot1);
-			sprite.pushArr([scaleAction, alphaAction, rotateAction]);
+			var rotateAction = new WGE.Actions.UniformRotateAction([0, 6000], 0, rot1);
+
+			fatherSprite.pushArr([scaleAction, alphaAction, rotateAction]);
+
+			var sprite = new WGE.SlideshowAnimationSprite(t, t + 6000, img, -1);
+			sprite.setHotspot2Center();
+			
+			// sprite.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
+			// sprite.zIndex = zIndex;
+			// var scaleAction = new WGE.Actions.UniformScaleAction([0, 6000], [0.7, 0.7], [0.95, 0.95])
+			// var alphaAction = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
+			// var rot1 = (Math.random() / 10 + 0.02) * (Math.random() > 0.5 ? 1 : -1);
+			// var rotateAction = new WGE.Actions.UniformRotateAction([0, 6000], 0, rot1);
+			// sprite.pushArr([scaleAction, alphaAction, rotateAction]);
 
 			var img2 = blurredImgs[i];
 
 			var sprite2 = new WGE.SlideshowAnimationSprite(t, t + 6000, img2, -1);
 			sprite2.setHotspot2Center();
-			sprite2.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
-			var alphaAction2 = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
-			sprite2.push(alphaAction2);
-			sprite2.scaleTo(WGE.SlideshowSettings.width / (img2.width - 40), WGE.SlideshowSettings.height / (img2.height - 40));
-			sprite2.zIndex = zIndex - 1;
-			this.timeline.pushArr([sprite, sprite2]);
+			var sx = WGE.SlideshowSettings.width / (img2.width - 40), sy = WGE.SlideshowSettings.height / (img2.height - 40)
+			sprite2.scaleTo(sx / 0.7, sy / 0.7);
+
+			
+			// sprite2.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
+			// var alphaAction2 = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);			
+			// var scaleAction2 = new WGE.Actions.UniformScaleAction([0, 6000], [sx, sy], [sx / 0.7, sy / 0.7])
+			// var rotateAction2 = new WGE.Actions.UniformRotateAction([0, 6000], 0, rot1);
+			// sprite2.pushArr([alphaAction2, rotateAction2, scaleAction2]);
+
+			fatherSprite.addChild(sprite2, sprite);
+			this.timeline.push(fatherSprite);
 			zIndex += 100;
 			t += 5000;
 		}
