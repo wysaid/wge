@@ -25,7 +25,7 @@ WGE.SlideshowSettings =
 	style : "width:100%;height:100%"
 };
 
-if(soundManager && soundManager.onready)
+if(window.soundManager && window.soundManager.onready)
 {
 	soundManager.onready(function(){
 		WGE.soundManagerReady = true;
@@ -168,7 +168,7 @@ WGE.SlideshowInterface = WGE.Class(
 			audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 
 		if(audioFileNames)
-			this._initAudio(audioFileNames);
+			this.audioFileName = audioFileNames;
 	},
 
 	//config 为json配置文件
@@ -209,6 +209,9 @@ WGE.SlideshowInterface = WGE.Class(
 	//需要第三方 soundManager
 	_initAudio : function(url)
 	{
+		if(this.audio)
+			return; 
+
 		var self = this;
 		var arg = {url : url};
 
@@ -226,7 +229,6 @@ WGE.SlideshowInterface = WGE.Class(
 			{
 				self.audio = soundManager.createSound(arg);
 				self.audio.play();
-
 				//初始时将音乐标记为暂停状态，而不是未播放状态。
 				if(!self._animationRequest)
 					self.audio.pause();
@@ -259,7 +261,6 @@ WGE.SlideshowInterface = WGE.Class(
 
 	getAudioPlayingTime : function()
 	{
-		// console.log(this.audioPlayedTimes * this.audio.duration + this.audio.position);
 		return this.audioPlayedTimes * this.audio.duration + this.audio.position;
 	},
 
@@ -281,7 +282,9 @@ WGE.SlideshowInterface = WGE.Class(
 		}
 
 		if(this.audio)
+		{
 			this.audio.play();
+		}
 		
 		this._lastFrameTime = Date.now();
 		this._loopFunc = this.mainloop.bind(this);
@@ -366,22 +369,21 @@ WGE.SlideshowInterface = WGE.Class(
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 			this.context.restore();
 			console.log("Slideshow endloop finished.");
-			this.audio.stop();
 			return ;
 		}
 
 		this.context.save();
 
-		 if(dt < 2500)
+		 if(dt < 1500)
 		{
 			this.context.drawImage(this._endCanvas, 0, 0);
-			this.context.globalAlpha = dt / 2000;
+			this.context.globalAlpha = dt / 1500;
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
 		}
 		else
 		{
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
-			this.context.globalAlpha = (dt - 2500) / 1000;
+			this.context.globalAlpha = (dt - 1500) / 3000;
 			this.context.fillStyle = "#000";
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
@@ -392,6 +394,10 @@ WGE.SlideshowInterface = WGE.Class(
 
 	_end : function()
 	{
+		if(this.audio)
+		{
+			this.audio.stop();
+		}
 		console.log("Slideshow End");
 		this._animationRequest = null;
 		this._endBlurCanvas = WGE.CE("canvas");

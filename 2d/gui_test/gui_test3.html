@@ -9,6 +9,7 @@
 <script type="text/javascript" src="../../extends/wgeExtendActions.js"></script>
 <script type="text/javascript" src="../../extends/wgeExtendFunctions.js"></script>
 <script type="text/javascript" src="../wgeSprite.js"></script>
+<script type="text/javascript" src="../wgeSlideshow.js"></script>
 <style type="text/css">
 input {
 	width: 100px;
@@ -21,18 +22,7 @@ input {
 var timeline = new WGE.TimeLine(10000000); //给本demo足够长时间。。。
 var isOK = false;
 
-var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationWithChildrenInterface2d,
-{
-	initialize : function(startTime, endTime, img, w, h)
-	{
-		this.setAttrib(startTime, endTime);
-		this.timeActions = [];
-		if(img)
-		{
-			WGE.Sprite.initialize.call(this, img, w, h);
-		}
-	}
-});
+var mySprite = WGE.SlideshowAnimationSprite;
 
 var myGUI = WGE.Class(WGE.GUIInterface, 
 {
@@ -113,6 +103,7 @@ y重心：<input type="number" value="0.5" id="hotspotY"><br>
 <input type="button" onclick="onBurst()" value="Burst"><br>
 <input type="button" onclick="fSlides()" value="Slides"><br>
 <input type="button" onclick="fRelativeMove()" value="相对运动"><br>
+<input type="button" onclick="fRepeatMove()" value="重复运动"><br>
 <div style="width:80%; margin:2px;height:50px;border:groove;text-align:center;">
 <p id="myText">当前没有动作</p>
 </div>
@@ -541,6 +532,50 @@ function fRelativeMove()
 		sprite2.scaleTo(0.3, 0.3);
 		sprite2.push(new WGE.Actions.UniformRotateAction([actionStartTime, actionEndTime - 1000], 0, 2 * Math.PI, 1));
 		sprite.addChild(sprite2);
+		timeline.start(0);
+		gui.start();
+	});
+}
+
+var mySprite2 = WGE.Class(WGE.LogicSprite, WGE.AnimationWithChildrenInterface2d,
+{
+
+	initialize : function(startTime, endTime)
+	{
+		this.setAttrib(startTime, endTime);
+		this.timeActions = [];
+		WGE.LogicSprite.initialize.call(this);
+		
+	}
+});
+
+function fRepeatMove()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+
+	var fatherSprite = new mySprite2(spriteStartTime, spriteEndTime);
+
+	
+	//fatherSprite.moveTo(500, 300);
+	fatherSprite.setHotspotWithRatio(hotspotX, hotspotY);
+
+	var action = new WGE.Actions.UniformLinearMoveAction([actionStartTime, actionEndTime], [0, 300], [2000, 300], 10);
+
+	fatherSprite.push(action);
+
+	timeline.push(fatherSprite);
+
+	WGE.loadImages(["../../res/comic8.jpg"], function(imgArr){
+		var sprite = new mySprite(spriteStartTime, spriteEndTime, img, -1);
+		sprite.setHotspot2Center();
+		var sprite2 = new mySprite(spriteStartTime, spriteEndTime, imgArr[0], -1);
+		sprite2.setHotspot2Center();
+		sprite2.moveTo(-sprite2.size.data[0], 0)
+		fatherSprite.addChild(sprite, sprite2);
 		timeline.start(0);
 		gui.start();
 	});
