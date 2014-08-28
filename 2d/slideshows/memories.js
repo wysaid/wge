@@ -51,12 +51,17 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			cvs.height = dh * 2 + 20;
 			var ctx = cvs.getContext('2d');
 
-			ctx.drawImage(img1, 0, 0, img1.width, img1.height, 0, 0, cvs.width / 2, cvs.height / 2);
-			ctx.drawImage(img2, 0, 0, img2.width, img2.height, cvs.width / 2, 0, cvs.width / 2, cvs.height / 2);
-			ctx.drawImage(img3, 0, 0, img3.width, img3.height, 0, cvs.height / 2, cvs.width / 2, cvs.height / 2);
-			ctx.drawImage(img4, 0, 0, img4.width, img4.height, cvs.width / 2, cvs.height / 2, cvs.width / 2, cvs.height / 2);
+			var ratio = Math.random() * 0.5 + 0.5;
+			var w = ratio * cvs.width / 2;
+			var h = ratio * cvs.height / 2;
+			ctx.fillStyle = "#000";
+			ctx.fillRect(0, 0, cvs.width, cvs.height);
+			ctx.drawImage(img1, 0, 0, img1.width, img1.height, Math.random() * 100, Math.random() * 100, w, h);
+			ctx.drawImage(img2, 0, 0, img2.width, img2.height, cvs.width / 2 + Math.random() * 100, Math.random() * 100, w, h);
+			ctx.drawImage(img3, 0, 0, img3.width, img3.height, Math.random() * 100, cvs.height / 2 + Math.random() * 100, w, h);
+			ctx.drawImage(img4, 0, 0, img4.width, img4.height, cvs.width / 2 + Math.random() * 100, cvs.height / 2 + Math.random() * 100, w, h);
 
-			var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 3);
+			var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
 
 			ctx.putImageData(dstData, 0, 0);
 			blurredImgs.push(cvs);
@@ -95,8 +100,8 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 		var t = 0;
 		var zIndex = 0;
 
-		var blurredImgs = this._genBlurredImages(this.srcImages);
 		var boundingBoxes = this._genBoundingBox(this.srcImages);
+		var blurredImgs = this._genBlurredImages(boundingBoxes);
 
 		for(var i in this.srcImages)
 		{
