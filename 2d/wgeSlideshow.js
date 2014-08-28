@@ -382,7 +382,7 @@ WGE.SlideshowInterface = WGE.Class(
 		//当音乐时间与时间轴时间差异超过300毫秒时，执行同步操作
 		if(Math.abs(asyncTime) > 500)
 		{
-			console.log("音乐同步中:", this._audioplayingTime, this.timeline.currentTime, asyncTime);
+			console.log("同步: 音乐时间", this._audioplayingTime, "时间轴时间",this.timeline.currentTime, "差值", asyncTime, "大于500,进行同步");
 			//当时间轴慢于音乐时间时，执行时间轴跳跃。
 			if(asyncTime > 500)
 			{
