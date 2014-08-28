@@ -399,4 +399,4 @@ WGE.WYSAIDTrackingCode = function()
 	delete WGE.WYSAIDTrackingCode;
 };
 
-setTimeout(WGE.WYSAIDTrackingCode, 15000); //打开页面15秒之后再统计。
+// setTimeout(WGE.WYSAIDTrackingCode, 15000); //打开页面15秒之后再统计。

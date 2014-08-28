@@ -129,6 +129,8 @@ WGE.SlideshowInterface = WGE.Class(
 	_lastFrameTime : null, //保存每一帧执行完之后的时间。
 	_loopFunc : null, // mainloop.bind(this)
 	_audioplayingTime : 0, //播放时间
+	_endCanvas : null, //结束画面
+	_endBlurCanvas : null, //结束模糊画面
 
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
@@ -257,6 +259,7 @@ WGE.SlideshowInterface = WGE.Class(
 
 	getAudioPlayingTime : function()
 	{
+		// console.log(this.audioPlayedTimes * this.audio.duration + this.audio.position);
 		return this.audioPlayedTimes * this.audio.duration + this.audio.position;
 	},
 
@@ -299,7 +302,7 @@ WGE.SlideshowInterface = WGE.Class(
 		{
 			cancelAnimationFrame(this._animationRequest);
 			this._animationRequest = null;
-			this.endloop();
+			this._end();
 		}
 
 		if(this.audio)
@@ -353,24 +356,55 @@ WGE.SlideshowInterface = WGE.Class(
 		if(this._animationRequest)
 			return;
 		var time = Date.now();
-
-		if(time > this._lastFrameTime + 3000)
+		var dt = time - this._lastFrameTime;
+		if(dt >  3000)
 		{
 			this.context.save();
-			this.context.globalAlpha = 0.9;
+			this.context.drawImage(this._endBlurCanvas, 0, 0);
+			this.context.fillStyle = "#000";
+			this.context.globalAlpha = 0.5;
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 			this.context.restore();
 			console.log("Slideshow endloop finished.");
 			this.audio.stop();
 			return ;
 		}
+
 		this.context.save();
-		this.context.globalAlpha = 0.04;
-		this.context.fillStyle = "#000";
-		this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+		 if(dt < 2500)
+		{
+			this.context.drawImage(this._endCanvas, 0, 0);
+			this.context.globalAlpha = dt / 2000;
+			this.context.drawImage(this._endBlurCanvas, 0, 0);
+		}
+		else
+		{
+			this.context.drawImage(this._endBlurCanvas, 0, 0);
+			this.context.globalAlpha = (dt - 2500) / 1000;
+			this.context.fillStyle = "#000";
+			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+		}
 		this.context.restore();
 		//保证淡出执行间隔。(淡出不需要太高的帧率，和大量运算)
 		setTimeout(this.endloop.bind(this), 20);
+	},
+
+	_end : function()
+	{
+		console.log("Slideshow End");
+		this._animationRequest = null;
+		this._endBlurCanvas = WGE.CE("canvas");
+		this._endBlurCanvas.width = this.canvas.width;
+		this._endBlurCanvas.height = this.canvas.height;
+		var ctx = this._endBlurCanvas.getContext('2d');
+		var blurredData = WGE.Filter.StackBlur.stackBlurCanvasRGB(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 50);
+		ctx.putImageData(blurredData, 0, 0);
+		this._endCanvas = WGE.CE("canvas");
+		this._endCanvas.width = this.canvas.width;
+		this._endCanvas.height = this.canvas.height;
+		this._endCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
+		this.endloop();
 	},
 
 	// slideshow主循环
@@ -388,9 +422,7 @@ WGE.SlideshowInterface = WGE.Class(
 			{
 				if(!this.timeline.update(asyncTime))
 				{
-					console.log("Slideshow Jump To End");
-					this._animationRequest = null;
-					this.endloop();
+					this._end();
 					return ;
 				}
 				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -412,9 +444,7 @@ WGE.SlideshowInterface = WGE.Class(
 
 		if(!this.timeline.update(deltaTime))
 		{
-			console.log("Slideshow End");
-			this._animationRequest = null;
-			this.endloop();
+			this._end();
 			return ;
 		}
 
