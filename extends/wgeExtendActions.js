@@ -583,5 +583,21 @@ A.MoveRightAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 });
 
 
+A.SlideUpAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+{
+
+
+	distance : 0,
+	otherSprite : null,
+	act : function(percent)
+	{
+		
+	},
+
+	setDistance : function(distance)
+	{
+		this.distance = distance;
+	}
+});
 
 })();

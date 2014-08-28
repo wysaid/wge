@@ -89,12 +89,12 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
              sprite2.push(action7);
         }  
 
+
         //向上拖动
+        //[15000 - 23000]
         {
             
         }
-
-
 
         this.timeline.push(sprite, sprite1,sprite2);
         this.timeline.start(0);
