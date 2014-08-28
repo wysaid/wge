@@ -54,8 +54,6 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
             c.globalAlpha = (1.0 / (10.0 / 2.0));
             for (var j = 0; j < 120.0; j += 2.0)
                 c.drawImage(srcimage, 0, j);
-            //var dataSrc = c.getImageData(0, 0, blurCanvas.width, blurCanvas.height);
-            //var dstCanvas = Filters.toCanvas(dataSrc);
             this.blurImages.push(blurCanvas);
          }
     },
@@ -147,6 +145,7 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
         var spriteLength = 39;
         var descDis = 300;
         var img1 = WGE.rotateArray(this.blurImages);
+        img1 = WGE.rotateArray(this.blurImages);
         img1 = WGE.rotateArray(this.blurImages);
         for (var i = 0; i < spriteLength; i++) {
 
