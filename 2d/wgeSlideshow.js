@@ -135,7 +135,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
 	//请重写自己的实现
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, config, imageRatioX, imageRatioY, canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback,imageRatioX, imageRatioY, config,  canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
