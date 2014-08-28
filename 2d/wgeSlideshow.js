@@ -374,16 +374,16 @@ WGE.SlideshowInterface = WGE.Class(
 
 		this.context.save();
 
-		 if(dt < 2500)
+		 if(dt < 1500)
 		{
 			this.context.drawImage(this._endCanvas, 0, 0);
-			this.context.globalAlpha = dt / 2000;
+			this.context.globalAlpha = dt / 1500;
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
 		}
 		else
 		{
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
-			this.context.globalAlpha = (dt - 2500) / 1000;
+			this.context.globalAlpha = (dt - 1500) / 3000;
 			this.context.fillStyle = "#000";
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
