@@ -168,7 +168,7 @@ WGE.SlideshowInterface = WGE.Class(
 			audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 
 		if(audioFileNames)
-			this._initAudio(audioFileNames);
+			this.audioFileName = audioFileNames;
 	},
 
 	//config 为json配置文件
@@ -209,11 +209,11 @@ WGE.SlideshowInterface = WGE.Class(
 	//需要第三方 soundManager
 	_initAudio : function(url)
 	{
+		if(this.audio)
+			return; 
+
 		var self = this;
-		var arg = {url : url,
-			whileplaying : function(){
-				self._audioplayingTime = self.audioPlayedTimes * this.duration + this.position;
-			}};
+		var arg = {url : url};
 
 		if(typeof this._audioFinish == "function")
 			arg.onfinish = this._audioFinish.bind(this);
@@ -229,7 +229,6 @@ WGE.SlideshowInterface = WGE.Class(
 			{
 				self.audio = soundManager.createSound(arg);
 				self.audio.play();
-
 				//初始时将音乐标记为暂停状态，而不是未播放状态。
 				if(!self._animationRequest)
 					self.audio.pause();
@@ -250,10 +249,10 @@ WGE.SlideshowInterface = WGE.Class(
 		this.audio.play();
 	},
 
-	// _audioplaying : function()
-	// {
-	// 	this._audioplayingTime = this.getAudioPlayingTime();
-	// },
+	_audioplaying : function()
+	{
+		this._audioplayingTime = this.getAudioPlayingTime();
+	},
 
 	_audiosuspend : function()
 	{
@@ -262,7 +261,6 @@ WGE.SlideshowInterface = WGE.Class(
 
 	getAudioPlayingTime : function()
 	{
-		// console.log(this.audioPlayedTimes * this.audio.duration + this.audio.position);
 		return this.audioPlayedTimes * this.audio.duration + this.audio.position;
 	},
 
@@ -284,7 +282,9 @@ WGE.SlideshowInterface = WGE.Class(
 		}
 
 		if(this.audio)
+		{
 			this.audio.play();
+		}
 		
 		this._lastFrameTime = Date.now();
 		this._loopFunc = this.mainloop.bind(this);
@@ -369,7 +369,6 @@ WGE.SlideshowInterface = WGE.Class(
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 			this.context.restore();
 			console.log("Slideshow endloop finished.");
-			this.audio.stop();
 			return ;
 		}
 
@@ -395,6 +394,10 @@ WGE.SlideshowInterface = WGE.Class(
 
 	_end : function()
 	{
+		if(this.audio)
+		{
+			this.audio.stop();
+		}
 		console.log("Slideshow End");
 		this._animationRequest = null;
 		this._endBlurCanvas = WGE.CE("canvas");
