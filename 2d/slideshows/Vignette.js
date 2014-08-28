@@ -144,9 +144,10 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
         var h = 0;
         var spriteLength = 39;
         var descDis = 300;
+        var img1 = WGE.rotateArray(this.srcImages);
         for (var i = 0; i < spriteLength; i++) {
 
-            sprites[i] = new mySprite(18000, 24000, WGE.rotateArray(this.srcImages), -1); 
+            sprites[i] = new mySprite(18000, 24000, img1, -1); 
             //sprites[i].setHotspot2Center();
             sprites[i].moveTo(0, h);
             h += sprites[i].size.data[1];
