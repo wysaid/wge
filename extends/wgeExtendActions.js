@@ -564,9 +564,21 @@ A.acceleratedMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 A.MoveRightAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
 
-	actionStop : function()
+
+	distance : 0,
+	act : function(percent)
 	{
-		
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		var x = Math.sin(Math.PI/2* t) * this.distance;
+		this.bindObj.moveTo(this.fromX+x, this.fromY);
+
+	},
+
+	setDistance : function(distance)
+	{
+		this.distance = distance;
 	}
 });
 

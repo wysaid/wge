@@ -48,14 +48,15 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
         	sprites[i] = new mySprite(4000, 10000, WGE.rotateArray(this.srcImages), -1);
         	sprites[i].setHotspot2Center();
 
-        var action5 = new WGE.Actions.UniformLinearMoveAction([0, 1000], [WGE.SlideshowSettings.width/2 - sprites[i].size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+        var action5 = new WGE.Actions.MoveRightAction([0, 1000], [WGE.SlideshowSettings.width/2 - sprites[i].size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+        action5.setDistance(sprites[i].size.data[0]);
        
  		var action6 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
 	    [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
         sprites[i].push(action5);
         sprites[i].push(action6);
 
-        var action7 = new WGE.Actions.UniformLinearMoveAction([0, 1000], [WGE.SlideshowSettings.width/2 - sprites[i].size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+        var action7 = new WGE.Actions.UniformLinearMoveAction([5000, 6000], [WGE.SlideshowSettings.width/2 - sprites[i].size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
 
         };
 
@@ -69,8 +70,8 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
         var action1 = new  WGE.Actions.acceleratedMoveAction([0, 4000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
             [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
         
-        var action2 = new WGE.Actions.UniformLinearMoveAction([4000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprites[0].size.data[0], WGE.SlideshowSettings.height/2], 1);
-
+        var action2 = new WGE.Actions.MoveRightAction([4000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprites[0].size.data[0], WGE.SlideshowSettings.height/2], 1);
+        action2.setDistance(sprites[0].size.data[0]);
         
         sprite.push(action);
         sprite.push(action2);
