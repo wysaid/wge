@@ -34,11 +34,11 @@ var len = imageArr.length;
 var slideshow = new WGE.Snapshots(div, imageArr, finishLoadAll, finishLoadOne);
 
 // 加载完全部
-function finishLoadAll(imgArr)
+function finishLoadAll(imgArr, slideshowThis)
 {
-	slideshow.context.clearRect(0, 0, slideshow.canvas.width, slideshow.canvas.height);
-	slideshow.context.fillText("图片加载完毕，初始场景...", 10, slideshow.canvas.height / 2);
-	slideshow.play();
+	slideshowThis.context.clearRect(0, 0, slideshowThis.canvas.width, slideshowThis.canvas.height);
+	slideshowThis.context.fillText("图片加载完毕，初始场景...", 10, slideshowThis.canvas.height / 2);
+	slideshowThis.play();
 }
 
 //加载完单张

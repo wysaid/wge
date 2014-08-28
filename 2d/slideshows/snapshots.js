@@ -78,21 +78,6 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 	loopTime : 5000,
 	loopImageNum : 1,
 
-	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
-	{
-		var self = this;
-		WGE.loadImages(imgURLs, function(imgArr) {
-			self.srcImages = WGE.imagesFitSlideshow(imgArr, imageRatioX, imageRatioY);
-
-			if(self.config)
-				self.initTimeline(self.config);
-			if(finishCallback)
-				finishCallback();
-
-			self.config = null;
-		}, eachCallback);
-	},
-
 	_genBlurredImages : function(imgArr)
 	{
 		var blurredImgs = [];

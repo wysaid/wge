@@ -32,10 +32,13 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 				if(self.config)
 					self.initTimeline(self.config);
 				if(finishCallback)
-					finishCallback();
+					finishCallback(self.srcImages, self);
 
 				self.config = null;
-			}, eachCallback);
+			}, function(img, n) {
+				if(eachCallback)
+					eachCallback(img, n, self);
+			});
 		})
 	},
 
@@ -69,13 +72,29 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			var ratio = Math.random() * 0.5 + 0.5;
 			var w = ratio * cvs.width / 2;
 			var h = ratio * cvs.height / 2;
-			ctx.fillStyle = "#000";
-			ctx.fillRect(0, 0, cvs.width, cvs.height);
+			
 			ctx.drawImage(this._bgImage, 0, 0, this._bgImage.width, this._bgImage.height, 0, 0, cvs.width, cvs.height);
-			ctx.drawImage(img1, 0, 0, img1.width, img1.height, Math.random() * 100, Math.random() * 100, w, h);
-			ctx.drawImage(img2, 0, 0, img2.width, img2.height, cvs.width / 2 + Math.random() * 100, Math.random() * 100, w, h);
-			ctx.drawImage(img3, 0, 0, img3.width, img3.height, Math.random() * 100, cvs.height / 2 + Math.random() * 100, w, h);
-			ctx.drawImage(img4, 0, 0, img4.width, img4.height, cvs.width / 2 + Math.random() * 100, cvs.height / 2 + Math.random() * 100, w, h);
+
+			ctx.save();
+			ctx.translate(Math.random() * 100, Math.random() * 100);
+			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.drawImage(img1, 0, 0, img1.width, img1.height, 0, 0, w, h);
+			ctx.restore();
+			ctx.save();
+			ctx.translate(cvs.width / 2 + Math.random() * 100, Math.random() * 100);
+			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.drawImage(img2, 0, 0, img2.width, img2.height, 0, 0, w, h);
+			ctx.restore();
+			ctx.save();
+			ctx.translate(Math.random() * 100, cvs.height / 2 + Math.random() * 100);
+			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.drawImage(img3, 0, 0, img3.width, img3.height, 0, 0, w, h);
+			ctx.restore();
+			ctx.save();
+			ctx.translate(cvs.width / 2 + Math.random() * 100, cvs.height / 2 + Math.random() * 100);
+			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.drawImage(img4, 0, 0, img4.width, img4.height, 0, 0, w, h);
+			ctx.restore();
 
 			var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
 

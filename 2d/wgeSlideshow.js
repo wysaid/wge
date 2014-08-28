@@ -221,10 +221,13 @@ WGE.SlideshowInterface = WGE.Class(
 			if(self.config)
 				self.initTimeline(self.config);
 			if(finishCallback)
-				finishCallback();
+				finishCallback(self.srcImages, self);
 
 			self.config = null;
-		}, eachCallback);
+		}, function(img, n) {
+			if(eachCallback)
+				eachCallback(img, n, self);
+		});
 	},
 
 	//需要第三方 soundManager
@@ -415,10 +418,6 @@ WGE.SlideshowInterface = WGE.Class(
 
 	_end : function()
 	{
-		if(this.audio)
-		{
-			this.audio.stop();
-		}
 		console.log("Slideshow End");
 		this._animationRequest = null;
 		this._endBlurCanvas = WGE.CE("canvas");
@@ -432,7 +431,14 @@ WGE.SlideshowInterface = WGE.Class(
 		this._endCanvas.height = this.canvas.height;
 		this._endCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
 		this.timeline.end();
+
+		this._lastFrameTime = Date.now();
 		this.endloop();
+
+		if(this.audio)
+		{
+			this.audio.stop();
+		}
 	},
 
 	// slideshow主循环
