@@ -341,14 +341,15 @@ WGE.SlideshowInterface = WGE.Class(
 
 	resume : function()
 	{
-		if(!this._animationRequest && this.timeline)
+		if(!this._animationRequest && this.timeline && this.timeline.isStarted)
 		{
 			requestAnimationFrame(this._loopFunc);
-		}
+			this._lastFrameTime = Date.now();
 
-		if(this.audio)
-		{
-			this.audio.resume();
+			if(this.audio)
+			{
+				this.audio.resume();
+			}
 		}
 	},
 
@@ -421,6 +422,7 @@ WGE.SlideshowInterface = WGE.Class(
 		this._endCanvas.width = this.canvas.width;
 		this._endCanvas.height = this.canvas.height;
 		this._endCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
+		this.timeline.end();
 		this.endloop();
 	},
 
