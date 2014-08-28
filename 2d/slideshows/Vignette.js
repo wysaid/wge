@@ -32,52 +32,71 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
     initTimeline : function(config)
     {
         this.timeline = new WGE.TimeLine(50000);
-        this.ControlActions();
+        this.CombineScence();
 	},
 
 
-	ControlActions : function()
+	CombineScence : function()
 	{
-		var sprite = new mySprite(0, 5000, this.srcImages[0], -1);
+		var sprite = new mySprite(0, 5000, WGE.rotateArray(this.srcImages), -1);
+        var sprite1 = new mySprite(4000, 10000, WGE.rotateArray(this.srcImages), -1);
+        var sprite2 = new mySprite(9000, 14000, WGE.rotateArray(this.srcImages), -1); 
         //sprite.moveTo(WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2);
         sprite.setHotspot2Center();
-
-        //加入要循环播放的数组中
-        var sprites = [];
-        for (var i = 0; i < 1; i++) {
-        	sprites[i] = new mySprite(4000, 10000, WGE.rotateArray(this.srcImages), -1);
-        	sprites[i].setHotspot2Center();
-
-        var action5 = new WGE.Actions.MoveRightAction([0, 1000], [WGE.SlideshowSettings.width/2 - sprites[i].size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-        action5.setDistance(sprites[i].size.data[0]);
-       
- 		var action6 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
-	    [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-        sprites[i].push(action5);
-        sprites[i].push(action6);
-
-        var action7 = new WGE.Actions.UniformLinearMoveAction([5000, 6000], [WGE.SlideshowSettings.width/2 - sprites[i].size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-
-        };
-
-
-        var sprite1 = new mySprite(4000, 9000, this.srcImages[1], -1);
-        //sprite1.moveTo(WGE.SlideshowSettings.width/2 - sprite1.size.data[0], WGE.SlideshowSettings.height/2);
         sprite1.setHotspot2Center();
-        var action = new WGE.Actions.acceleratedMoveAction([0, 4000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
-            [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-        
-        var action1 = new  WGE.Actions.acceleratedMoveAction([0, 4000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
-            [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-        
-        var action2 = new WGE.Actions.MoveRightAction([4000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprites[0].size.data[0], WGE.SlideshowSettings.height/2], 1);
-        action2.setDistance(sprites[0].size.data[0]);
-        
-        sprite.push(action);
-        sprite.push(action2);
+        sprite2.setHotspot2Center();
 
-        this.timeline.push(sprite);
-        this.timeline.pushArr(sprites);
+
+        //[0-5000],动作两个
+        {
+            var action = new WGE.Actions.acceleratedMoveAction([0, 4000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+            [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+        
+            var action2 = new WGE.Actions.MoveRightAction([4000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprite1.size.data[0], WGE.SlideshowSettings.height/2], 1);
+            action2.setDistance((sprite1.size.data[0]+sprite1.size.data[0])/2);
+
+             sprite.push(action);
+             sprite.push(action2);
+
+        }
+
+        //[5000 - 10000]
+         {
+            var action3 = new WGE.Actions.MoveRightAction([0, 1000], [WGE.SlideshowSettings.width/2 - (sprite1.size.data[0]+sprite1.size.data[0])/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+            action3.setDistance((sprite1.size.data[0]+sprite1.size.data[0])/2);
+           
+            var action4 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+            [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+
+            var action5 = new WGE.Actions.MoveRightAction([5000, 6000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprite2.size.data[0], WGE.SlideshowSettings.height/2], 1);
+            action5.setDistance((sprite2.size.data[0]+sprite1.size.data[0])/2);
+
+             sprite1.push(action3);
+             sprite1.push(action4);
+             sprite1.push(action5);
+
+        }     
+
+        //[10000 - 15000]
+        {
+             var action6 = new WGE.Actions.MoveRightAction([0, 1000], [WGE.SlideshowSettings.width/2 - (sprite2.size.data[0]+sprite1.size.data[0])/2 , WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+             action6.setDistance((sprite2.size.data[0]+sprite1.size.data[0])/2);
+           
+            var action7 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+            [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+
+             sprite2.push(action6);
+             sprite2.push(action7);
+        }  
+
+        //向上拖动
+        {
+            
+        }
+
+
+
+        this.timeline.push(sprite, sprite1,sprite2);
         this.timeline.start(0);
 	},
 
