@@ -77,32 +77,63 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 
 	loopTime : 5000,
 	loopImageNum : 1,
+	blurredImgs : null,
+	boundingBoxes : null,
+
+	initialize : function()
+	{
+		WGE.SlideshowInterface.initialize.apply(this, arguments);
+		this.blurredImgs = [];
+		this.boundingBoxes = [];
+	},
 
 	_genBlurredImages : function(imgArr)
 	{
 		var blurredImgs = [];
 
-		// var filter = new WGE.Filter.StackBlur();
-
 		for(var i in imgArr)
 		{
-			var img = imgArr[i];
-			var ctx = img.getContext('2d');
-			var dw = 1024 / 8, dh = 768 / 8;
+			// var img = imgArr[i];
+			// var dw = 1024 / 8, dh = 768 / 8;
 			
-			var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, dw * 2 + 20, dh * 2 + 20, 10);
+			// var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, dw * 2 + 20, dh * 2 + 20, 10);
 
-			// var cvs = filter.bind(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, dw * 2 + 40, dh * 2 + 40).run([10]);
 
-			var cvs = WGE.CE('canvas');
-			cvs.width = dstData.width;
-			cvs.height = dstData.height;
-			var ctx2 = cvs.getContext('2d');
+			// var cvs = WGE.CE('canvas');
+			// cvs.width = dstData.width;
+			// cvs.height = dstData.height;
+			// var ctx2 = cvs.getContext('2d');
 
-			ctx2.putImageData(dstData, 0, 0);
-			blurredImgs.push(cvs);
+			// ctx2.putImageData(dstData, 0, 0);
+			// blurredImgs.push(cvs);
+			blurredImgs.push(this._genBlurredImage(imgArr[i]));
 		}
 		return blurredImgs;
+	},
+
+	_genBlurredImage : function(img)
+	{
+		var cvs;		
+		var dw = 1024 / 8, dh = 768 / 8;
+		var dstData;
+		cvs = WGE.CE('canvas');
+		cvs.width = dw * 2 + 20;
+		cvs.height = dh * 2 + 20;
+
+		var ctx = cvs.getContext('2d');
+
+		if(img.getContext)
+		{
+			dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, cvs.width, cvs.height, 10);
+		}
+		else
+		{
+			ctx.drawImage(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, cvs.width, cvs.height, 0, 0, cvs.width, cvs.height);
+			dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, img.width / 2 - dw - 20, img.height / 2 - dh - 20, cvs.width, cvs.height, 10);
+		}
+		
+		ctx.putImageData(dstData, 0, 0);		
+		return cvs;
 	},
 
 	_genBoundingBox : function(imgArr)
@@ -127,6 +158,27 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 			boundingBoxArr.push(cvs);
 		}
 		return boundingBoxArr;
+	},
+
+	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
+	{
+		var self = this;
+		WGE.loadImages(imgURLs, function(imgArr) {
+			self.srcImages = WGE.slideshowFitImages(imgArr, imageRatioX, imageRatioY);
+
+			if(self.config)
+				self.initTimeline(self.config);
+			if(finishCallback)
+				finishCallback(self.srcImages, self);
+
+			self.config = null;
+		}, function(img, n) {
+			// var imgFit = WGE.slideshowFitImages(img, imageRatioX, imageRatioY);
+			// this.blurredImgs.push(this._genBlurredImage(imgFit));
+			// this.boundingBoxes.push
+			if(eachCallback)
+				eachCallback(img, n, self);
+		});
 	},
 
 	initTimeline : function(config)

@@ -67,6 +67,26 @@ WGE.slideshowFitImages = function(imgs, w, h)
 	return fitImgs;
 };
 
+WGE.slideshowFitImage = function(img, w, h)
+{
+	if(!(w && h))
+	{
+		w = 1024;
+		h = 768;
+	}
+	else
+	{
+		w *= WGE.SlideshowSettings.width;
+		h *= WGE.SlideshowSettings.height;
+	}
+
+	var canvas = WGE.CE('canvas');
+	var scale = Math.min(img.width / w, img.height / h);
+	canvas.width = img.width / scale;
+	canvas.height = img.height / scale;
+	canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+	return canvas;
+};
 
 WGE.imagesFitSlideshow = function(imgs, w, h)
 {
