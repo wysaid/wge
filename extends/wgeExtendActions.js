@@ -613,8 +613,8 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 		var t = this.repeatTimes * percent;
 		t -= Math.floor(t);
 		t = t * t * (3 - 2 * t);
-		var t1 = t/0.8;
-		var t2 = (t - 0.8) / 0.2;
+		var t1 = t/proporty;
+		var t2 = (t - proporty) / (1-proporty);
 		
 		
 		if(t < 0.8){

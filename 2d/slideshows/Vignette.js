@@ -42,20 +42,22 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 
     handleImgs : function()
     {
-        // for (var i = 0; i < this.srcImages.length; i++) {
-        //     var srcimage = this.srcImages[i];
-        //     var blurCanvas = document.createElement('canvas');
-        //     blurCanvas.width = srcimage.width;
-        //     blurCanvas.height = srcimage.height;
-        //     var c = blurCanvas.getContext('2d');
-        //     c.clearRect(0, 0, c.width, c.height);
-        //     c.globalAlpha = (1.0 / (10.0 / 2.0));
-        //     for (var j = 0; j < 120.0; j += 2.0)
-        //         c.drawImage(srcimage, 0, j);
-        //     var dataSrc = c.getImageData(0, 0, blurCanvas.width, blurCanvas.height);
-        //     var dstCanvas = Filters.toCanvas(dataSrc);
-        //     this.blurImages.push(dstCanvas);
-        // };
+        for (var i = 0; i < this.srcImages.length; i++) {
+            var width = this.srcImages[i].width;
+            var height = this.srcImages[i].height;
+            var srcimage = this.srcImages[i];
+            var blurCanvas = document.createElement('canvas');
+            blurCanvas.width = srcimage.width;
+            blurCanvas.height = srcimage.height;
+            var c = blurCanvas.getContext('2d');
+            c.clearRect(0, 0, c.width, c.height);
+            c.globalAlpha = (1.0 / (10.0 / 2.0));
+            for (var j = 0; j < 120.0; j += 2.0)
+                c.drawImage(srcimage, 0, j);
+            //var dataSrc = c.getImageData(0, 0, blurCanvas.width, blurCanvas.height);
+            //var dstCanvas = Filters.toCanvas(dataSrc);
+            this.blurImages.push(blurCanvas);
+         }
     },
 
 
@@ -144,7 +146,8 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
         var h = 0;
         var spriteLength = 39;
         var descDis = 300;
-        var img1 = WGE.rotateArray(this.srcImages);
+        var img1 = WGE.rotateArray(this.blurImages);
+        img1 = WGE.rotateArray(this.blurImages);
         for (var i = 0; i < spriteLength; i++) {
 
             sprites[i] = new mySprite(18000, 24000, img1, -1); 
@@ -153,6 +156,16 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
             h += sprites[i].size.data[1];
             logicSprite.addChild(sprites[i]);
         }
+        var img =  WGE.rotateArray(this.srcImages);
+        for (var i = 0; i < 2; i++) {
+            sprites[spriteLength + i] = new mySprite(18000, 24000, img, -1); 
+            //sprites[i].setHotspot2Center();
+            sprites[spriteLength + i].moveTo(0, h);
+            h += sprites[spriteLength + i].size.data[1];
+            logicSprite.addChild(sprites[spriteLength + i]);
+        };
+
+        spriteLength += 2;
 
         var action18 = new WGE.Actions.MoveSlideAction([0, 5000], [0  , 0], [0 , 0], 1);
         logicSprite.push(action18);
