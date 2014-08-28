@@ -175,8 +175,8 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 			var sprite2 = new WGE.SlideshowAnimationSprite(t, t + 6000, img2, -1);
 			sprite2.setHotspot2Center();
 			sprite2.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
-			// var alphaAction2 = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
-			// sprite2.push(alphaAction2);
+			var alphaAction2 = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
+			sprite2.push(alphaAction2);
 			sprite2.scaleTo(WGE.SlideshowSettings.width / (img2.width - 40), WGE.SlideshowSettings.height / (img2.height - 40));
 			sprite2.zIndex = zIndex - 1;
 			this.timeline.pushArr([sprite, sprite2]);

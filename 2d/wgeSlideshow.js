@@ -374,7 +374,7 @@ WGE.SlideshowInterface = WGE.Class(
 
 		this.context.save();
 
-		 if(dt < 1500)
+		if(dt < 1500)
 		{
 			this.context.drawImage(this._endCanvas, 0, 0);
 			this.context.globalAlpha = dt / 1500;
@@ -434,8 +434,9 @@ WGE.SlideshowInterface = WGE.Class(
 				this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 				this.timeline.render(this.context);
 			}
-			else
+			else if(this.audio)
 			{
+				
 				this.audio.resume();
 				this._audioplayingTime = this.getAudioPlayingTime();
 			}
