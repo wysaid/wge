@@ -643,6 +643,76 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	}
 });
 
+//和slideup接轨的动作
+A.acceleratedSlideMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+{
+	firstNode : true,
+	posx : 0,
+	posy : 0,
+
+	act : function(percent)
+	{
+		if(this.firstNode)
+		{
+			this.firstNode = false;
+			this.posx = this.bindObj.pos.data[0];
+			this.posy = this.bindObj.pos.data[1];
+		}
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		var y = Math.sin(Math.PI * 2 * t) * 50;
+		this.bindObj.moveTo(this.posx, this.posy + y);
+	},
+
+	actionStart : function()
+	{
+		
+	},
+
+	actionStop : function()
+	{
+
+	}
+});
+
+
+A.MoveSlideRightAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
+{
+
+
+	distance : 0,
+	firstNode : true,
+	posx : 0,
+	posy : 0,
+
+	act : function(percent)
+	{
+		if(this.firstNode)
+		{
+			this.firstNode = false;
+			this.posx = this.bindObj.pos.data[0];
+			this.posy = this.bindObj.pos.data[1];
+		}
+		var t = this.repeatTimes * percent;
+		t -= Math.floor(t);
+		t = t * t * (3 - 2 * t);
+		var x = Math.sin(Math.PI/2* t) * this.distance;
+		this.bindObj.moveTo(this.posx+x, this.posy);
+
+	},
+
+	setDistance : function(distance)
+	{
+		this.distance = distance;
+	},
+
+	actionStop : function()
+	{
+
+	}
+
+});
 
 
 })();

@@ -34,8 +34,9 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
     initTimeline : function(config)
     {
         this.handleImgs();
-        this.timeline = new WGE.TimeLine(50000);
-        this.CombineScence();
+        this.timeline = new WGE.TimeLine(57000);
+        this.CombineScence(0);
+        this.CombineScence(28000);
 
 	},
 
@@ -52,40 +53,43 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
             var c = blurCanvas.getContext('2d');
             c.clearRect(0, 0, c.width, c.height);
             c.globalAlpha = (1.0 / (10.0 / 2.0));
-            for (var j = 0; j < 120.0; j += 2.0)
-                c.drawImage(srcimage, 0, j);
-            this.blurImages.push(blurCanvas);
+            //for (var j = 0; j < 120.0; j += 2.0)
+             //   c.drawImage(srcimage, 0, j);
+            this.blurImages.push(srcimage);
          }
     },
 
 
-	CombineScence : function()
+	CombineScence : function(start)
 	{
-		var sprite = new mySprite(0, 5000, WGE.rotateArray(this.srcImages), -1);
-        var sprite1 = new mySprite(4000, 10000, WGE.rotateArray(this.srcImages), -1);
-        var sprite2 = new mySprite(9000, 18000, WGE.rotateArray(this.srcImages), -1); 
-        var sprite3 = new mySprite(14000,18000, WGE.rotateArray(this.srcImages), -1); 
-        var logicSprite = new MyLogicSprite(18000, 24000);
+		var sprite = new mySprite(start, start+6000, WGE.rotateArray(this.srcImages), -1);
+        var sprite1 = new mySprite(start+5000, start+11000, WGE.rotateArray(this.srcImages), -1);
+        var sprite2 = new mySprite(start+10000, start+16000, WGE.rotateArray(this.srcImages), -1); 
+        var sprite3 = new mySprite(start+15000,start+19000, WGE.rotateArray(this.srcImages), -1); 
+        var logicSprite = new MyLogicSprite(start+19000, start+29000);
         logicSprite.setHotspot2Center();
-        //logicSprite.moveTo(WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2);
-        //sprite.moveTo(WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2);
+
         sprite.setHotspot2Center();
         sprite1.setHotspot2Center();
         sprite2.setHotspot2Center();
         sprite3.setHotspot2Center();
-        //sprite3.moveTo(WGE.SlideshowSettings.width/2 + sprite3.width, WGE.SlideshowSettings.height/2);
-
 
         //[0-5000],动作两个
         {
-            var action = new WGE.Actions.acceleratedMoveAction([0, 4000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
+            // var action0 = new WGE.Actions.MoveRightAction([0, 1000], [WGE.SlideshowSettings.width/2 - sprite.size.data[0], WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+            // action0.setDistance(sprite.size.data[0]);
+
+            var action0 = new WGE.Actions.UniformAlphaAction([0, 2000], 0, 1, 1);
+
+            var action = new WGE.Actions.acceleratedMoveAction([0000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
             [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
         
-            var action2 = new WGE.Actions.MoveRightAction([4000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprite1.size.data[0], WGE.SlideshowSettings.height/2], 1);
+            var action2 = new WGE.Actions.MoveRightAction([5000, 6000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprite1.size.data[0], WGE.SlideshowSettings.height/2], 1);
             action2.setDistance((sprite1.size.data[0]+sprite1.size.data[0])/2);
 
-             sprite.push(action);
-             sprite.push(action2);
+            sprite.push(action0);
+            sprite.push(action);
+            sprite.push(action2);
 
         }
 
@@ -130,53 +134,58 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 
              var action19 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
             [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-            //var action9 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
-            //[WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
 
              sprite3.push(action8);
              sprite3.push(action19);
 
-            // sprite2.push(action9);
         }  
 
-        //
-        var sprites = [];
-        var h = 0;
-        var spriteLength = 39;
-        var descDis = 300;
-        var img1 = WGE.rotateArray(this.blurImages);
-        img1 = WGE.rotateArray(this.blurImages);
-        img1 = WGE.rotateArray(this.blurImages);
-        for (var i = 0; i < spriteLength; i++) {
+        //拖尾效果
+        {
+            var sprites = [];
+            var h = WGE.SlideshowSettings.height/2;
+            var spriteLength = 39;
+            var descDis = 300;
+            var img1 = WGE.rotateArray(this.blurImages);
+            img1 = WGE.rotateArray(this.blurImages);
+            img1 = WGE.rotateArray(this.blurImages);
+            img1 = WGE.rotateArray(this.blurImages);
+            img1 = WGE.rotateArray(this.blurImages);
+            for (var i = 0; i < spriteLength; i++) {
 
-            sprites[i] = new mySprite(18000, 24000, img1, -1); 
-            //sprites[i].setHotspot2Center();
-            sprites[i].moveTo(0, h);
-            h += sprites[i].size.data[1];
-            logicSprite.addChild(sprites[i]);
+                sprites[i] = new mySprite(18000, 24000, img1, -1); 
+                sprites[i].setHotspot2Center();
+                sprites[i].moveTo(WGE.SlideshowSettings.width/2, h);
+                h += sprites[i].size.data[1];
+                logicSprite.addChild(sprites[i]);
+            }
+            var img =  WGE.rotateArray(this.srcImages);
+            img =  WGE.rotateArray(this.srcImages);
+            for (var i = 0; i < 2; i++) {
+                sprites[spriteLength + i] = new mySprite(18000, 24000, img, -1); 
+                sprites[spriteLength + i].setHotspot2Center();
+                sprites[spriteLength + i].moveTo(WGE.SlideshowSettings.width/2, h);
+                h += sprites[spriteLength + i].size.data[1];
+                logicSprite.addChild(sprites[spriteLength + i]);
+            };
+
+            spriteLength += 2;
+
+            var action18 = new WGE.Actions.MoveSlideAction([0, 5000], [0  , 0], [0 , 0], 1);
+            logicSprite.push(action18);
+            action18.setDescDistance(descDis);
+
+            action18.setDistance(h - sprites[spriteLength - 1].size.data[1]  - sprites[spriteLength - 2].size.data[1]+ descDis -WGE.SlideshowSettings.height/2 );
+
+
+            var action20 = new WGE.Actions.acceleratedSlideMoveAction([4500, 10000], [0, 0], 
+            [0, 0], 1);
+
+             var action21 = new WGE.Actions.MoveSlideRightAction([9000, 10000], [WGE.SlideshowSettings.width/2 - (sprite2.size.data[0]+sprite1.size.data[0])/2 , WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+             action21.setDistance(1024);
+
+            logicSprite.push(action20);
         }
-        var img =  WGE.rotateArray(this.srcImages);
-        for (var i = 0; i < 2; i++) {
-            sprites[spriteLength + i] = new mySprite(18000, 24000, img, -1); 
-            //sprites[i].setHotspot2Center();
-            sprites[spriteLength + i].moveTo(0, h);
-            h += sprites[spriteLength + i].size.data[1];
-            logicSprite.addChild(sprites[spriteLength + i]);
-        };
-
-        spriteLength += 2;
-
-        var action18 = new WGE.Actions.MoveSlideAction([0, 5000], [0  , 0], [0 , 0], 1);
-        logicSprite.push(action18);
-        action18.setDescDistance(descDis);
-
-        action18.setDistance(h - sprites[spriteLength - 1].size.data[1]  - sprites[spriteLength - 2].size.data[1]+ descDis );
-
-
-        //向上拖动
-        //[15000 - 23000]
-
-        //sprite3.moveTo(WGE.SlideshowSettings.width/2 + sprite3.width, WGE.SlideshowSettings.height/2);
 
         this.timeline.push(sprite, sprite1,sprite2, sprite3,logicSprite);
         
