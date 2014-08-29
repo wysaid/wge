@@ -405,9 +405,9 @@ WGE.Image404Data = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYcAAAKTCAYAAA
 
 WGE.gen404Image = function()
 {
-	var c = WGE.CE('canvas');
-	c.src = WGE.Image404Data;
-	if(c.complete)
+	var img = new Image;
+	img.src = WGE.Image404Data;
+	if(img.complete)
 	{
 		var c2 = WGE.CE('canvas');
 		c2.width = 1024;
@@ -415,19 +415,19 @@ WGE.gen404Image = function()
 		var ctx = c2.getContext('2d');
 		ctx.fillStyle = "#72BCAB";
 		ctx.fillRect(0, 0, c2.width, c2.height);
-		ctx.drawImage(c, 0, 0, c.width, c.height, 512 - c2.width/2, 384 - c2.height / 2);
+		ctx.drawImage(img, 0, 0, img.width, img.height, 512 - img.width/2, 384 - img.height / 2, img.width, img.height);
 		WGE.Image404Data = c2.toDataURL();
 	}
 	else
 	{
-		c.onload = function() {
+		img.onload = function() {
 			var c2 = WGE.CE('canvas');
 			c2.width = 1024;
 			c2.height = 768;
 			var ctx = c2.getContext('2d');
 			ctx.fillStyle = "#72BCAB";
 			ctx.fillRect(0, 0, c2.width, c2.height);
-			ctx.drawImage(c, 0, 0, c.width, c.height, 512 - c2.width/2, 384 - c2.height / 2);
+			ctx.drawImage(img, 0, 0, img.width, img.height, 512 - img.width/2, 384 - img.height / 2, img.width, img.height);
 			WGE.Image404Data = c2.toDataURL();
 		}
 	}
