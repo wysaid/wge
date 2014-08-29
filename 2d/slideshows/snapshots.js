@@ -93,19 +93,6 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 
 		for(var i in imgArr)
 		{
-			// var img = imgArr[i];
-			// var dw = 1024 / 8, dh = 768 / 8;
-			
-			// var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(img, img.width / 2 - dw - 20, img.height / 2 - dh - 20, dw * 2 + 20, dh * 2 + 20, 10);
-
-
-			// var cvs = WGE.CE('canvas');
-			// cvs.width = dstData.width;
-			// cvs.height = dstData.height;
-			// var ctx2 = cvs.getContext('2d');
-
-			// ctx2.putImageData(dstData, 0, 0);
-			// blurredImgs.push(cvs);
 			blurredImgs.push(this._genBlurredImage(imgArr[i]));
 		}
 		return blurredImgs;
@@ -158,27 +145,6 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 			boundingBoxArr.push(cvs);
 		}
 		return boundingBoxArr;
-	},
-
-	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
-	{
-		var self = this;
-		WGE.loadImages(imgURLs, function(imgArr) {
-			self.srcImages = WGE.slideshowFitImages(imgArr, imageRatioX, imageRatioY);
-
-			if(self.config)
-				self.initTimeline(self.config);
-			if(finishCallback)
-				finishCallback(self.srcImages, self);
-
-			self.config = null;
-		}, function(img, n) {
-			// var imgFit = WGE.slideshowFitImages(img, imageRatioX, imageRatioY);
-			// this.blurredImgs.push(this._genBlurredImage(imgFit));
-			// this.boundingBoxes.push
-			if(eachCallback)
-				eachCallback(img, n, self);
-		});
 	},
 
 	initTimeline : function(config)
