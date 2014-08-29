@@ -14,7 +14,7 @@
 */
 
 
-WGE.FotorSlideshowInterface = WGE.Class(FT.kAnimator, WGE.SlideshowInterface
+WGE.FotorSlideshowInterface = WGE.Class(FT.kAnimator, WGE.SlideshowInterface,
 {
 
 	//options、lastPhotoCallback 都是无意义参数，建议剔除
