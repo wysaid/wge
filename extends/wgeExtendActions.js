@@ -579,6 +579,11 @@ A.MoveRightAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	setDistance : function(distance)
 	{
 		this.distance = distance;
+	},
+
+	actionStop : function()
+	{
+
 	}
 });
 

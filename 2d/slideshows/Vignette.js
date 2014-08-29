@@ -31,14 +31,44 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
     audioFileName : ["slideshow_love.OGG","slideshow_love.mp3"]
     ,
     blurImages : [],
+    totalTime : 0,
+    musicTime : 217000,
+    recycleTimes : 0,
     initTimeline : function(config)
     {
         this.handleImgs();
-        this.timeline = new WGE.TimeLine(57000);
-        this.CombineScence(0);
-        this.CombineScence(28000);
+        this.calculateTime();
+        this.timeline = new WGE.TimeLine(this.totalTime);   
+        this.recycleAnimation();
 
 	},
+
+
+    calculateTime : function()
+    {
+        var recycleTime = Math.floor(this.srcImages.length / 5);
+        var animationTime = recycleTime*29000 - (recycleTime + 1)*1000;
+        var leftNum = this.srcImages.length % 5;
+        if(leftNum <= 3)
+            animationTime += leftNum*6000;
+        else 
+            animationTime += 3*6000 + 4000;
+
+        this.totalTime = animationTime > this.musicTime ? animationTime : this.musicTime;
+        this.recycleTimes = Math.floor(this.totalTime/29000) + 1;
+        console.log(this.totalTime);
+        console.log(this.recycleTimes);
+
+    },
+
+    recycleAnimation: function ()
+    {
+        var currentTime = 0;
+        //var rctimes = Math.floor(this.srcImages.length / 5) + 1;
+        for (var i = 0; i < this.recycleTimes; i++) {
+            this.CombineScence(i*29000 - i*1000);
+        };
+    },
 
 
     handleImgs : function()
@@ -85,7 +115,7 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
             [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
         
             var action2 = new WGE.Actions.MoveRightAction([5000, 6000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2+sprite1.size.data[0], WGE.SlideshowSettings.height/2], 1);
-            action2.setDistance((sprite1.size.data[0]+sprite1.size.data[0])/2);
+            action2.setDistance((sprite.size.data[0]+sprite1.size.data[0])/2);
 
             sprite.push(action0);
             sprite.push(action);
@@ -95,8 +125,8 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
 
         //[5000 - 10000]
          {
-            var action3 = new WGE.Actions.MoveRightAction([0, 1000], [WGE.SlideshowSettings.width/2 - (sprite1.size.data[0]+sprite1.size.data[0])/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
-            action3.setDistance((sprite1.size.data[0]+sprite1.size.data[0])/2);
+            var action3 = new WGE.Actions.MoveRightAction([0, 1000], [WGE.SlideshowSettings.width/2 - (sprite.size.data[0]+sprite1.size.data[0])/2, WGE.SlideshowSettings.height/2], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
+            action3.setDistance((sprite.size.data[0]+sprite1.size.data[0])/2);
            
             var action4 = new WGE.Actions.acceleratedMoveAction([1000, 5000], [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 
             [WGE.SlideshowSettings.width/2, WGE.SlideshowSettings.height/2], 1);
@@ -160,7 +190,6 @@ WGE.Vignette = WGE.Class(WGE.SlideshowInterface,
                 logicSprite.addChild(sprites[i]);
             }
             var img =  WGE.rotateArray(this.srcImages);
-            img =  WGE.rotateArray(this.srcImages);
             for (var i = 0; i < 2; i++) {
                 sprites[spriteLength + i] = new mySprite(18000, 24000, img, -1); 
                 sprites[spriteLength + i].setHotspot2Center();
