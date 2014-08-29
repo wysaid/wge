@@ -1,8 +1,8 @@
 "use strict";
 /*
-* photoFrames.js
+* piano.js
 *
-*  Created on: 2014-7-29
+*  Created on: 2014-8-29
 *      Author: Wang Yang
 *        Blog: http://blog.wysaid.org
 */
