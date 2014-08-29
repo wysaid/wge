@@ -1,6 +1,6 @@
 "use strict";
 /*
-* photoFrames.js
+* snapshots.js
 *
 *  Created on: 2014-7-29
 *      Author: Wang Yang

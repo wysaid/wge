@@ -1,6 +1,6 @@
 "use strict";
 /*
-* photoFrames.js
+* memories.js
 *
 *  Created on: 2014-8-28
 *      Author: Wang Yang

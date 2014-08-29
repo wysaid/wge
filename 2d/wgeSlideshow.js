@@ -166,7 +166,7 @@ WGE.SlideshowInterface = WGE.Class(
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
 	//请重写自己的实现
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback,imageRatioX, imageRatioY, config,  canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY, config,  canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -310,6 +310,8 @@ WGE.SlideshowInterface = WGE.Class(
 	//释放内存，在移动设备上效果比较明显。
 	release : function()
 	{
+		this.audio.destruct();
+		this.srcImages = undefined;
 		WGE.release(this);
 	},
 
@@ -400,7 +402,7 @@ WGE.SlideshowInterface = WGE.Class(
 
 	endloop : function()
 	{
-		if(this._animationRequest)
+		if(this._animationRequest || !(this.context && this._endBlurCanvas && this._endCanvas))
 			return;
 		var time = Date.now();
 		var dt = time - this._lastFrameTime;
