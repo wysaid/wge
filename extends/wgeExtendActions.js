@@ -602,7 +602,7 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	y1 : 0,
 	act : function(percent)
 	{
-		var proporty = 0.6;
+		var proporty = 0.5;
 		var t = this.repeatTimes * percent;
 		t -= Math.floor(t);
 		t = t * t * (3 - 2 * t);
@@ -610,7 +610,7 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 		var t2 = (t - proporty) / (1-proporty);
 		
 		
-		if(t < 0.6){
+		if(t < 0.5){
 			this.y  = Math.sin(Math.PI/2* t1) * this.distance;
 			this.bindObj.moveTo(this.fromX, this.fromY - this.y);
 		}

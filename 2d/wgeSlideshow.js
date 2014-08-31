@@ -487,6 +487,7 @@ WGE.SlideshowInterface = WGE.Class(
 			{
 				if(!this.timeline.update(asyncTime))
 				{
+					this.timeline.currentTime = this.timeline.totalTime;
 					this._end();
 					return ;
 				}
@@ -510,6 +511,7 @@ WGE.SlideshowInterface = WGE.Class(
 
 		if(!this.timeline.update(deltaTime))
 		{
+			this.timeline.currentTime = this.timeline.totalTime;
 			this._end();
 			return ;
 		}

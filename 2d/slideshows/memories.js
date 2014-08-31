@@ -19,7 +19,9 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 	_bgImage : null,
 	_bgImageURL : "memories.jpg",
 
-	_loadImages : function(imgURLs, finishCallback, eachCallback)
+	_gradient : null,
+
+	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
 	{
 		var self = this;
 
@@ -27,7 +29,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			self._bgImage = imgArr[0];
 
 			WGE.loadImages(imgURLs, function(imgArr) {
-			    self.srcImages = WGE.imagesFitSlideshow(imgArr, self._imageRatioX, self._imageRatioY);
+				self.srcImages = WGE.imagesFitSlideshow(imgArr, imageRatioX, imageRatioY);
 
 				if(self.config)
 					self.initTimeline(self.config);
@@ -40,14 +42,14 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 					eachCallback(img, n, self);
 			});
 		})
-	},
+	},	
 
 	_genBlurredImages : function(imgArr)
 	{
 		var blurredImgs = [];
 
 		var tmpArr = [0, 1, 2, 3];
-
+		var filter = new WGE.Filter.Monochrome();
 		for(var i = 0; i < imgArr.length; ++i)
 		{
 
@@ -62,7 +64,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			var img3 = imgArr[(tmpArr[2] + i) % imgArr.length];
 			var img4 = imgArr[(tmpArr[3] + i) % imgArr.length];
 
-			var dw = 1024 / 4, dh = 768 / 4;
+			var dw = 1024 , dh = 768 ;
 
 			var cvs = WGE.CE('canvas');
 			cvs.width = dw * 2 + 20;
@@ -74,32 +76,34 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			var h = ratio * cvs.height / 2;
 			
 			ctx.drawImage(this._bgImage, 0, 0, this._bgImage.width, this._bgImage.height, 0, 0, cvs.width, cvs.height);
-
+			ctx.save();
+			ctx.shadowBlur = 20;
+			ctx.shadowColor = "#000";
 			ctx.save();
 			ctx.translate(Math.random() * 100, Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
 			ctx.drawImage(img1, 0, 0, img1.width, img1.height, 0, 0, w, h);
 			ctx.restore();
 			ctx.save();
 			ctx.translate(cvs.width / 2 + Math.random() * 100, Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
 			ctx.drawImage(img2, 0, 0, img2.width, img2.height, 0, 0, w, h);
 			ctx.restore();
 			ctx.save();
 			ctx.translate(Math.random() * 100, cvs.height / 2 + Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
 			ctx.drawImage(img3, 0, 0, img3.width, img3.height, 0, 0, w, h);
 			ctx.restore();
 			ctx.save();
 			ctx.translate(cvs.width / 2 + Math.random() * 100, cvs.height / 2 + Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 2 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
 			ctx.drawImage(img4, 0, 0, img4.width, img4.height, 0, 0, w, h);
 			ctx.restore();
+			ctx.restore();
+			//var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
 
-			var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
-
-			ctx.putImageData(dstData, 0, 0);
-			blurredImgs.push(cvs);
+			//ctx.putImageData(dstData, 0, 0);
+			blurredImgs.push(filter.bind(cvs).run(null, true));
 		}
 		return blurredImgs;
 	},
@@ -157,14 +161,6 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 
 			var sprite = new WGE.SlideshowAnimationSprite(t, t + 6000, img, -1);
 			sprite.setHotspot2Center();
-			
-			// sprite.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
-			// sprite.zIndex = zIndex;
-			// var scaleAction = new WGE.Actions.UniformScaleAction([0, 6000], [0.7, 0.7], [0.95, 0.95])
-			// var alphaAction = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
-			// var rot1 = (Math.random() / 10 + 0.02) * (Math.random() > 0.5 ? 1 : -1);
-			// var rotateAction = new WGE.Actions.UniformRotateAction([0, 6000], 0, rot1);
-			// sprite.pushArr([scaleAction, alphaAction, rotateAction]);
 
 			var img2 = blurredImgs[i];
 
@@ -172,19 +168,15 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			sprite2.setHotspot2Center();
 			var sx = WGE.SlideshowSettings.width / (img2.width - 40), sy = WGE.SlideshowSettings.height / (img2.height - 40)
 			sprite2.scaleTo(sx / 0.7, sy / 0.7);
-
-			
-			// sprite2.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
-			// var alphaAction2 = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);			
-			// var scaleAction2 = new WGE.Actions.UniformScaleAction([0, 6000], [sx, sy], [sx / 0.7, sy / 0.7])
-			// var rotateAction2 = new WGE.Actions.UniformRotateAction([0, 6000], 0, rot1);
-			// sprite2.pushArr([alphaAction2, rotateAction2, scaleAction2]);
-
 			fatherSprite.addChild(sprite2, sprite);
 			this.timeline.push(fatherSprite);
 			zIndex += 100;
 			t += 5000;
 		}
+
+		this._gradient = this.context.createRadialGradient(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2, 200, WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2, 700);
+		this._gradient.addColorStop(0, "rgba(0,0,0,0)");
+		this._gradient.addColorStop(1, "rgba(0,0,0,1)");
 
 		if(this.audio)
 		{
@@ -199,6 +191,25 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 		}
 		else audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 		this._initAudio(audioFileNames);
+	},
+
+	// slideshow主循环
+	mainloop : function()
+	{
+		var timeNow = Date.now();
+		var deltaTime = timeNow - this._lastFrameTime;
+		this._lastFrameTime = timeNow;
+
+		if(!this.timeline.update(deltaTime))
+		{
+			this._end();
+			return ;
+		}
+
+		this.timeline.render(this.context);
+		this.context.fillStyle = this._gradient;
+		this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+		this._animationRequest = requestAnimationFrame(this._loopFunc);
 	}
 });
 

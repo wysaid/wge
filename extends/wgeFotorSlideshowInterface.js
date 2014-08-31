@@ -94,7 +94,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			return;
 		var time = Date.now();
 		var dt = time - this._lastFrameTime;
-		if(dt >  3000)
+		if(dt >  5000)
 		{
 			this.context.save();
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
@@ -108,6 +108,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			});
 			if(this.audio)
 			{
+				this.audio.setVolume(this.lastVolume);
 				this.audio.stop();
 			}
 			return ;
@@ -124,14 +125,14 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		else
 		{
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
-			this.context.globalAlpha = (dt - 1500) / 3000;
+			this.context.globalAlpha = (dt - 1500) / 7000;
 			this.context.fillStyle = "#000";
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 		this.context.restore();
-		if(this.audio.volume)
-			this.audio.setVolume(this.audio.volume - this.audio.volume/150);
 		//保证淡出执行间隔。(淡出不需要太高的帧率，和大量运算)
+		if(this.audio.volume)
+			this.audio.setVolume(this.audio.volume - this.lastVolume/250);
 		setTimeout(this.endloop.bind(this), 20);
 	},
 
@@ -150,6 +151,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		this._endCanvas.height = this.canvas.height;
 		this._endCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
 		this.timeline.end();
+		this.lastVolume = this.audio.volume;
 
 		this._lastFrameTime = Date.now();
 
@@ -158,7 +160,6 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			position: this.timeline.totalTime,
 			duration: this.timeline.totalTime
 		});
-		
 		setTimeout(this.endloop.bind(this), 1);
 	},
 
