@@ -161,12 +161,16 @@ WGE.SlideshowInterface = WGE.Class(
 	_endCanvas : null, //结束画面
 	_endBlurCanvas : null, //结束模糊画面
 
+	_imageRatioX : null,
+	_imageRatioY : null, //图像缩放率
+	_syncTime : 500, //音乐同步默认时间
+
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
 	//请重写自己的实现
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY, config,  canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY, config, canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -184,7 +188,13 @@ WGE.SlideshowInterface = WGE.Class(
 		if(config)
 			this.config = config;
 
-		this._loadImages(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY);
+		if(imageRatioX && imageRatioY)
+		{
+			this._imageRatioX = imageRatioX;
+			this._imageRatioY = imageRatioY;
+		}
+
+		this._loadImages(imgURLs, finishCallback, eachCallback);
 
 		var audioFileNames;
 		if(this.audioFileName instanceof Array)
@@ -232,11 +242,11 @@ WGE.SlideshowInterface = WGE.Class(
 		}
 	},
 
-	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
+	_loadImages : function(imgURLs, finishCallback, eachCallback)
 	{
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
-			self.srcImages = WGE.slideshowFitImages(imgArr, imageRatioX, imageRatioY);
+		    self.srcImages = WGE.slideshowFitImages(imgArr, self._imageRatioX, self._imageRatioY);
 
 			if(self.config)
 				self.initTimeline(self.config);
@@ -350,7 +360,6 @@ WGE.SlideshowInterface = WGE.Class(
 		{
 			cancelAnimationFrame(this._animationRequest);
 			this._animationRequest = null;
-			this._end();
 		}
 
 		if(this.audio)
@@ -470,11 +479,11 @@ WGE.SlideshowInterface = WGE.Class(
 		var asyncTime = this._audioplayingTime - this.timeline.currentTime;
 
 		//当音乐时间与时间轴时间差异超过300毫秒时，执行同步操作
-		if(Math.abs(asyncTime) > 500)
+		if(Math.abs(asyncTime) > this._syncTime)
 		{
-			console.log("同步: 音乐时间", this._audioplayingTime, "时间轴时间",this.timeline.currentTime, "差值", asyncTime, "大于500,进行同步");
+			console.log("同步: 音乐时间", this._audioplayingTime, "时间轴时间",this.timeline.currentTime, "差值", asyncTime, "大于" + this._syncTime + ",进行同步");
 			//当时间轴慢于音乐时间时，执行时间轴跳跃。
-			if(asyncTime > 500)
+			if(asyncTime > this._syncTime)
 			{
 				if(!this.timeline.update(asyncTime))
 				{

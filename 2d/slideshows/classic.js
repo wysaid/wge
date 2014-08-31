@@ -77,6 +77,9 @@ WGE.Classic = WGE.Class(WGE.SlideshowInterface,
 
 	loopTime : 5000,
 	loopImageNum : 1,
+	_syncTime : undefined,
+	_imageRatioX : 1.2,
+	_imageRatioY : 1.2,
 
 	initialize : function()
 	{
@@ -93,19 +96,17 @@ WGE.Classic = WGE.Class(WGE.SlideshowInterface,
 
 		for(var i in this.srcImages)
 		{
-			var rand = Math.random();
 			var img = this.srcImages[i];
 
 			var sprite = new WGE.SlideshowAnimationSprite(t, t + 6000, img, -1);
-			sprite.setHotspot2Center();
-			sprite.moveTo(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2);
-			sprite.zIndex = zIndex;
-			var scaleAction = new WGE.Actions.UniformScaleAction([0, 6000], [0.95, 0.95], [0.7, 0.7])
-			var alphaAction = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
-			var rot1 = (Math.random() / 10 + 0.02) * (Math.random() > 0.5 ? 1 : -1);
-			var rotateAction = new WGE.Actions.UniformRotateAction([0, 3000], 0, rot1);
-			sprite.pushArr([scaleAction, alphaAction, rotateAction]);
+			var hotX = Math.random(), hotY = Math.random();
 
+			sprite.moveTo(WGE.SlideshowSettings.width * hotX, WGE.SlideshowSettings.height * hotY);
+			sprite.setHotspotWithRatio(hotX, hotY);
+			sprite.zIndex = zIndex;
+			var scaleAction = new WGE.Actions.UniformScaleAction([0, 6000], [1, 1], [0.84, 0.84])
+			var alphaAction = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
+			sprite.pushArr([scaleAction, alphaAction]);
 			this.timeline.push(sprite);
 			zIndex += 100;
 			t += 5000;

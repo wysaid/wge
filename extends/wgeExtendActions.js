@@ -532,13 +532,6 @@ A.jumpScaleAction = WGE.Class(WGE.TimeActionInterface,
 	}
 });
 
-
-WGE.bounceRange = 
-{
-	range : 50,
-};
-
-
 A.acceleratedMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
 	act : function(percent)

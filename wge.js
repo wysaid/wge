@@ -215,35 +215,60 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 	var n = 0;
 	var imgArr = [];
 
-	var F = function() {
+	var J = function(img) {
 		++n;
 		if(typeof eachCallback == 'function')
-			eachCallback(this, n);
-		if(n >= imgArr.length && typeof finishCallback == 'function')
+			eachCallback(img, n, img.wgeImageID);
+		if(n >= imageURLArr.length && typeof finishCallback == 'function')
 			finishCallback(imgArr);
 		this.onload = null; //解除对imgArr, n 等的引用
 	};
 
-	//当加载失败时，确保引擎正常工作，并返回默认404图片.
-	var E = function() {
-		this.src = WGE.Image404Data;
+	var F = function() {
+		var url = URL.createObjectURL(this.response);
+		var img = new Image();
+		imgArr[this.wgeImageID] = img;
+		img.wgeImageID = this.wgeImageID;
+		img.onload = function() {
+			J.call(this, this, this.wgeImageID);
+			URL.revokeObjectURL(url);
+		};
+		img.onerror = function() {
+			this.src = WGE.Image404Data;
+		};
+
+		img.src = url;
+		img.url = this.url;
+		
 	};
 
-	for(var i = 0; i != imageURLArr.length; ++i)
-	{
+	//当加载失败时，确保引擎正常工作，并返回默认404图片.
+	var E = function() {
 		var img = new Image();
-		imgArr.push(img);
-		img.src = imageURLArr[i];
-		if(img.complete)
-		{
-			F.call(img);
-		}
-		else
-		{
-			img.onload = F;
-			img.onerror = E;
-		}
-	}
+		imgArr[this.wgeImageID] = img;
+		img.wgeImageID = this.wgeImageID;
+		img.onload = function() {			
+			J.call(this, this, this.wgeImageID);
+		};
+
+		img.onerror = function() {
+			this.src = WGE.Image404Data;
+		};
+
+		img.src = this.url;
+	};
+
+	for (var i = 0; i < imageURLArr.length; i++)
+	{
+		var xhr = new XMLHttpRequest();
+		xhr.wgeImageID = i;
+		xhr.onload = F;
+		xhr.onerror = E;
+		xhr.url = imageURLArr[i];
+		xhr.open('GET', xhr.url, true);
+		xhr.responseType = 'blob';
+ 	    xhr.send();
+ 	}
 }
 
 //简介： 所有需要提供给Animation使用的sprite 
@@ -3191,12 +3216,16 @@ WGE.SlideshowInterface = WGE.Class(
 	_endCanvas : null, //结束画面
 	_endBlurCanvas : null, //结束模糊画面
 
+	_imageRatioX : null,
+	_imageRatioY : null, //图像缩放率
+	_syncTime : 500, //音乐同步默认时间
+
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
 	//请重写自己的实现
 	//末尾的canvas和context参数可选， 如果填写则直接将绘制目标设置为末尾参数指定的canvas(主要用于demo)
-	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY, config,  canvas, context)
+	initialize : function(fatherDOM, imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY, config, canvas, context)
 	{
 		this.father = fatherDOM;
 		this.canvas = canvas;
@@ -3214,7 +3243,13 @@ WGE.SlideshowInterface = WGE.Class(
 		if(config)
 			this.config = config;
 
-		this._loadImages(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY);
+		if(imageRatioX && imageRatioY)
+		{
+			this._imageRatioX = imageRatioX;
+			this._imageRatioY = imageRatioY;
+		}
+
+		this._loadImages(imgURLs, finishCallback, eachCallback);
 
 		var audioFileNames;
 		if(this.audioFileName instanceof Array)
@@ -3262,11 +3297,11 @@ WGE.SlideshowInterface = WGE.Class(
 		}
 	},
 
-	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
+	_loadImages : function(imgURLs, finishCallback, eachCallback)
 	{
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
-			self.srcImages = WGE.slideshowFitImages(imgArr, imageRatioX, imageRatioY);
+		    self.srcImages = WGE.slideshowFitImages(imgArr, self._imageRatioX, self._imageRatioY);
 
 			if(self.config)
 				self.initTimeline(self.config);
@@ -3380,7 +3415,6 @@ WGE.SlideshowInterface = WGE.Class(
 		{
 			cancelAnimationFrame(this._animationRequest);
 			this._animationRequest = null;
-			this._end();
 		}
 
 		if(this.audio)
@@ -3500,11 +3534,11 @@ WGE.SlideshowInterface = WGE.Class(
 		var asyncTime = this._audioplayingTime - this.timeline.currentTime;
 
 		//当音乐时间与时间轴时间差异超过300毫秒时，执行同步操作
-		if(Math.abs(asyncTime) > 500)
+		if(Math.abs(asyncTime) > this._syncTime)
 		{
-			console.log("同步: 音乐时间", this._audioplayingTime, "时间轴时间",this.timeline.currentTime, "差值", asyncTime, "大于500,进行同步");
+			console.log("同步: 音乐时间", this._audioplayingTime, "时间轴时间",this.timeline.currentTime, "差值", asyncTime, "大于" + this._syncTime + ",进行同步");
 			//当时间轴慢于音乐时间时，执行时间轴跳跃。
-			if(asyncTime > 500)
+			if(asyncTime > this._syncTime)
 			{
 				if(!this.timeline.update(asyncTime))
 				{
@@ -4201,13 +4235,6 @@ A.jumpScaleAction = WGE.Class(WGE.TimeActionInterface,
 	}
 });
 
-
-WGE.bounceRange = 
-{
-	range : 50,
-};
-
-
 A.acceleratedMoveAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 {
 	act : function(percent)
@@ -4278,7 +4305,7 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	y1 : 0,
 	act : function(percent)
 	{
-		var proporty = 0.8;
+		var proporty = 0.6;
 		var t = this.repeatTimes * percent;
 		t -= Math.floor(t);
 		t = t * t * (3 - 2 * t);
@@ -4286,7 +4313,7 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 		var t2 = (t - proporty) / (1-proporty);
 		
 		
-		if(t < 0.8){
+		if(t < 0.6){
 			this.y  = Math.sin(Math.PI/2* t1) * this.distance;
 			this.bindObj.moveTo(this.fromX, this.fromY - this.y);
 		}
@@ -4512,6 +4539,10 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			return ;
 		}
 
+		if(template.config.assetsDir) {
+			WGE.SlideshowSettings.assetsDir = template.config.assetsDir;			
+		}
+
 		FT.EventManager.sendEvent(new FT.KTemplateLoadingEvent(0, FT.TLP_ANIMATION_IMAGELOADING, this.template));
 
 		WGE.SlideshowInterface.initialize.call(this, element, imageURLs, function (imgArr, slideshowThis){
@@ -4633,7 +4664,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		{
 			this.audio.stop();
 		}
-		setTimeout(this.endloop().bind(this), 1);
+		setTimeout(this.endloop.bind(this), 1);
 	},
 
 	setParam : function() {}
