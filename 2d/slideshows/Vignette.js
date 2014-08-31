@@ -1,5 +1,9 @@
 //这里统一时间线，音乐等，继承公共类SlideshowInterface
 
+WGE.bounceRange = 
+{
+    range : 50,
+};
 
 var mySprite = WGE.Class(WGE.Sprite, WGE.AnimationWithChildrenInterface2d,
 {
