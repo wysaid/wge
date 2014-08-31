@@ -48,61 +48,132 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 	{
 		var blurredImgs = [];
 
-		var tmpArr = [0, 1, 2, 3];
 		var filter = new WGE.Filter.Monochrome();
+
+		var totalImg = 10;
+		var w = WGE.SlideshowSettings.width / 2, h = WGE.SlideshowSettings.height / 2;
+		var dw = WGE.SlideshowSettings.width / 2, dh = WGE.SlideshowSettings.height / 2;
+
 		for(var i = 0; i < imgArr.length; ++i)
 		{
-
-			var tmpN = parseInt(Math.round(Math.random() * 3));
-			var tmpM = parseInt(Math.round(Math.random() * 3));
-			var n = tmpArr[tmpN];
-			tmpArr[tmpN] = tmpArr[tmpM];
-			tmpArr[tmpM] = n;			
-
-			var img1 = imgArr[(tmpArr[0] + i) % imgArr.length];
-			var img2 = imgArr[(tmpArr[1] + i) % imgArr.length];
-			var img3 = imgArr[(tmpArr[2] + i) % imgArr.length];
-			var img4 = imgArr[(tmpArr[3] + i) % imgArr.length];
-
-			var dw = 1024 , dh = 768 ;
+			var tmpArr = [];
+			for(var j = i; j < totalImg + i; ++j)
+				tmpArr.push(imgArr[j % imgArr.length]);			
 
 			var cvs = WGE.CE('canvas');
 			cvs.width = dw * 2 + 20;
 			cvs.height = dh * 2 + 20;
-			var ctx = cvs.getContext('2d');
+			var ctx = cvs.getContext('2d');			
 
-			var ratio = Math.random() * 0.5 + 0.5;
-			var w = ratio * cvs.width / 2;
-			var h = ratio * cvs.height / 2;
-			
 			ctx.drawImage(this._bgImage, 0, 0, this._bgImage.width, this._bgImage.height, 0, 0, cvs.width, cvs.height);
+
 			ctx.save();
 			ctx.shadowBlur = 20;
 			ctx.shadowColor = "#000";
-			ctx.save();
-			ctx.translate(Math.random() * 100, Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
-			ctx.drawImage(img1, 0, 0, img1.width, img1.height, 0, 0, w, h);
-			ctx.restore();
-			ctx.save();
-			ctx.translate(cvs.width / 2 + Math.random() * 100, Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
-			ctx.drawImage(img2, 0, 0, img2.width, img2.height, 0, 0, w, h);
-			ctx.restore();
-			ctx.save();
-			ctx.translate(Math.random() * 100, cvs.height / 2 + Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
-			ctx.drawImage(img3, 0, 0, img3.width, img3.height, 0, 0, w, h);
-			ctx.restore();
-			ctx.save();
-			ctx.translate(cvs.width / 2 + Math.random() * 100, cvs.height / 2 + Math.random() * 100);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
-			ctx.drawImage(img4, 0, 0, img4.width, img4.height, 0, 0, w, h);
-			ctx.restore();
-			ctx.restore();
-			//var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
+			var img, scaling;
 
-			//ctx.putImageData(dstData, 0, 0);
+			// 0
+			img = tmpArr[0];
+			ctx.save();
+			ctx.rotate((Math.random() - 0.5) * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			// 1
+			img = tmpArr[1];
+			ctx.save();
+			ctx.translate((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//2
+			img = tmpArr[2];
+			ctx.save();
+			ctx.translate(w, 0);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//3
+			img = tmpArr[3];
+			ctx.save();
+			ctx.translate((Math.random() - 0.5) * 300 + w, 0);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//4
+			img = tmpArr[4];
+			ctx.save();
+			ctx.translate(0, h);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//5
+			img = tmpArr[5];
+			ctx.save();
+			ctx.translate(0, (Math.random() - 0.5) * 300 + h);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//6
+			img = tmpArr[6];
+			ctx.save();
+			ctx.translate((Math.random() - 0.5) * 300 + w, (Math.random() - 0.5) * 300 + h);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//7
+			img = tmpArr[7];
+			ctx.save();
+			ctx.translate((Math.random() - 0.5) * 300 + w, (Math.random() - 0.5) * 300 + h);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//8
+			img = tmpArr[8];
+			ctx.save();
+			ctx.translate(Math.random() * w * 2, Math.random() * h * 2);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
+			//9
+			img = tmpArr[9];
+			ctx.save();
+			ctx.translate(Math.random() * w * 2, Math.random() * h * 2);
+			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+			
+			ctx.restore();
+			// var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
+			// ctx.putImageData(dstData, 0, 0);
 			blurredImgs.push(filter.bind(cvs).run(null, true));
 		}
 		return blurredImgs;
@@ -174,9 +245,9 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			t += 5000;
 		}
 
-		this._gradient = this.context.createRadialGradient(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2, 200, WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2, 700);
-		this._gradient.addColorStop(0, "rgba(0,0,0,0)");
-		this._gradient.addColorStop(1, "rgba(0,0,0,1)");
+		// this._gradient = this.context.createRadialGradient(WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2, 400, WGE.SlideshowSettings.width / 2, WGE.SlideshowSettings.height / 2, 700);
+		// this._gradient.addColorStop(0, "rgba(0,0,0,0)");
+		// this._gradient.addColorStop(1, "rgba(0,0,0,1)");
 
 		if(this.audio)
 		{
@@ -194,22 +265,22 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 	},
 
 	// slideshow主循环
-	mainloop : function()
-	{
-		var timeNow = Date.now();
-		var deltaTime = timeNow - this._lastFrameTime;
-		this._lastFrameTime = timeNow;
+	// mainloop : function()
+	// {
+	// 	var timeNow = Date.now();
+	// 	var deltaTime = timeNow - this._lastFrameTime;
+	// 	this._lastFrameTime = timeNow;
 
-		if(!this.timeline.update(deltaTime))
-		{
-			this._end();
-			return ;
-		}
+	// 	if(!this.timeline.update(deltaTime))
+	// 	{
+	// 		this._end();
+	// 		return ;
+	// 	}
 
-		this.timeline.render(this.context);
-		this.context.fillStyle = this._gradient;
-		this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-		this._animationRequest = requestAnimationFrame(this._loopFunc);
-	}
+	// 	this.timeline.render(this.context);
+	// 	this.context.fillStyle = this._gradient;
+	// 	this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+	// 	this._animationRequest = requestAnimationFrame(this._loopFunc);
+	// }
 });
 

@@ -415,7 +415,7 @@ WGE.SlideshowInterface = WGE.Class(
 			return;
 		var time = Date.now();
 		var dt = time - this._lastFrameTime;
-		if(dt >  3000)
+		if(dt >  5000)
 		{
 			this.context.save();
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
@@ -438,7 +438,7 @@ WGE.SlideshowInterface = WGE.Class(
 		else
 		{
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
-			this.context.globalAlpha = (dt - 1500) / 3000;
+			this.context.globalAlpha = (dt - 1500) / 7000;
 			this.context.fillStyle = "#000";
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}

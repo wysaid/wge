@@ -3470,7 +3470,7 @@ WGE.SlideshowInterface = WGE.Class(
 			return;
 		var time = Date.now();
 		var dt = time - this._lastFrameTime;
-		if(dt >  3000)
+		if(dt >  5000)
 		{
 			this.context.save();
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
@@ -3493,7 +3493,7 @@ WGE.SlideshowInterface = WGE.Class(
 		else
 		{
 			this.context.drawImage(this._endBlurCanvas, 0, 0);
-			this.context.globalAlpha = (dt - 1500) / 3000;
+			this.context.globalAlpha = (dt - 1500) / 7000;
 			this.context.fillStyle = "#000";
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
@@ -4526,6 +4526,7 @@ F.Zone2d = WGE.Class(
 
 WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 {
+	_lastVolume : null, //音乐淡出辅助变量
 
 	//options、lastPhotoCallback 都是无意义参数，建议剔除
 	initialize : function(element, options, template, callback, scope, lastPhotoCallback)
@@ -4618,8 +4619,9 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			});
 			if(this.audio)
 			{
-				this.audio.setVolume(this.lastVolume);
 				this.audio.stop();
+				this.audio.setVolume(this._lastVolume);
+				this._lastVolume = null;
 			}
 			return ;
 		}
@@ -4640,9 +4642,11 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 		this.context.restore();
+
+		if(this._lastVolume)
+			this.audio.setVolume(this._lastVolume * (1 - dt / 5000));
+
 		//保证淡出执行间隔。(淡出不需要太高的帧率，和大量运算)
-		if(this.audio.volume)
-			this.audio.setVolume(this.audio.volume - this.lastVolume/250);
 		setTimeout(this.endloop.bind(this), 20);
 	},
 
@@ -4661,7 +4665,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		this._endCanvas.height = this.canvas.height;
 		this._endCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
 		this.timeline.end();
-		this.lastVolume = this.audio.volume;
+		this._lastVolume = this.audio.volume;
 
 		this._lastFrameTime = Date.now();
 
@@ -4673,7 +4677,11 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		setTimeout(this.endloop.bind(this), 1);
 	},
 
-	setParam : function() {}
+	setParam : function(param)
+	{
+		if(typeof param.musicVolume == "number")
+			this.setVolume(param.musicVolume);
+	}
 
 });
 
