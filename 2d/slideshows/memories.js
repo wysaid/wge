@@ -19,7 +19,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 	_bgImage : null,
 	_bgImageURL : "memories.jpg",
 
-	_loadImages : function(imgURLs, finishCallback, eachCallback, imageRatioX, imageRatioY)
+	_loadImages : function(imgURLs, finishCallback, eachCallback)
 	{
 		var self = this;
 
@@ -27,7 +27,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			self._bgImage = imgArr[0];
 
 			WGE.loadImages(imgURLs, function(imgArr) {
-				self.srcImages = WGE.imagesFitSlideshow(imgArr, imageRatioX, imageRatioY);
+			    self.srcImages = WGE.imagesFitSlideshow(imgArr, self._imageRatioX, self._imageRatioY);
 
 				if(self.config)
 					self.initTimeline(self.config);
