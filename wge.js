@@ -215,35 +215,60 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 	var n = 0;
 	var imgArr = [];
 
-	var F = function() {
+	var J = function(img) {
 		++n;
 		if(typeof eachCallback == 'function')
-			eachCallback(this, n);
-		if(n >= imgArr.length && typeof finishCallback == 'function')
+			eachCallback(img, n, img.wgeImageID);
+		if(n >= imageURLArr.length && typeof finishCallback == 'function')
 			finishCallback(imgArr);
 		this.onload = null; //解除对imgArr, n 等的引用
 	};
 
-	//当加载失败时，确保引擎正常工作，并返回默认404图片.
-	var E = function() {
-		this.src = WGE.Image404Data;
+	var F = function() {
+		var url = URL.createObjectURL(this.response);
+		var img = new Image();
+		imgArr[this.wgeImageID] = img;
+		img.wgeImageID = this.wgeImageID;
+		img.onload = function() {
+			J.call(this, this, this.wgeImageID);
+			URL.revokeObjectURL(url);
+		};
+		img.onerror = function() {
+			this.src = WGE.Image404Data;
+		};
+
+		img.src = url;
+		img.url = this.url;
+		
 	};
 
-	for(var i = 0; i != imageURLArr.length; ++i)
-	{
+	//当加载失败时，确保引擎正常工作，并返回默认404图片.
+	var E = function() {
 		var img = new Image();
-		imgArr.push(img);
-		img.src = imageURLArr[i];
-		if(img.complete)
-		{
-			F.call(img);
-		}
-		else
-		{
-			img.onload = F;
-			img.onerror = E;
-		}
-	}
+		imgArr[this.wgeImageID] = img;
+		img.wgeImageID = this.wgeImageID;
+		img.onload = function() {			
+			J.call(this, this, this.wgeImageID);
+		};
+
+		img.onerror = function() {
+			this.src = WGE.Image404Data;
+		};
+
+		img.src = this.url;
+	};
+
+	for (var i = 0; i < imageURLArr.length; i++)
+	{
+		var xhr = new XMLHttpRequest();
+		xhr.wgeImageID = i;
+		xhr.onload = F;
+		xhr.onerror = E;
+		xhr.url = imageURLArr[i];
+		xhr.open('GET', xhr.url, true);
+		xhr.responseType = 'blob';
+ 	    xhr.send();
+ 	}
 }
 
 //简介： 所有需要提供给Animation使用的sprite 
@@ -4278,7 +4303,7 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 	y1 : 0,
 	act : function(percent)
 	{
-		var proporty = 0.8;
+		var proporty = 0.6;
 		var t = this.repeatTimes * percent;
 		t -= Math.floor(t);
 		t = t * t * (3 - 2 * t);
@@ -4286,7 +4311,7 @@ A.MoveSlideAction = WGE.Class(WGE.Actions.UniformLinearMoveAction,
 		var t2 = (t - proporty) / (1-proporty);
 		
 		
-		if(t < 0.8){
+		if(t < 0.6){
 			this.y  = Math.sin(Math.PI/2* t1) * this.distance;
 			this.bindObj.moveTo(this.fromX, this.fromY - this.y);
 		}
@@ -4512,6 +4537,10 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			return ;
 		}
 
+		if(template.config.assetsDir) {
+			WGE.SlideshowSettings.assetsDir = template.config.assetsDir;			
+		}
+
 		FT.EventManager.sendEvent(new FT.KTemplateLoadingEvent(0, FT.TLP_ANIMATION_IMAGELOADING, this.template));
 
 		WGE.SlideshowInterface.initialize.call(this, element, imageURLs, function (imgArr, slideshowThis){
@@ -4633,7 +4662,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		{
 			this.audio.stop();
 		}
-		setTimeout(this.endloop().bind(this), 1);
+		setTimeout(this.endloop.bind(this), 1);
 	},
 
 	setParam : function() {}
