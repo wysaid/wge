@@ -104,7 +104,8 @@ WGE.Classic = WGE.Class(WGE.SlideshowInterface,
 			sprite.moveTo(WGE.SlideshowSettings.width * hotX, WGE.SlideshowSettings.height * hotY);
 			sprite.setHotspotWithRatio(hotX, hotY);
 			sprite.zIndex = zIndex;
-			var scaleAction = new WGE.Actions.UniformScaleAction([0, 5500], [1 + Math.random() * 0.5, 1 + Math.random() * 0.5], [0.84, 0.84])
+			var scaling = Math.random() * 0.5 + 1.2;
+			var scaleAction = new WGE.Actions.UniformScaleAction([0, 5500], [scaling, scaling], [0.84, 0.84])
 			var alphaAction = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
 			sprite.pushArr([scaleAction, alphaAction]);
 			this.timeline.push(sprite);

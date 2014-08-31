@@ -98,7 +98,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		if(dt >  5000)
 		{
 			this.context.save();
-			this.context.drawImage(this._endBlurCanvas, 0, 0);
+			this.context.drawImage(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
 			this.context.fillStyle = "#000";
 			this.context.globalAlpha = 0.5;
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -122,11 +122,11 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		{
 			this.context.drawImage(this._endCanvas, 0, 0);
 			this.context.globalAlpha = dt / 1500;
-			this.context.drawImage(this._endBlurCanvas, 0, 0);
+			this.context.drawImage(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
 		}
 		else
 		{
-			this.context.drawImage(this._endBlurCanvas, 0, 0);
+			this.context.drawImage(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
 			this.context.globalAlpha = (dt - 1500) / 7000;
 			this.context.fillStyle = "#000";
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -145,10 +145,11 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		console.log("Slideshow End");
 		this._animationRequest = null;
 		this._endBlurCanvas = WGE.CE("canvas");
-		this._endBlurCanvas.width = this.canvas.width;
-		this._endBlurCanvas.height = this.canvas.height;
+		this._endBlurCanvas.width = this.canvas.width / 2;
+		this._endBlurCanvas.height = this.canvas.height / 2;
 		var ctx = this._endBlurCanvas.getContext('2d');
-		var blurredData = WGE.Filter.StackBlur.stackBlurCanvasRGB(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 50);
+		ctx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height);
+		var blurredData = WGE.Filter.StackBlur.stackBlurCanvasRGB(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 50);
 		ctx.putImageData(blurredData, 0, 0);
 		this._endCanvas = WGE.CE("canvas");
 		this._endCanvas.width = this.canvas.width;
