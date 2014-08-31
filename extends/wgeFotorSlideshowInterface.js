@@ -62,7 +62,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		this._audioplayingTime = this.getAudioPlayingTime();
 		FT.EventManager.sendEvent({
 			type: "FM_PLAY_PROGRESS",
-			position: this._audioplayingTime,
+			position: this.timeline.currentTime,
 			duration: this.timeline.totalTime
 		});
 	},
