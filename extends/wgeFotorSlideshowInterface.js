@@ -31,6 +31,10 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			return ;
 		}
 
+		if(template.config.assetsDir) {
+			WGE.SlideshowSettings.assetsDir = template.config.assetsDir;			
+		}
+
 		FT.EventManager.sendEvent(new FT.KTemplateLoadingEvent(0, FT.TLP_ANIMATION_IMAGELOADING, this.template));
 
 		WGE.SlideshowInterface.initialize.call(this, element, imageURLs, function (imgArr, slideshowThis){
@@ -152,7 +156,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		{
 			this.audio.stop();
 		}
-		setTimeout(this.endloop().bind(this), 1);
+		setTimeout(this.endloop.bind(this), 1);
 	},
 
 	setParam : function() {}

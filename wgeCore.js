@@ -214,35 +214,60 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 	var n = 0;
 	var imgArr = [];
 
-	var F = function() {
+	var J = function(img) {
 		++n;
 		if(typeof eachCallback == 'function')
-			eachCallback(this, n);
-		if(n >= imgArr.length && typeof finishCallback == 'function')
+			eachCallback(img, n, img.wgeImageID);
+		if(n >= imageURLArr.length && typeof finishCallback == 'function')
 			finishCallback(imgArr);
 		this.onload = null; //解除对imgArr, n 等的引用
 	};
 
-	//当加载失败时，确保引擎正常工作，并返回默认404图片.
-	var E = function() {
-		this.src = WGE.Image404Data;
+	var F = function() {
+		var url = URL.createObjectURL(this.response);
+		var img = new Image();
+		imgArr[this.wgeImageID] = img;
+		img.wgeImageID = this.wgeImageID;
+		img.onload = function() {
+			J.call(this, this, this.wgeImageID);
+			URL.revokeObjectURL(url);
+		};
+		img.onerror = function() {
+			this.src = WGE.Image404Data;
+		};
+
+		img.src = url;
+		img.url = this.url;
+		
 	};
 
-	for(var i = 0; i != imageURLArr.length; ++i)
-	{
+	//当加载失败时，确保引擎正常工作，并返回默认404图片.
+	var E = function() {
 		var img = new Image();
-		imgArr.push(img);
-		img.src = imageURLArr[i];
-		if(img.complete)
-		{
-			F.call(img);
-		}
-		else
-		{
-			img.onload = F;
-			img.onerror = E;
-		}
-	}
+		imgArr[this.wgeImageID] = img;
+		img.wgeImageID = this.wgeImageID;
+		img.onload = function() {			
+			J.call(this, this, this.wgeImageID);
+		};
+
+		img.onerror = function() {
+			this.src = WGE.Image404Data;
+		};
+
+		img.src = this.url;
+	};
+
+	for (var i = 0; i < imageURLArr.length; i++)
+	{
+		var xhr = new XMLHttpRequest();
+		xhr.wgeImageID = i;
+		xhr.onload = F;
+		xhr.onerror = E;
+		xhr.url = imageURLArr[i];
+		xhr.open('GET', xhr.url, true);
+		xhr.responseType = 'blob';
+ 	    xhr.send();
+ 	}
 }
 
 //简介： 所有需要提供给Animation使用的sprite 
