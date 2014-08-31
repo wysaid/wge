@@ -41,7 +41,7 @@ else
 	{
 		var url = scriptURLs[i];
 		text += "//" + url + "\n";
-		text += WGE.requestTextByURL(url) + "\n\n";
+		text += WGE.requestTextByURL(url + "?" + Math.random()) + "\n\n";
 	}
 
 	txtDOM.value = text;

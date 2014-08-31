@@ -165,6 +165,14 @@ WGE.SlideshowInterface = WGE.Class(
 	_imageRatioY : null, //图像缩放率
 	_syncTime : 500, //音乐同步默认时间
 
+	//loadingimage时，没完成一张，就对其进行处理。(函数)
+	//参数有两个，第一个为一个Image对象， 第二个为它对应的下标。
+	_dealLoadingImage : null, 
+
+	//完成图像加载后执行，
+	//参数有一个，为Image数组
+	_dealFinishLoadingImage : null,
+
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
@@ -246,15 +254,20 @@ WGE.SlideshowInterface = WGE.Class(
 	{
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
-		    self.srcImages = WGE.slideshowFitImages(imgArr, self._imageRatioX, self._imageRatioY);
+			if(typeof self._dealFinishLoadingImage == 'function')
+				self._dealFinishLoadingImage();
+			else
+				self.srcImages = WGE.slideshowFitImages(imgArr, self._imageRatioX, self._imageRatioY);
 
 			if(self.config)
 				self.initTimeline(self.config);
 			if(finishCallback)
-				finishCallback(self.srcImages, self);
+				finishCallback(self.srcImages || imgArr, self);
 
 			self.config = null;
-		}, function(img, n) {
+		}, function(img, n, imageIndex) {
+			if(typeof self._dealLoadingImage == 'function')
+				self._dealLoadingImage(img, imageIndex);
 			if(eachCallback)
 				eachCallback(img, n, self);
 		});

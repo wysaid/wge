@@ -208,7 +208,7 @@ WGE.ID = function(id)
 
 //第一个参数为包含image url的数组
 //第二个参数为所有图片完成后的callback，传递参数为一个包含所有图片的数组
-//第三个参数为单张图片完成后的callback，传递两个参数，分别为当前完成的图片和当前已经完成的图片数
+//第三个参数为单张图片完成后的callback，传递三个参数，分别为当前完成的图片、当前已经完成的图片数、当前完成的图片在整个相对于image url数组的下标
 WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 {
 	var n = 0;
