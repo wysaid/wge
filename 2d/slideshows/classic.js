@@ -99,7 +99,7 @@ WGE.Classic = WGE.Class(WGE.SlideshowInterface,
 			var img = this.srcImages[i];
 
 			var sprite = new WGE.SlideshowAnimationSprite(t, t + 6000, img, -1);
-			var hotX = Math.random(), hotY = Math.random();
+			var hotX = Math.random(), hotY = Math.random() * 0.5;
 
 			sprite.moveTo(WGE.SlideshowSettings.width * hotX, WGE.SlideshowSettings.height * hotY);
 			sprite.setHotspotWithRatio(hotX, hotY);

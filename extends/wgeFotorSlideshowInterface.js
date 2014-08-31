@@ -149,7 +149,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		this._endBlurCanvas.height = this.canvas.height / 2;
 		var ctx = this._endBlurCanvas.getContext('2d');
 		ctx.drawImage(this.canvas, 0, 0, this.canvas.width, this.canvas.height, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height);
-		var blurredData = WGE.Filter.StackBlur.stackBlurCanvasRGB(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 50);
+		var blurredData = WGE.Filter.StackBlur.stackBlurCanvasRGB(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 25);
 		ctx.putImageData(blurredData, 0, 0);
 		this._endCanvas = WGE.CE("canvas");
 		this._endCanvas.width = this.canvas.width;

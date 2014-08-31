@@ -75,7 +75,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			// 0
 			img = tmpArr[0];
 			ctx.save();
-			ctx.rotate((Math.random() - 0.5) * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate((Math.random() - 0.5) * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -85,7 +85,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[1];
 			ctx.save();
 			ctx.translate((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -95,7 +95,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[2];
 			ctx.save();
 			ctx.translate(w, 0);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -105,7 +105,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[3];
 			ctx.save();
 			ctx.translate((Math.random() - 0.5) * 300 + w, 0);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -115,7 +115,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[4];
 			ctx.save();
 			ctx.translate(0, h);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -125,7 +125,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[5];
 			ctx.save();
 			ctx.translate(0, (Math.random() - 0.5) * 300 + h);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -135,7 +135,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[6];
 			ctx.save();
 			ctx.translate((Math.random() - 0.5) * 300 + w, (Math.random() - 0.5) * 300 + h);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -145,7 +145,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[7];
 			ctx.save();
 			ctx.translate((Math.random() - 0.5) * 300 + w, (Math.random() - 0.5) * 300 + h);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -155,7 +155,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[8];
 			ctx.save();
 			ctx.translate(Math.random() * w * 2, Math.random() * h * 2);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -165,7 +165,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			img = tmpArr[9];
 			ctx.save();
 			ctx.translate(Math.random() * w * 2, Math.random() * h * 2);
-			ctx.rotate(Math.random() * Math.PI / 3 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
