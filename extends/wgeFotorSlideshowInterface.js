@@ -106,6 +106,10 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			FT.EventManager.sendEvent({
 				type: "FM_MUSIC_END"
 			});
+			if(this.audio)
+			{
+				this.audio.stop();
+			}
 			return ;
 		}
 
@@ -125,6 +129,8 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 		this.context.restore();
+		if(this.audio.volume)
+			this.audio.setVolume(this.audio.volume - this.audio.volume/150);
 		//保证淡出执行间隔。(淡出不需要太高的帧率，和大量运算)
 		setTimeout(this.endloop.bind(this), 20);
 	},
@@ -152,10 +158,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			position: this.timeline.totalTime,
 			duration: this.timeline.totalTime
 		});
-		if(this.audio)
-		{
-			this.audio.stop();
-		}
+		
 		setTimeout(this.endloop.bind(this), 1);
 	},
 
