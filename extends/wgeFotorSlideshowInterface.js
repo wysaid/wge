@@ -45,7 +45,13 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		WGE.SlideshowInterface.initialize.call(this, element, imageURLs, function (imgArr, slideshowThis){
 			if(callback)
 				callback.call(scope);
-			self.play();
+			if(!WGE.isMobile)
+				self.play();
+			else
+			{
+				self.play();
+				self.pause();
+			}
 		}, function(img, n, slideshowThis){
 			FT.EventManager.sendEvent(new FT.KTemplateLoadingEvent(n / len, FT.TLP_ANIMATION_IMAGELOADING, self.template));
 		});
