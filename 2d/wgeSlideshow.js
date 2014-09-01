@@ -141,7 +141,7 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 
 WGE.SlideshowInterface = WGE.Class(
 {
-	audioFileName : "", //音乐文件名
+	audioFileName : "", //音乐文件名(可以为数组)
 	musicDuration : 60000, //音乐文件的总时长
 	audio : null,
 	audioPlayedTimes : 0, //音乐被重复播放次数
@@ -289,6 +289,8 @@ WGE.SlideshowInterface = WGE.Class(
 
 		if(typeof this._audiosuspend == "function")
 			arg.onsuspend = this._audiosuspend.bind(this);
+		if(typeof this._audioTimeout == "function")
+			arg.ontimeout = this._audioTimeout.bind(this);
 
 		var tryInitAudio = function() {
 			if(WGE.soundManagerReady)
@@ -296,6 +298,8 @@ WGE.SlideshowInterface = WGE.Class(
 				if(self.audio)
 					return;
 				self.audio = soundManager.createSound(arg);
+				if(!self.audio)
+					self._checkAudioFailed();
 				self.audio.play();
 				//初始时将音乐标记为暂停状态，而不是未播放状态。
 				if(!self._animationRequest)
@@ -325,6 +329,26 @@ WGE.SlideshowInterface = WGE.Class(
 	_audiosuspend : function()
 	{
 		
+	},
+
+	_audioTimeout : function()
+	{
+		console.error("Audio time out!");
+	},
+
+	_checkAudioFailed : function()
+	{
+		if(this.audio.readyState == 2)
+		{
+			console.error("Failed to play audio : ", this.audioFileName);
+			this.stop();
+			return true;
+		}
+		else if(this.audio.readyState == 3)
+		{
+			this._checkAudioFailed = null;
+		}
+		return false;
 	},
 
 	getAudioPlayingTime : function()
@@ -502,7 +526,7 @@ WGE.SlideshowInterface = WGE.Class(
 		//当音乐时间与时间轴时间差异超过300毫秒时，执行同步操作
 		if(Math.abs(asyncTime) > this._syncTime)
 		{
-			console.log("同步: 音乐时间", this._audioplayingTime, "时间轴时间",this.timeline.currentTime, "差值", asyncTime, "大于" + this._syncTime + ",进行同步");
+			//console.log("同步: 音乐时间", this._audioplayingTime, "时间轴时间",this.timeline.currentTime, "差值", asyncTime, "大于" + this._syncTime + ",进行同步");
 			//当时间轴慢于音乐时间时，执行时间轴跳跃。
 			if(asyncTime > this._syncTime)
 			{
@@ -517,7 +541,8 @@ WGE.SlideshowInterface = WGE.Class(
 			}
 			else if(this.audio)
 			{
-				
+				if(this._checkAudioFailed && this._checkAudioFailed())
+					return ;
 				this.audio.resume();
 				this._audioplayingTime = this.getAudioPlayingTime();
 			}

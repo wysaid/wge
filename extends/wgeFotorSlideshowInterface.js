@@ -72,6 +72,22 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 		});
 	},
 
+	_checkAudioFailed : function()
+	{
+		if(this.audio.readyState == 2)
+		{
+			console.error("Failed to play audio : ", this.audioFileName);
+			FT.EventManager.sendEvent({type: "FM_TEMPLATE_LOADMUSIC_FAILED"});
+			this.stop();
+			return true;
+		}
+		else if(this.audio.readyState == 3)
+		{
+			this._checkAudioFailed = null;
+		}
+		return false;
+	},
+
 	onEvent: function(e)
 	{
 		try
