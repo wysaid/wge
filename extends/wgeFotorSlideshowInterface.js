@@ -204,7 +204,10 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 	setParam : function(param)
 	{
 		if(typeof param.musicVolume == "number")
+		{
+			this._lastVolume = null;
 			this.setVolume(param.musicVolume);
+		}
 	}
 
 });
