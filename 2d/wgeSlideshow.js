@@ -173,6 +173,8 @@ WGE.SlideshowInterface = WGE.Class(
 	//参数有一个，为Image数组
 	_dealFinishLoadingImage : null,
 
+	_lastVolume : null, //音乐淡出辅助变量
+
 	//注意： 在initialize末尾把子类的构造函数传递进来，末尾执行是很不好的行为
 	//请直接在子类里面执行。 避免不必要的逻辑绕弯，加大维护时的麻烦。
 	//config参数表示slideshow的配置文件。 默认将对config进行解析，如果默认方法无法解析，
@@ -437,6 +439,12 @@ WGE.SlideshowInterface = WGE.Class(
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 			this.context.restore();
 			console.log("Slideshow endloop finished.");
+			if(this.audio)
+			{
+				this.audio.stop();
+				this.audio.setVolume(this._lastVolume);
+				this._lastVolume = null;
+			}
 			return ;
 		}
 
@@ -456,6 +464,10 @@ WGE.SlideshowInterface = WGE.Class(
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 		this.context.restore();
+
+		if(this._lastVolume)
+			this.audio.setVolume(this._lastVolume * (1 - dt / 5000));
+
 		//保证淡出执行间隔。(淡出不需要太高的帧率，和大量运算)
 		setTimeout(this.endloop.bind(this), 20);
 	},
@@ -476,14 +488,9 @@ WGE.SlideshowInterface = WGE.Class(
 		this._endCanvas.height = this.canvas.height;
 		this._endCanvas.getContext('2d').drawImage(this.canvas, 0, 0);
 		this.timeline.end();
-
+		this._lastVolume = this.audio.volume;
 		this._lastFrameTime = Date.now();
 		this.endloop();
-
-		if(this.audio)
-		{
-			this.audio.stop();
-		}
 	},
 
 	// slideshow主循环

@@ -51,8 +51,8 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 		var filter = new WGE.Filter.Monochrome();
 
 		var totalImg = 10;
-		var w = WGE.SlideshowSettings.width / 2, h = WGE.SlideshowSettings.height / 2;
-		var dw = WGE.SlideshowSettings.width / 2, dh = WGE.SlideshowSettings.height / 2;
+		var w = WGE.SlideshowSettings.width / 1.4, h = WGE.SlideshowSettings.height / 1.4;
+		var dw = WGE.SlideshowSettings.width / 0.7, dh = WGE.SlideshowSettings.height / 0.7;
 
 		for(var i = 0; i < imgArr.length; ++i)
 		{
@@ -61,41 +61,49 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 				tmpArr.push(imgArr[j % imgArr.length]);			
 
 			var cvs = WGE.CE('canvas');
-			cvs.width = dw * 2 + 20;
-			cvs.height = dh * 2 + 20;
+			cvs.width = dw;
+			cvs.height = dh;
 			var ctx = cvs.getContext('2d');			
 
 			ctx.drawImage(this._bgImage, 0, 0, this._bgImage.width, this._bgImage.height, 0, 0, cvs.width, cvs.height);
 
 			ctx.save();
-			ctx.shadowBlur = 20;
+			ctx.shadowBlur = 50;
 			ctx.shadowColor = "#000";
 			var img, scaling;
 
 			// 0
 			img = tmpArr[0];
 			ctx.save();
-			ctx.rotate((Math.random() - 0.5) * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.translate(-50, -50);
+			ctx.rotate((Math.random() - 0.5) * Math.PI / 9);
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 
-			// 1
 			img = tmpArr[1];
 			ctx.save();
-			ctx.translate((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.translate(dw * 0.3, -50);
+			ctx.rotate(-Math.random() * Math.PI / 9);
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 
-			//2
+			img = tmpArr[8];
+			ctx.save();
+			ctx.translate(dw * 0.5, -50);
+			ctx.rotate(Math.random() * Math.PI / 9);
+			scaling = 1.0 / Math.max(img.width / w, img.height / h);
+			ctx.scale(scaling, scaling);
+			ctx.drawImage(img, 0, 0);
+			ctx.restore();
+
 			img = tmpArr[2];
 			ctx.save();
-			ctx.translate(w, 0);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.translate(dw * 0.8, -50);
+			ctx.rotate( -Math.random() * Math.PI / 6);
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
@@ -104,77 +112,56 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 			//3
 			img = tmpArr[3];
 			ctx.save();
-			ctx.translate((Math.random() - 0.5) * 300 + w, 0);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.translate(-50, dh * (1.0 / 3.0));
+			ctx.rotate(-Math.random() * Math.PI / 9);
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 
-			//4
 			img = tmpArr[4];
 			ctx.save();
-			ctx.translate(0, h);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.translate(-50, dh * (2.0 / 3.0));
+			ctx.rotate(-Math.random() * Math.PI / 9);
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 
-			//5
 			img = tmpArr[5];
 			ctx.save();
-			ctx.translate(0, (Math.random() - 0.5) * 300 + h);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.translate(dw * 0.4, dh * 0.6);
+			ctx.rotate(Math.random() * Math.PI / 9);
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 
-			//6
 			img = tmpArr[6];
 			ctx.save();
-			ctx.translate((Math.random() - 0.5) * 300 + w, (Math.random() - 0.5) * 300 + h);
+			ctx.translate(dw * 0.7, dh * 0.6);
 			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 
-			//7
 			img = tmpArr[7];
 			ctx.save();
-			ctx.translate((Math.random() - 0.5) * 300 + w, (Math.random() - 0.5) * 300 + h);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
+			ctx.translate(dw * 0.7, dh * 0.3);
+			ctx.rotate(Math.random() * Math.PI / 9);
 			scaling = 1.0 / Math.max(img.width / w, img.height / h);
 			ctx.scale(scaling, scaling);
 			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 
-			//8
-			img = tmpArr[8];
-			ctx.save();
-			ctx.translate(Math.random() * w * 2, Math.random() * h * 2);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
-			scaling = 1.0 / Math.max(img.width / w, img.height / h);
-			ctx.scale(scaling, scaling);
-			ctx.drawImage(img, 0, 0);
-			ctx.restore();
-
-			//9
-			img = tmpArr[9];
-			ctx.save();
-			ctx.translate(Math.random() * w * 2, Math.random() * h * 2);
-			ctx.rotate(Math.random() * Math.PI / 6 * (Math.random() > 0.5 ? 1 : -1));
-			scaling = 1.0 / Math.max(img.width / w, img.height / h);
-			ctx.scale(scaling, scaling);
-			ctx.drawImage(img, 0, 0);
 			ctx.restore();
 			
-			ctx.restore();
-			// var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
-			// ctx.putImageData(dstData, 0, 0);
 			blurredImgs.push(filter.bind(cvs).run(null, true));
+
+			//var dstData = WGE.Filter.StackBlur.stackBlurCanvasRGB(cvs, 0, 0, cvs.width, cvs.height, 1);
+			//ctx.putImageData(dstData, 0, 0);
+			blurredImgs.push(cvs);
 		}
 		return blurredImgs;
 	},
@@ -237,8 +224,8 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 
 			var sprite2 = new WGE.SlideshowAnimationSprite(t, t + 6000, img2, -1);
 			sprite2.setHotspot2Center();
-			var sx = WGE.SlideshowSettings.width / (img2.width - 40), sy = WGE.SlideshowSettings.height / (img2.height - 40)
-			sprite2.scaleTo(sx / 0.7, sy / 0.7);
+			//var sx = WGE.SlideshowSettings.width / (img2.width - 40), sy = WGE.SlideshowSettings.height / (img2.height - 40)
+			//sprite2.scaleTo(sx / 0.7, sy / 0.7);
 			fatherSprite.addChild(sprite2, sprite);
 			this.timeline.push(fatherSprite);
 			zIndex += 100;

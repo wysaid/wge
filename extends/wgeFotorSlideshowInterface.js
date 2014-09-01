@@ -18,6 +18,10 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 {
 	_lastVolume : null, //音乐淡出辅助变量
 
+	_blurFadeoutTime : 1500, //界面模糊淡出时间
+	_logoShowTime : 1500, //logo出现时间点
+	_totalEndingTime : 5000, //总共结束时间
+
 	//options、lastPhotoCallback 都是无意义参数，建议剔除
 	initialize : function(element, options, template, callback, scope, lastPhotoCallback)
 	{
@@ -95,7 +99,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			return;
 		var time = Date.now();
 		var dt = time - this._lastFrameTime;
-		if(dt >  5000)
+		if(dt >  this._totalEndingTime)
 		{
 			this.context.save();
 			this.context.drawImage(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
@@ -104,9 +108,6 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 			this.context.restore();
 			console.log("Slideshow endloop finished.");
-			FT.EventManager.sendEvent({
-				type: "FM_MUSIC_END"
-			});
 			if(this.audio)
 			{
 				this.audio.stop();
@@ -118,23 +119,23 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 
 		this.context.save();
 
-		if(dt < 1500)
+		if(dt < this._blurFadeoutTime)
 		{
 			this.context.drawImage(this._endCanvas, 0, 0);
-			this.context.globalAlpha = dt / 1500;
+			this.context.globalAlpha = dt / this._blurFadeoutTime;
 			this.context.drawImage(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
 		}
 		else
 		{
 			this.context.drawImage(this._endBlurCanvas, 0, 0, this._endBlurCanvas.width, this._endBlurCanvas.height, 0, 0, this.canvas.width, this.canvas.height);
-			this.context.globalAlpha = (dt - 1500) / 7000;
+			this.context.globalAlpha = (dt - this._blurFadeoutTime) / (2.0 * (this._totalEndingTime - this._blurFadeoutTime));
 			this.context.fillStyle = "#000";
 			this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		}
 		this.context.restore();
 
 		if(this._lastVolume)
-			this.audio.setVolume(this._lastVolume * (1 - dt / 5000));
+			this.audio.setVolume(this._lastVolume * (1 - dt / this._totalEndingTime));
 
 		//保证淡出执行间隔。(淡出不需要太高的帧率，和大量运算)
 		setTimeout(this.endloop.bind(this), 20);
@@ -166,6 +167,16 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			duration: this.timeline.totalTime
 		});
 		setTimeout(this.endloop.bind(this), 1);
+		setTimeout(this._showLogo.bind(this), this._logoShowTime);
+	},
+
+	_showLogo : function()
+	{
+		if(this._animationRequest || !(this.context && this._endBlurCanvas && this._endCanvas))
+			return;
+		FT.EventManager.sendEvent({
+			type: "FM_MUSIC_END"
+		});
 	},
 
 	setParam : function(param)
