@@ -257,7 +257,7 @@ WGE.SlideshowInterface = WGE.Class(
 		var self = this;
 		WGE.loadImages(imgURLs, function(imgArr) {
 			if(typeof self._dealFinishLoadingImage == 'function')
-				self._dealFinishLoadingImage();
+				self._dealFinishLoadingImage(imgArr);
 			else
 				self.srcImages = WGE.slideshowFitImages(imgArr, self._imageRatioX, self._imageRatioY);
 

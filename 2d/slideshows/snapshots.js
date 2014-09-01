@@ -98,6 +98,11 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 		return blurredImgs;
 	},
 
+	_dealFinishLoadingImage : function(imgArr)
+	{
+		this.srcImages = WGE.imagesFitSlideshow(imgArr);
+	},
+
 	_genBlurredImage : function(img)
 	{
 		var cvs;		
