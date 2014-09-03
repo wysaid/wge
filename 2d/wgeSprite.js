@@ -407,7 +407,108 @@ WGE.GifSprite = WGE.Class(WGE.VideoSpriteInterface,
 			ctx.globalAlpha = alpha;
 		if(blendmode)
 			ctx.globalCompositeOperation = blendmode;
-		ctx.drawImage(img, -this.hotspot.data[0], pos.data[1] -this.hotspot.data[1]);
+		ctx.drawImage(img, -this.hotspot.data[0], -this.hotspot.data[1]);
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
+		ctx.restore();
+	}
+
+});
+
+WGE.VideoSprite = WGE.Class(WGE.VideoSpriteInterface,
+{
+	_video : null,
+
+	initialize : function(video, w, h)
+	{
+		this.pos = new WGE.Vec2(0, 0);
+		this.hotspot = new WGE.Vec2(0, 0);
+		this.size = new WGE.Vec2(0, 0);
+		this.scaling = new WGE.Vec2(1, 1);
+		if(video)
+			this.initSprite(video, w, h);
+	},
+
+	initSprite : function(video, w, h)
+	{
+		this.size = new WGE.Vec2(parseInt(w), parseInt(h));
+		if(typeof video == "string")
+		{
+			var v = WGE.CE('video');
+			var self = this;
+			v.onload = function() {
+				self._video = this;
+			};
+			v.onerror = function() {
+				console.log("load video faild : ", video);
+			}
+			v.src = video;
+		}
+		else
+		{
+			this._video = video;
+		}
+	},
+
+	playVideo : function()
+	{
+		this._video.play();
+	},
+
+	pauseVideo : function()
+	{
+		this._video.pause();
+	},
+
+	loopVideo : function(shouldLoop)
+	{
+		this._video.loop = shouldLoop;
+	},
+
+	//将sprite渲染到指定的context
+	render : function(ctx)
+	{
+		if(!this._video)
+			return ;
+		ctx.save();
+		ctx.translate(this.pos.data[0], this.pos.data[1]);
+		if(this.rotation)
+			ctx.rotate(this.rotation);
+
+		ctx.scale(this.scaling.data[0], this.scaling.data[1]);
+
+		ctx.globalAlpha *= this.alpha;		
+		if(this.blendMode)
+			ctx.globalCompositeOperation = this.blendMode;
+
+		ctx.drawImage(this._video, -this.hotspot.data[0], -this.hotspot.data[1], this.size.data[0], this.size.data[1]);
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
+		ctx.restore();
+	},
+
+	renderTo : function(ctx, pos, rot, scaling, alpha, blendmode)
+	{
+		if(!this._video)
+			return;
+		ctx.save();
+		ctx.translate(pos.data[0], pos.data[1]);
+		if(rot)
+			ctx.rotate(rot);
+
+		if(scaling)
+			ctx.scale(scaling.data[0], scaling.data[1]);
+		if(alpha)
+			ctx.globalAlpha = alpha;
+		if(blendmode)
+			ctx.globalCompositeOperation = blendmode;
+		ctx.drawImage(this._video, -this.hotspot.data[0], -this.hotspot.data[1]);
 
 		for(var i in this.childSprites)
 		{

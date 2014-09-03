@@ -173,6 +173,34 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 			WGE.AnimationWithChildrenInterface2d.run.call(this, totalTime);
 		},
 	});
+
+	WGE.SlideshowAnimationVideoSprite = WGE.Class(WGE.VideoSprite, WGE.AnimationWithChildrenInterface2d,
+	{		
+		initialize : function(startTime, endTime, video, w, h)
+		{
+			WGE.AnimationWithChildrenInterface2d.initialize.call(this, startTime, endTime);
+			WGE.VideoSprite.initialize.call(this, video, w, h);
+		},
+
+		run : function(totalTime)
+		{			
+			WGE.AnimationWithChildrenInterface2d.run.call(this, totalTime);
+		},
+
+		timeStart : function()
+		{
+			if(this._video.paused)
+				this._video.play();
+			WGE.AnimationWithChildrenInterface2d.timeStart.call(this);
+		},
+
+		timeUp : function()
+		{
+			if(!this._video.loop)
+				this._video.pause();
+			WGE.AnimationWithChildrenInterface2d.timeUp.call(this);
+		},
+	});
 }
 
 

@@ -116,6 +116,7 @@ y重心：<input type="number" value="0.5" id="hotspotY"><br>
 <input type="button" onclick="fRelativeMove()" value="相对运动"><br>
 <input type="button" onclick="fRepeatMove()" value="重复运动"><br>
 <input type="button" onclick="fgifSprite()" value="gif动画"><br>
+<input type="button" onclick="fvideoSprite()" value="视频Sprite"><br>
 <div style="width:80%; margin:2px;height:50px;border:groove;text-align:center;">
 <p id="myText">当前没有动作</p>
 </div>
@@ -604,8 +605,33 @@ function fgifSprite()
 	sprite.moveTo(500, 300);
 	sprite.setHotspotWithRatio(hotspotX, hotspotY);
 
-//	var action = new WGE.Actions.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
-//	sprite.push(action);
+	timeline.push(sprite);
+	timeline.start(0);
+	gui.start();
+}
+
+function fvideoSprite()
+{
+	if(!isOK)
+		return ;
+	setVARs();
+	timeline.clear();
+	gui.stop();
+	var video = WGE.ID('videoTest');
+	var sprite = new WGE.SlideshowAnimationVideoSprite(spriteStartTime, spriteEndTime + 10000, video, 320, 176);
+	sprite.setHotspot2Center();
+//	sprite.moveTo(500, 300);
+
+	var action = new WGE.Actions.UniformScaleAction([actionStartTime, actionEndTime], [0.1, 0.1], [3.0, 3.0], repeatTimes);	
+	var action2 = new WGE.Actions.UniformRotateAction([actionStartTime, actionEndTime], 0, 2 * Math.PI, repeatTimes);
+	//var action3 = new WGE.Actions.BlinkAlphaAction([0, actionEndTime], 1, 0.6, repeatTimes);
+	var action4 = new move2Action([actionStartTime, actionEndTime], [200, 200], [800, 500], repeatTimes);
+
+	sprite.push(action);
+	sprite.push(action2);
+	//sprite.push(action3);
+	sprite.push(action4);
+
 	timeline.push(sprite);
 	timeline.start(0);
 	gui.start();
@@ -620,6 +646,9 @@ function fgifSprite()
 <img src="../../res/comic10.jpg" id="test3">
 <img src="../../res/comic11.jpg" id="test4">
 <img src="../../res/comic12.jpg" id="test5">
+<video id="videoTest">
+	<source src="../../res/video/1.mp4" type="video/mp4" />
+</video>
 
 </div>
 </body>
