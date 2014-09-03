@@ -32,7 +32,7 @@ WGE.Memories = WGE.Class(WGE.SlideshowInterface,
 	_eachCallback : null,
 	_loadingFinish : false,
 
-	_asyncTime : 2000,
+	_syncTime : 2000,
 
 	initialize : function()
 	{

@@ -337,7 +337,8 @@ WGE.GifSprite = WGE.Class(WGE.VideoSpriteInterface,
 		this.hotspot = new WGE.Vec2(0, 0);
 		this.size = new WGE.Vec2(0, 0);
 		this.scaling = new WGE.Vec2(1, 1);
-		initSprite(imgArr, w, h, noShare);
+		if(imgArr)
+			this.initSprite(imgArr, w, h, noShare);
 	},
 
 	initSprite : function(imgArr, w, h, noShare)

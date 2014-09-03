@@ -159,11 +159,19 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 
 	WGE.SlideshowAnimationGifSprite = WGE.Class(WGE.GifSprite, WGE.AnimationWithChildrenInterface2d,
 	{
-		initialize : function(startTime, endTime)
+		switchTime : 250,
+
+		initialize : function(startTime, endTime, imgArr, w, h)
 		{
 			WGE.AnimationWithChildrenInterface2d.initialize.call(this, startTime, endTime);
-			WGE.GifSprite.initialize.call(this);
-		}
+			WGE.GifSprite.initialize.call(this, imgArr, w, h);
+		},
+
+		run : function(totalTime)
+		{
+			this.playIndex = parseInt(totalTime / this.switchTime) % this._imgArr.length;
+			WGE.AnimationWithChildrenInterface2d.run.call(this, totalTime);
+		},
 	});
 }
 
