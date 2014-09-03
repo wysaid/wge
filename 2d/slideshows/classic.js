@@ -78,8 +78,8 @@ WGE.Classic = WGE.Class(WGE.SlideshowInterface,
 	loopTime : 5000,
 	loopImageNum : 1,
 	_syncTime : undefined,
-	_imageRatioX : 1.2,
-	_imageRatioY : 1.2,
+	// _imageRatioX : 1.2,
+	// _imageRatioY : 1.2,
 
 	initialize : function()
 	{
@@ -107,9 +107,9 @@ WGE.Classic = WGE.Class(WGE.SlideshowInterface,
 			var scaling = Math.random() * 0.5 + 1.2;
 			var scaleAction;
 			if(Math.random() < 0.5)
-				scaleAction = new WGE.Actions.UniformScaleAction([0, 5500], [scaling, scaling], [0.84, 0.84])
+				scaleAction = new WGE.Actions.UniformScaleAction([0, 5500], [scaling, scaling], [1, 1])
 			else
-				scaleAction = new WGE.Actions.UniformScaleAction([0, 5500], [0.84, 0.84], [scaling, scaling]);
+				scaleAction = new WGE.Actions.UniformScaleAction([0, 5500], [1, 1], [scaling, scaling]);
 			var alphaAction = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
 			sprite.pushArr([scaleAction, alphaAction]);
 			this.timeline.push(sprite);

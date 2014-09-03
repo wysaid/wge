@@ -26,7 +26,7 @@ document.body.appendChild(div);
 var imageArr = [];
 
 for(var i = 0; i != 5; ++i)
-	imageArr.push("../../res/52.jpg");
+	imageArr.push("../../res/test2.jpg");
 
 var len = imageArr.length;
 
@@ -37,14 +37,16 @@ var slideshow = new WGE.Snapshots(div, imageArr, finishLoadAll, finishLoadOne);
 function finishLoadAll(imgArr, slideshowThis)
 {
 	slideshowThis.context.clearRect(0, 0, slideshowThis.canvas.width, slideshowThis.canvas.height);
+	slideshowThis.context.fillStyle = "#0f0";
 	slideshowThis.context.fillText("图片加载完毕，初始场景...", 10, slideshowThis.canvas.height / 2);
 	slideshowThis.play();
 }
 
 //加载完单张
-function finishLoadOne(img, n)
-{	
+function finishLoadOne(img, n, slideshowThis)
+{
 	slideshow.context.clearRect(0, 0, slideshow.canvas.width, slideshow.canvas.height);
+	slideshowThis.context.fillStyle = "#0f0";
 	slideshow.context.fillText("加载图片: 第" + n + "张，共" + len + "张", 10, slideshow.canvas.height / 2);
 }
 

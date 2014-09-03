@@ -80,11 +80,22 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 	blurredImgs : null,
 	boundingBoxes : null,
 
+	_filter : null,
+	_syncTime : 2000,
+
+	_queue : null,
+
+	_timerID : null,
+	_finishCallback : null,
+	_eachCallback : null,
+	_loadingFinish : false,
+
 	initialize : function()
 	{
-		WGE.SlideshowInterface.initialize.apply(this, arguments);
 		this.blurredImgs = [];
 		this.boundingBoxes = [];
+		this._filter = new WGE.Filter.Monochrome();
+		WGE.SlideshowInterface.initialize.apply(this, arguments);
 	},
 
 	_genBlurredImages : function(imgArr)
@@ -96,11 +107,6 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 			blurredImgs.push(this._genBlurredImage(imgArr[i]));
 		}
 		return blurredImgs;
-	},
-
-	_dealFinishLoadingImage : function(imgArr)
-	{
-		this.srcImages = WGE.imagesFitSlideshow(imgArr);
 	},
 
 	_genBlurredImage : function(img)
@@ -128,45 +134,45 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 		return cvs;
 	},
 
-	_genBoundingBox : function(imgArr)
+	_genBoundingBoxes : function(imgArr)
 	{
 		var boundingBoxArr = [];
 
 		for(var i in imgArr)
 		{
-			var img = imgArr[i];
-			//var ctx = img.getContext('2d');
-			var cvs = WGE.CE('canvas');
-			cvs.width = img.width + 40;
-			cvs.height = img.height + 40;
-			var ctx = cvs.getContext('2d');
-			ctx.save();
-			ctx.fillStyle = "#fff";
-			ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-			ctx.shadowBlur = 10;
-			ctx.fillRect(10, 10, cvs.width - 20, cvs.height - 20);
-			ctx.restore();
-			ctx.drawImage(img, 20, 20);			
-			boundingBoxArr.push(cvs);
+			boundingBoxArr.push(this._genBoundingBox(imgArr[i]));
 		}
 		return boundingBoxArr;
 	},
 
+	_genBoundingBox : function(img)
+	{
+		var cvs = WGE.CE('canvas');
+		cvs.width = img.width + 40;
+		cvs.height = img.height + 40;
+		var ctx = cvs.getContext('2d');
+		ctx.save();
+		ctx.fillStyle = "#fff";
+		ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+		ctx.shadowBlur = 10;
+		ctx.fillRect(10, 10, cvs.width - 20, cvs.height - 20);
+		ctx.restore();
+		ctx.drawImage(img, 20, 20);
+		return cvs;
+	},
+
 	initTimeline : function(config)
 	{
-		var totalTime = Math.ceil(this.srcImages.length / this.loopImageNum) * this.loopTime;
+		var totalTime = Math.ceil(this.boundingBoxes.length / this.loopImageNum) * this.loopTime;
 		this.timeline = new WGE.TimeLine(totalTime);
 
 		var t = 0;
 		var zIndex = 0;
 
-		var blurredImgs = this._genBlurredImages(this.srcImages);
-		var boundingBoxes = this._genBoundingBox(this.srcImages);
-
-		for(var i in this.srcImages)
+		for(var i in this.boundingBoxes)
 		{
 			var rand = Math.random();
-			var img = boundingBoxes[i];
+			var img = this.boundingBoxes[i];
 
 			var sprite = new WGE.SlideshowAnimationSprite(t, t + 6000, img, -1);
 			sprite.setHotspot2Center();
@@ -178,7 +184,7 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 			var rotateAction = new WGE.Actions.UniformRotateAction([0, 3000], 0, rot1);
 			sprite.pushArr([scaleAction, alphaAction, rotateAction]);
 
-			var img2 = blurredImgs[i];
+			var img2 = this.blurredImgs[i];
 
 			var sprite2 = new WGE.SlideshowAnimationSprite(t, t + 6000, img2, -1);
 			sprite2.setHotspot2Center();
@@ -205,6 +211,77 @@ WGE.Snapshots = WGE.Class(WGE.SlideshowInterface,
 		}
 		else audioFileNames = WGE.SlideshowSettings.assetsDir + this.audioFileName;
 		this._initAudio(audioFileNames);
+	},
+
+	_dealLoadingImage : function(img, index, n)
+	{
+		if(!this._queue)
+			this._queue = [];
+		this._queue.push({IMAGE : img, INDEX : index, TOTAL : n});
+
+		if(!this._timerID)
+			this._timerID = setTimeout(this._processingQueue.bind(this), 20);		
+	},
+
+	_loadImages : function(imgURLs, finishCallback, eachCallback)
+	{
+		var self = this;
+		this._finishCallback = finishCallback;
+		this._eachCallback = eachCallback;
+		WGE.loadImages(imgURLs, function(imgArr) {
+			if(typeof self._dealFinishLoadingImage == 'function')
+				self._dealFinishLoadingImage(imgArr);
+			else
+				self.srcImages = WGE.slideshowFitImages(imgArr, self._imageRatioX, self._imageRatioY);
+
+		}, function(img, n, imageIndex) {
+			if(typeof self._dealLoadingImage == 'function')
+				self._dealLoadingImage(img, imageIndex, n);
+		});
+	},
+
+	_processingQueue : function()
+	{
+		if(!(this._queue instanceof Array && this._queue.length > 0))
+		{
+			this._queue = null;
+			this._timerID = null;
+			if(this._loadingFinish)
+			{
+				if(this.config)
+					this.initTimeline(this.config);
+				if(this._finishCallback)
+					this._finishCallback(this.srcImages, this);
+				this.config = null;
+			}
+			return ;
+		}
+		var obj = this._queue.shift();
+		this._processingImage(obj);
+		this._timerID = setTimeout(this._processingQueue.bind(this), 20);
+	},
+
+	_dealFinishLoadingImage : function(imgArr)
+	{
+		this._loadingFinish = true;
+		if(!this._timerID)
+		{
+			if(this.config)
+				this.initTimeline(this.config);
+			if(this.finishCallback)
+				this.finishCallback(this.srcImages || imgArr, this);
+			this.config = null;
+		}
+	},
+
+	_processingImage : function(obj)
+	{
+		var index = obj.INDEX;
+		var img = obj.IMAGE;
+		var fitImg = WGE.slideshowFitImage(img);
+		this.blurredImgs[index] = this._genBlurredImage(fitImg);
+		this.boundingBoxes[index] = this._genBoundingBox(fitImg);
+		this._eachCallback(img, obj.TOTAL, this);
 	}
 });
 

@@ -242,19 +242,27 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 	};
 
 	//当加载失败时，确保引擎正常工作，并返回默认404图片.
-	var E = function() {
+	// var E = function() {
+	// 	var img = new Image();
+	// 	imgArr[this.wgeImageID] = img;
+	// 	img.wgeImageID = this.wgeImageID;
+	// 	img.onload = function() {			
+	// 		J.call(this, this, this.wgeImageID);
+	// 	};
+
+	// 	img.onerror = function() {
+	// 		this.src = WGE.Image404Data;
+	// 	};
+
+	// 	img.src = this.url;
+	// };
+
+	var E2 = function() {
 		var img = new Image();
 		imgArr[this.wgeImageID] = img;
 		img.wgeImageID = this.wgeImageID;
-		img.onload = function() {			
-			J.call(this, this, this.wgeImageID);
-		};
-
-		img.onerror = function() {
-			this.src = WGE.Image404Data;
-		};
-
-		img.src = this.url;
+		img.src = WGE.Image404Data;
+		J.call(img, img, this.wgeImageID);
 	};
 
 	for (var i = 0; i < imageURLArr.length; i++)
@@ -262,7 +270,7 @@ WGE.loadImages = function(imageURLArr, finishCallback, eachCallback)
 		var xhr = new XMLHttpRequest();
 		xhr.wgeImageID = i;
 		xhr.onload = F;
-		xhr.onerror = E;
+		xhr.onerror = E2;
 		xhr.url = imageURLArr[i];
 		xhr.open('GET', xhr.url, true);
 		xhr.responseType = 'blob';

@@ -302,3 +302,116 @@ WGE.SpriteExt3d = WGE.Class(WGE.Sprite,
 {
 
 });
+
+
+//////////////////////////////////////////
+//
+// 简介 :  video sprite 实现类似于gif或者video标签的播放方式。
+//
+//////////////////////////////////////////
+
+WGE.VideoSpriteInterface = WGE.Class(WGE.LogicSprite,
+{
+	// _resource : null,  // Sprite自身图像。
+
+	// initialize : function(img, w, h)
+	// {
+	// 	this.pos = new WGE.Vec2(0, 0);
+	// 	this.hotspot = new WGE.Vec2(0, 0);
+	// 	this.size = new WGE.Vec2(0, 0);
+	// 	this.scaling = new WGE.Vec2(1, 1);
+	// }
+
+
+});
+
+WGE.GifSprite = WGE.Class(WGE.VideoSpriteInterface,
+{
+	_imgArr : null,
+	playIndex : 0,
+
+	//w和h 必须指定！
+	initialize : function(imgArr, w, h, noShare)
+	{
+		this.pos = new WGE.Vec2(0, 0);
+		this.hotspot = new WGE.Vec2(0, 0);
+		this.size = new WGE.Vec2(0, 0);
+		this.scaling = new WGE.Vec2(1, 1);
+		initSprite(imgArr, w, h, noShare);
+	},
+
+	initSprite : function(imgArr, w, h, noShare)
+	{
+		this.size = new WGE.Vec2(parseInt(w), parseInt(h));
+		if(noShare)
+		{
+			this._imgArr = [];
+			for(var i in imgArr)
+			{
+				var img = imgArr[i];
+				var cvs = WGE.CE('canvas');
+				cvs.width = img.width;
+				cvs.height = img.height;
+				cvs.getContext('2d').drawImage(img, 0, 0);
+				this._imgArr.push(cvs);
+			}
+		}
+		else
+		{
+			this._imgArr = imgArr;
+		}
+	},
+
+	switchImage : function()
+	{
+		++this.playIndex %= this._imgArr.length;
+	},
+
+	//将sprite渲染到指定的context
+	render : function(ctx)
+	{
+		var img = this._imgArr[this.playIndex];
+		ctx.save();
+		ctx.translate(this.pos.data[0], this.pos.data[1]);
+		if(this.rotation)
+			ctx.rotate(this.rotation);
+
+		ctx.scale(this.scaling.data[0], this.scaling.data[1]);
+
+		ctx.globalAlpha *= this.alpha;		
+		if(this.blendMode)
+			ctx.globalCompositeOperation = this.blendMode;
+
+		ctx.drawImage(img, -this.hotspot.data[0], -this.hotspot.data[1]);
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
+		ctx.restore();
+	},
+
+	renderTo : function(ctx, pos, rot, scaling, alpha, blendmode)
+	{
+		var img = this._imgArr[this.playIndex];
+		ctx.save();
+		ctx.translate(pos.data[0], pos.data[1]);
+		if(rot)
+			ctx.rotate(rot);
+
+		if(scaling)
+			ctx.scale(scaling.data[0], scaling.data[1]);
+		if(alpha)
+			ctx.globalAlpha = alpha;
+		if(blendmode)
+			ctx.globalCompositeOperation = blendmode;
+		ctx.drawImage(img, -this.hotspot.data[0], pos.data[1] -this.hotspot.data[1]);
+
+		for(var i in this.childSprites)
+		{
+			this.childSprites[i].render(ctx);
+		}
+		ctx.restore();
+	}
+
+});

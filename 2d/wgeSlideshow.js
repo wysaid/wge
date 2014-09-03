@@ -22,7 +22,7 @@ WGE.SlideshowSettings =
 	assetsDir : "",  //音乐等资源所在文件夹
 	width : 1024,
 	height : 768,
-	style : "width:100%;height:100%"
+	style : "width:100%;height:100%;background-color:#000"
 };
 
 if(window.soundManager && window.soundManager.onready)
@@ -43,8 +43,8 @@ WGE.slideshowFitImages = function(imgs, w, h)
 {
 	if(!(w && h))
 	{
-		w = 1024;
-		h = 768;
+		w = WGE.SlideshowSettings.width;
+		h = WGE.SlideshowSettings.height;
 	}
 	else
 	{
@@ -71,8 +71,8 @@ WGE.slideshowFitImage = function(img, w, h)
 {
 	if(!(w && h))
 	{
-		w = 1024;
-		h = 768;
+		w = WGE.SlideshowSettings.width;
+		h = WGE.SlideshowSettings.height;
 	}
 	else
 	{
@@ -92,8 +92,8 @@ WGE.imagesFitSlideshow = function(imgs, w, h)
 {
 	if(!(w && h))
 	{
-		w = 1024;
-		h = 768;
+		w = WGE.SlideshowSettings.width;
+		h = WGE.SlideshowSettings.height;
 	}
 	else
 	{
@@ -114,7 +114,27 @@ WGE.imagesFitSlideshow = function(imgs, w, h)
 		fitImgs.push(canvas);
 	}
 	return fitImgs;
-}
+};
+
+WGE.imageFitSlideshow = function(img, w, h)
+{
+	if(!(w && h))
+	{
+		w = 1024;
+		h = 768;
+	}
+	else
+	{
+		w *= WGE.SlideshowSettings.width;
+		h *= WGE.SlideshowSettings.height;
+	}
+	var canvas = WGE.CE('canvas');
+	var scale = Math.max(img.width / w, img.height / h);
+	canvas.width = img.width / scale;
+	canvas.height = img.height / scale;
+	canvas.getContext('2d').drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width, canvas.height);
+	return canvas;
+};
 
 if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 {
@@ -134,6 +154,15 @@ if(WGE.Sprite && WGE.AnimationWithChildrenInterface2d)
 		{
 			WGE.AnimationWithChildrenInterface2d.initialize.call(this, startTime, endTime);
 			WGE.LogicSprite.initialize.call(this);
+		}
+	});
+
+	WGE.SlideshowAnimationGifSprite = WGE.Class(WGE.GifSprite, WGE.AnimationWithChildrenInterface2d,
+	{
+		initialize : function(startTime, endTime)
+		{
+			WGE.AnimationWithChildrenInterface2d.initialize.call(this, startTime, endTime);
+			WGE.GifSprite.initialize.call(this);
 		}
 	});
 }

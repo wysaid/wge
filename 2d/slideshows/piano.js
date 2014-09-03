@@ -820,9 +820,21 @@ WGE.Piano = WGE.Class(WGE.SlideshowInterface,
 	loopImageNum : 1,
 	blurredImgs : null,
 	boundingBoxes : null,
+	_syncTime : 2000,
+
+	_filter : null,
+
+	_queue : null,
+
+	_timerID : null,
+	_finishCallback : null,
+	_eachCallback : null,
+	_loadingFinish : false,
 
 	initialize : function()
 	{
+		this.srcImages = [];
+		this._filter = new WGE.Filter.Monochrome();
 		WGE.SlideshowInterface.initialize.apply(this, arguments);
 	},
 
@@ -891,6 +903,76 @@ WGE.Piano = WGE.Class(WGE.SlideshowInterface,
 		this._audioplayingTime = 0;
 		this.context.strokeStyle = "#fff";
 		this.context.lineWidth = 6;
+	},
+
+	_dealLoadingImage : function(img, index, n)
+	{
+		if(!this._queue)
+			this._queue = [];
+		this._queue.push({IMAGE : img, INDEX : index, TOTAL : n});
+
+		if(!this._timerID)
+			this._timerID = setTimeout(this._processingQueue.bind(this), 20);		
+	},
+
+	_loadImages : function(imgURLs, finishCallback, eachCallback)
+	{
+		var self = this;
+		this._finishCallback = finishCallback;
+		this._eachCallback = eachCallback;
+		WGE.loadImages(imgURLs, function(imgArr) {
+			if(typeof self._dealFinishLoadingImage == 'function')
+				self._dealFinishLoadingImage(imgArr);
+			else
+				self.srcImages = WGE.slideshowFitImages(imgArr, self._imageRatioX, self._imageRatioY);
+
+		}, function(img, n, imageIndex) {
+			if(typeof self._dealLoadingImage == 'function')
+				self._dealLoadingImage(img, imageIndex, n);
+		});
+	},
+
+	_processingQueue : function()
+	{
+		if(!(this._queue instanceof Array && this._queue.length > 0))
+		{
+			this._queue = null;
+			this._timerID = null;
+			if(this._loadingFinish)
+			{
+				if(this.config)
+					this.initTimeline(this.config);
+				if(this._finishCallback)
+					this._finishCallback(this.srcImages, this);
+				this.config = null;
+			}
+			return ;
+		}
+		var obj = this._queue.shift();
+		this._processingImage(obj);
+		this._timerID = setTimeout(this._processingQueue.bind(this), 20);
+	},
+
+	_dealFinishLoadingImage : function(imgArr)
+	{
+		this._loadingFinish = true;
+		if(!this._timerID)
+		{
+			if(this.config)
+				this.initTimeline(this.config);
+			if(this.finishCallback)
+				this.finishCallback(this.srcImages || imgArr, this);
+			this.config = null;
+		}
+	},
+
+	_processingImage : function(obj)
+	{
+		var index = obj.INDEX;
+		var img = obj.IMAGE;
+		this.srcImages[index] = WGE.slideshowFitImage(img);
+		this.srcImages[index].PhotoFrameBW = this._filter.bind(this.srcImages[index]).run();
+		this._eachCallback(img, obj.TOTAL, this);
 	}
 });
 

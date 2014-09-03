@@ -46,7 +46,9 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			if(callback)
 				callback.call(scope);
 			if(!WGE.isMobile)
+			{
 				self.play();
+			}
 			else
 			{
 				self.play();
@@ -58,13 +60,14 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 
 		//兼容接口
 		this.setMusicVolume = this.setVolume;
-		this.clear = this.release;
+		this.clear = this.release.bind(this);
 	},
 
 	release : function()
 	{
 		this.audio.destruct();
 		this.srcImages = undefined;
+		this.timeline = undefined;
 		WGE.release(this);
 	},
 
@@ -76,6 +79,51 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 			position: this.timeline.currentTime,
 			duration: this.timeline.totalTime
 		});
+	},
+
+	//需要第三方 soundManager
+	_initAudio : function(url)
+	{
+		var self = this;
+		var arg = {url : url};
+
+		if(typeof this._audioFinish == "function")
+			arg.onfinish = this._audioFinish.bind(this);
+
+		if(typeof this._audioplaying == "function")
+			arg.whileplaying = this._audioplaying.bind(this);
+
+		if(typeof this._audiosuspend == "function")
+			arg.onsuspend = this._audiosuspend.bind(this);
+		if(typeof this._audioTimeout == "function")
+			arg.ontimeout = this._audioTimeout.bind(this);
+
+		var tryInitAudio = function() {
+			if(WGE.soundManagerReady)
+			{
+				if(self.audio)
+					return;
+				self.audio = soundManager.createSound(arg);
+				if(!self.audio)
+					self._checkAudioFailed();
+				self.audio.play();
+				//初始时将音乐标记为暂停状态，而不是未播放状态。
+				if(!self._animationRequest)
+					self.audio.pause();
+				try
+				{
+					var v = self.template.config.music.defaultVolume;
+					if(!isNaN(v))
+						self.audio.setVolume(v);
+				}catch(e) {}
+			}
+			else
+			{
+				setTimeout(tryInitAudio.bind(this), 100);
+			}
+		};
+
+		tryInitAudio();
 	},
 
 	_checkAudioFailed : function()
@@ -205,7 +253,7 @@ WGE.FotorSlideshowInterface = WGE.Class(FT.KAnimator, WGE.SlideshowInterface,
 	{
 		if(typeof param.musicVolume == "number")
 		{
-			this._lastVolume = null;
+			//this._lastVolume = null;
 			this.setVolume(param.musicVolume);
 		}
 	}
