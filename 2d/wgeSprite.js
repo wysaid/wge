@@ -364,7 +364,8 @@ WGE.GifSprite = WGE.Class(WGE.VideoSpriteInterface,
 
 	switchImage : function()
 	{
-		++this.playIndex %= this._imgArr.length;
+		++this.playIndex;
+		this.playIndex %= this._imgArr.length;
 	},
 
 	//将sprite渲染到指定的context
