@@ -158,6 +158,7 @@ WGE.Sprite2d = WGE.Class(
 	setZ : function(z)
 	{
 		this.zIndex = z;
+		this._program.bind();
 		this._context.uniform1f(this._zIndexLoc, z);
 	},
 
