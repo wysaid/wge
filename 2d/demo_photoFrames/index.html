@@ -76,7 +76,7 @@ function main()
 	}
 
 	timeline.clear();
-	var timeStamp = 0, stillTime = 17000, globalZ = 0;
+	var timeStamp = 0, stillTime = 18500, globalZ = 0;
 	for (var i = 0; i < totalImages; i += 20)
 	{
 	    for (var j = 0; j != 4; ++j)
@@ -84,7 +84,7 @@ function main()
 	        var scene = FTPhotoFrame.initScene(imgArray, 800, 600, globalZ, timeStamp, stillTime);
 	        timeline.pushArr(scene);
 	        globalZ += 10000;
-	        timeStamp += 15000;
+	        timeStamp += 17500;
 	    }
 	}
 
@@ -114,7 +114,7 @@ function mainloop()
 {
 	var timeNow = Date.now();
     
-	if(!timeline.update(timeNow - lastTime))
+	if(!timeline.update((timeNow - lastTime) * 1.2))
 	{
 	    console.log('PhotoFrames End');
 	    ctx.globalAlpha = 0.001;

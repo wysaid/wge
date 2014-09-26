@@ -734,6 +734,58 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		scene.push(actionManager2, frame3, frame4, frame5);
 	}
 
+	globalZ += 100.0;
+
+	//新增
+	{
+		var img = WGE.rotateArray(imageArray);
+		var imgBW = typeof img.PhotoFrameBW == 'object' ? img.PhotoFrameBW : (img.PhotoFrameBW = filterBW.bind(img).run());
+		
+		var frameNew1 = S(15000, 20500, img, -1);
+		var frameNew2 = S(15500, 20500, imgBW, -1);
+
+		frameNew1.zIndex = globalZ - 1;
+		frameNew2.zIndex = globalZ;
+
+		frameNew1.setHotspotWithRatio(0.5, 0.1);
+		frameNew1.moveTo(w / 2, h / 10);
+		frameNew1.setHotspotWithRatio(0.5, 0.1);
+		frameNew1.moveTo(w / 2, h / 10);
+
+		var frame1Action = new WGE.Actions.UniformScaleAction([0, 3000], [1.3, 1.3], [1, 1]);
+		var frame2Action = new WGE.Actions.UniformScaleAction([0, 3000], [1.0, 1.0], [1.3, 1.3]);
+
+		frameNew1.push(frame1Action);
+		frameNew2.push(frame2Action);
+
+		///////////////////////////////
+		var pnts1 = [P(0, h), P(w, h), P(w, h), P(0, h)];
+		var pnts2 = [P(0, 0), P(w, 0), P(w, 0), P(0, 0)];
+
+		var zone1 = Z(pnts1);
+		var zone2 = Z(pnts2);
+
+		frameNew1.zone = zone1;
+		frameNew2.zone = zone2;
+
+		var action1 = new FTPhotoFrame.PointMoveSlowDown3X([R(200), 1000], P2, P(0, h/2), pnts1[0]);
+		var action2 = new FTPhotoFrame.PointMoveSlowDown3X([R(200), 1000], P3, P(w, h/2), pnts1[1]);
+
+		var action3 = new FTPhotoFrame.PointMoveSlowDown3X([500, 1300 + R(200)], P0, P(0, h/2), pnts2[3]);
+		var action4 = new FTPhotoFrame.PointMoveSlowDown3X([R(500) + R(200), 1500], P1, P(w, h/2), pnts2[2]);
+
+		var action5 = new FTPhotoFrame.PointMoveSlowDown3X([1500, 2000 + R(500)], P(0, h/2), P2, pnts2[3]);
+		var action6 = new FTPhotoFrame.PointMoveSlowDown3X([1500 + R(200), 2500], P(w, h/2), P3, pnts2[2]);
+
+		var actionManager = M(15000, 17500);
+		actionManager.pushArr([action1, action2, action3, action4, action5, action6]);
+
+		scene.push(frameNew1, frameNew2, actionManager);
+
+
+
+	}
+
 	if(timeStamp && timeStamp > 0)
 	{
 		for(var i = 0; i != scene.length; ++i)
