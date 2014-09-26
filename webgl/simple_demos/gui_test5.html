@@ -29,6 +29,7 @@ function main()
 	var sprite = new WGE.Sprite2d(cvs, ctx);
 	sprite.initSprite(WGE.ID("test0"));
 	sprite.scaleTo(0.5, 0.5);
+	sprite.moveTo(400, 300);
 	sprite.render();
 	ctx.enable(ctx.STENCIL_TEST);
 	ctx.clearStencil(0);
