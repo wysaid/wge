@@ -73,7 +73,7 @@ WGE.SceneInterface = WGE.Class(
 	turnRightTo : function(rad)
 	{
 		var d = this.lookDir.data;
-		var v = WGE.mat2MulVec2(WGE.mat2Rotation(rad), new WGE.Vec3(0, 1, 0)).data;
+		var v = WGE.mat2MulVec2(WGE.mat2Rotation(rad), new WGE.Vec2(0, 1)).data;
 		d[0] = v[0];
 		d[1] = v[1];
 	},
