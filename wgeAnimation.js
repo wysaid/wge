@@ -16,7 +16,7 @@ WGE.TimeActionInterface = WGE.Class(
 	// 为了方便统一计算， percent 值域范围必须为[0, 1]， 内部计算时请自行转换。
 	act : function(percent) {},
 
-	// 为Action开始做准备工作，比如对一些属性进行复位。
+	// 为Action开始做准备工作，比如对一些属性进行复位。(非必须)
 	actionStart : function() {},
 
 	// Action结束之后的扫尾工作，比如将某物体设置运动结束之后的状态。
@@ -31,269 +31,6 @@ WGE.TimeActionInterface = WGE.Class(
 	// 注意：这里的时间是相对于某个 SpriteAnimation自身的时间，而不是整个时间轴的时间！
 	tStart : 0, //起始时间
 	tEnd : 0 //结束时间
-});
-
-//动态改变透明度
-WGE.UniformAlphaAction = WGE.Class(WGE.TimeActionInterface,
-{
-	fromAlpha : 1,
-	toAlpha : 1,
-	dis : 0,
-
-	initialize : function(time, from, to, repeatTimes)
-	{
-		if(time instanceof Array)
-		{
-			this.tStart = time[0];
-			this.tEnd = time[1];
-		}
-		else if(time instanceof WGE.Vec2)
-		{
-			this.tStart = time.data[0];
-			this.tEnd = time.data[1];
-		}
-		this.fromAlpha = from;
-		this.toAlpha = to;
-		this.dis = to - from;
-		this.repeatTimes = repeatTimes ? repeatTimes : 1;
-	},
-
-	act : function(percent)
-	{
-		var t = this.repeatTimes * percent;
-		t -= Math.floor(t);
-		try
-		{
-			this.bindObj.alpha = this.fromAlpha + this.dis * t;
-		}catch(e)
-		{
-			console.error("Invalid Binding Object!");
-		}
-
-		this.act = function(percent)
-		{
-			var t = this.repeatTimes * percent;
-			t -= Math.floor(t);
-			this.bindObj.alpha = this.fromAlpha + this.dis * t;
-		};
-	},
-
-	actionStart : function()
-	{
-		this.bindObj.alpha = this.fromAlpha;
-	},
-
-	actionStop : function()
-	{
-		this.bindObj.alpha = this.toAlpha;
-	}
-});
-
-WGE.BlinkAlphaAction = WGE.Class(WGE.UniformAlphaAction,
-{
-	act : function(percent)
-	{
-		var t = this.repeatTimes * percent;
-		t = (t - Math.floor(t)) * 2.0;
-		if(t > 1.0)
-			t = 2.0 - t;
-		t = t * t * (3.0 - 2.0 * t);
-		try
-		{
-			this.bindObj.alpha = this.fromAlpha + this.dis * t;
-		}catch(e)
-		{
-			console.error("Invalid Binding Object!");
-		}
-
-		this.act = function(percent)
-		{
-			var t = this.repeatTimes * percent;
-			t = (t - Math.floor(t)) * 2.0;
-			if(t > 1.0)
-				t = 2.0 - t;
-			t = t * t * (3.0 - 2.0 * t);
-			this.bindObj.alpha = this.fromAlpha + this.dis * t;
-		};
-	},
-
-	actionStop : function()
-	{
-		this.bindObj.alpha = this.fromAlpha;
-	}
-});
-
-//匀速直线运动
-WGE.UniformLinearMoveAction = WGE.Class(WGE.TimeActionInterface,
-{
-	//为了效率，此类计算不使用前面封装的对象
-	fromX : 0,
-	fromY : 0,
-	toX : 1,
-	toY : 1,
-	disX : 1,
-	disY : 1,
-
-	initialize : function(time, from, to, repeatTimes)
-	{
-		if(time instanceof Array)
-		{
-			this.tStart = time[0];
-			this.tEnd = time[1];
-		}
-		else
-		{
-			this.tStart = time.data[0];
-			this.tEnd = time.data[1];
-		}
-
-		if(from instanceof Array)
-		{
-			this.fromX = from[0];
-			this.fromY = from[1];
-		}
-		else
-		{
-			this.fromX = from.data[0];
-			this.fromY = from.data[1];
-		}
-
-		if(to instanceof Array)
-		{
-			this.toX = to[0];
-			this.toY = to[1];
-		}
-		else
-		{
-			this.toX = to.data[0];
-			this.toY = to.data[1];
-		}		
-
-		this.disX = this.toX - this.fromX;
-		this.disY = this.toY - this.fromY;
-
-		this.repeatTimes = repeatTimes ? repeatTimes : 1;
-	},
-
-	act : function(percent)
-	{
-		var t = this.repeatTimes * percent;
-		t -= Math.floor(t);
-		try
-		{
-			this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
-		}catch(e)
-		{
-			console.error("Invalid Binding Object!");
-		}
-
-		this.act = function(percent)
-		{
-			var t = this.repeatTimes * percent;
-			t -= Math.floor(t);
-			this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
-		};
-	},
-
-	actionStart : function()
-	{
-		this.bindObj.moveTo(this.fromX, this.fromY);
-	},
-
-	actionStop : function()
-	{
-		this.bindObj.moveTo(this.toX, this.toY);
-	}
-});
-
-WGE.NatureMoveAction = WGE.Class(WGE.UniformLinearMoveAction,
-{
-	act : function(percent)
-	{
-		var t = this.repeatTimes * percent;
-		t -= Math.floor(t);
-		t = t * t * (3 - 2 * t);
-		this.bindObj.moveTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
-	}
-});
-
-WGE.UniformScaleAction = WGE.Class(WGE.UniformLinearMoveAction,
-{
-	act : function(percent)
-	{
-		var t = this.repeatTimes * percent;
-		t -= Math.floor(t);
-		try
-		{
-			this.bindObj.scaleTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
-		}catch(e)
-		{
-			console.error("Invalid Binding Object!");
-		}
-
-		this.act = function(percent)
-		{
-			var t = this.repeatTimes * percent;
-			t -= Math.floor(t);
-			this.bindObj.scaleTo(this.fromX + this.disX * t, this.fromY + this.disY * t);
-		};
-	},
-
-	actionStart : function()
-	{
-		this.bindObj.scaleTo(this.fromX, this.fromY);
-	},
-
-	actionStop : function()
-	{
-		this.bindObj.scaleTo(this.toX, this.toY);
-	}
-});
-
-//简单适用实现，兼容2d版sprite和webgl版sprite2d
-WGE.UniformRotateAction = WGE.Class(WGE.UniformLinearMoveAction,
-{
-	fromRot : 0,
-	toRot : 0,
-	disRot : 0,
-
-	initialize : function(time, from, to, repeatTimes)
-	{
-		if(time instanceof Array)
-		{
-			this.tStart = time[0];
-			this.tEnd = time[1];
-		}
-		else
-		{
-			this.tStart = time.data[0];
-			this.tEnd = time.data[1];
-		}
-
-		this.fromRot = from;
-		this.toRot = to;
-		this.disRot = to - from;
-
-		this.repeatTimes = repeatTimes ? repeatTimes : 1;
-	},
-
-	actionStart : function()
-	{
-		this.bindObj.rotateTo(this.fromRot);
-	},
-
-	act : function(percent)
-	{
-		var t = this.repeatTimes * percent;
-		t -= Math.floor(t);
-		this.bindObj.rotateTo(this.fromRot + t * this.disRot);
-	},
-
-	actionStop : function()
-	{
-		this.bindObj.rotateTo(this.toRot);
-	}
-
 });
 
 WGE.AnimationInterface2d = WGE.Class(
@@ -452,6 +189,32 @@ WGE.AnimationWithChildrenInterface2d = WGE.Class(WGE.AnimationInterface2d,
 	}
 
 });
+
+
+//特殊用法, 不包含sprite的任何功能，仅仅作为管理那些特殊单独存在的action的容器。
+
+WGE.AnimationActionManager = WGE.Class(WGE.AnimationInterface2d,
+{
+	zIndex : -10000,
+
+	initialize : function(startTime, endTime)
+	{
+		this.setAttrib(startTime, endTime);
+		this.timeActions = [];
+	},
+
+	push : function()
+	{
+		this.timeActions.push.apply(this, arguments);
+	},
+
+	pushArr : function(arr)
+	{
+		this.timeActions.push.call(this.timeActions, arr);
+	}
+
+});
+
 
 /*
 // AnimationSprite 定义了某个时间段的动作。

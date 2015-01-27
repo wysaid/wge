@@ -1,11 +1,69 @@
 <html>
 <head>
-    <meta charset="utf-8" />
-    <title>WGE-Slideshow - Burst</title>
+<meta charset="utf-8">
+<title>Burst</title>
+<script type="text/javascript" src="../../3rdparty/soundmanager2.js"></script>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeFilters.js"></script>
+<script type="text/javascript" src="../wgeSprite.js"></script>
+<script type="text/javascript" src="../wgeSlideshow.js"></script>
+<script type="text/javascript" src="../../wgeAnimation.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendActions.js"></script>
+<script type="text/javascript" src="../../extends/wgeExtendFunctions.js"></script>
+<script type="text/javascript" src="Burst.js"></script>
 </head>
-<body style="font:bold;font-size:large;">
-    
-    Burst
+<body >
+<script type="text/javascript">
 
+var timeline = new WGE.TimeLine(60000);
+var div = WGE.CE("div");
+div.setAttribute("style", "width:" + WGE.SlideshowSettings.width + "px;height:" + WGE.SlideshowSettings.height + "px;");
+div.id = "demoContent";
+document.body.appendChild(div);
+
+//加载所需资源图片。
+var imageArr = [];
+
+for(var i = 0; i != 16; ++i)
+	imageArr.push("../../res/comic" + i + ".jpg");
+
+var len = imageArr.length;
+
+
+var burstSlideShow = new WGE.Burst(
+		div, 
+		imageArr, 
+		//加载完所有图片回调
+		loadAllDown,
+		//加载完一张图片回调
+		function(img, n)
+		{
+			burstSlideShow.context.font = "32px Aria";
+			burstSlideShow.context.clearRect(0, 0, burstSlideShow.canvas.width, burstSlideShow.canvas.height);
+			burstSlideShow.context.fillText("加载图片: 第" + n + "张，共" + len + "张", 10, burstSlideShow.canvas.height / 2);
+		}
+	);
+
+
+
+
+function loadAllDown(imgArr)
+{
+	//
+	burstSlideShow.context.font = "50px Aria";
+	burstSlideShow.context.fillStyle = "#0f0";
+	burstSlideShow.context.clearRect(0, 0, burstSlideShow.canvas.width, burstSlideShow.canvas.height);
+	burstSlideShow.context.fillText("图片加载完毕，初始场景...", 10, burstSlideShow.canvas.height / 2);
+	burstSlideShow.initTimeline();
+	burstSlideShow.play();
+
+}
+
+
+
+
+</script>
 </body>
 </html>

@@ -320,7 +320,7 @@ FTPhotoFrame.PhotoFrameSprite = WGE.Class(WGE.Sprite, WGE.AnimationInterface2d,
 		this.timeActions = [];
 		if(img)
 		{
-			this.initSprite(img, w, h);
+			WGE.Sprite.initialize.call(this, img, w, h);
 		}
 	},
 	
@@ -389,7 +389,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 	if(globalZ == undefined)
 		globalZ = 0;
 
-	var filterBW = new WGE.FilterBW();
+	var filterBW = new WGE.Filter.Monochrome();
 
 	//时间按每秒30帧计算
 	//0:5:25~0:8:20 [0, 2800]
@@ -411,8 +411,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame2.setHotspotWithRatio(0.5, 0.1);
 		frame2.moveTo(w / 2, h / 10);
 
-		var frame1Action = new WGE.UniformScaleAction([0, 6000], [1.3, 1.3], [1, 1]);
-		var frame2Action = new WGE.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
+		var frame1Action = new WGE.Actions.UniformScaleAction([0, 6000], [1.3, 1.3], [1, 1]);
+		var frame2Action = new WGE.Actions.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
 
 		frame1.push(frame1Action);
 		frame2.push(frame2Action);
@@ -488,8 +488,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame3.moveTo(w / 2, h / 10);
 		frame4.moveTo(w / 2, h / 10);
 
-		var frame3Action = new WGE.UniformScaleAction([0, 5000], [1.0, 1.0], [1.3, 1.3]);
-		var frame4Action = new WGE.UniformScaleAction([0, 5000], [1.2, 1.2], [1.0, 1.0]);
+		var frame3Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.0, 1.0], [1.3, 1.3]);
+		var frame4Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.2, 1.2], [1.0, 1.0]);
 		
 		frame3.push(frame3Action);
 		frame4.push(frame4Action);
@@ -508,8 +508,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame5.moveTo(w / 2, h / 10);
 		frame6.moveTo(w / 2, h / 10);
 
-		var frame5Action = new WGE.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
-		var frame6Action = new WGE.UniformScaleAction([0, 5000], [1.1, 1.1], [1.0, 1.0]);
+		var frame5Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
+		var frame6Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.1, 1.1], [1.0, 1.0]);
 
 		frame5.push(frame5Action);
 		frame6.push(frame6Action);
@@ -607,8 +607,8 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame1.moveTo(w/2, h/10);
 		frame1.zone = fs[0].zone;
 
-		var frame1Action = new WGE.UniformAlphaAction([0, 1000], 0, 1);
-		var frame1Action2 = new WGE.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
+		var frame1Action = new WGE.Actions.UniformAlphaAction([0, 1000], 0, 1);
+		var frame1Action2 = new WGE.Actions.UniformScaleAction([0, 6000], [1.0, 1.0], [1.3, 1.3]);
 		frame1.push(frame1Action);
 		frame1.push(frame1Action2);
 
@@ -632,7 +632,7 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame2.moveTo(w / 2 - 10, h / 10);
 		frame2.zIndex = globalZ;
 
-		var frame2Action = new WGE.UniformScaleAction([0, 6000], [1.3, 1.3], [1.0, 1.0]);
+		var frame2Action = new WGE.Actions.UniformScaleAction([0, 6000], [1.3, 1.3], [1.0, 1.0]);
 		frame2.push(frame2Action);
 
 		var pnts = [P(0, 0), P(0, h)];
@@ -672,10 +672,10 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame4.moveTo(w / 2, h / 10);
 		frame4.zIndex = globalZ + 2;
 
-		var frame3Action = new WGE.UniformScaleAction([0, 5000], [1.3, 1.3], [1.0, 1.0]);
+		var frame3Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.3, 1.3], [1.0, 1.0]);
 		frame3.push(frame3Action);
 
-		var frame4Action = new WGE.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
+		var frame4Action = new WGE.Actions.UniformScaleAction([0, 5000], [1.0, 1.0], [1.2, 1.2]);
 		frame4.push(frame4Action);
 
 		var pnts2 = [P(0, 0), P(0, h), P(w, 0), P(w, h)];
@@ -728,10 +728,62 @@ FTPhotoFrame.initScene = function(imageArray, w, h, globalZ, timeStamp, stillTim
 		frame5.moveTo(w / 2, h / 10);
 		frame5.zIndex = frame3.zIndex - 0.5;
 
-		var frame5Action = new WGE.UniformScaleAction([0, 2000], [1.2, 1.2], [1.0, 1.0]);
+		var frame5Action = new WGE.Actions.UniformScaleAction([0, 2000], [1.2, 1.2], [1.0, 1.0]);
 		frame5.push(frame5Action);
 
 		scene.push(actionManager2, frame3, frame4, frame5);
+	}
+
+	globalZ += 100.0;
+
+	//新增
+	{
+		var img = WGE.rotateArray(imageArray);
+		var imgBW = typeof img.PhotoFrameBW == 'object' ? img.PhotoFrameBW : (img.PhotoFrameBW = filterBW.bind(img).run());
+		
+		var frameNew1 = S(15000, 20500, img, -1);
+		var frameNew2 = S(15500, 20500, imgBW, -1);
+
+		frameNew1.zIndex = globalZ - 1;
+		frameNew2.zIndex = globalZ;
+
+		frameNew1.setHotspotWithRatio(0.5, 0.1);
+		frameNew1.moveTo(w / 2, h / 10);
+		frameNew1.setHotspotWithRatio(0.5, 0.1);
+		frameNew1.moveTo(w / 2, h / 10);
+
+		var frame1Action = new WGE.Actions.UniformScaleAction([0, 3000], [1.3, 1.3], [1, 1]);
+		var frame2Action = new WGE.Actions.UniformScaleAction([0, 3000], [1.0, 1.0], [1.3, 1.3]);
+
+		frameNew1.push(frame1Action);
+		frameNew2.push(frame2Action);
+
+		///////////////////////////////
+		var pnts1 = [P(0, h), P(w, h), P(w, h), P(0, h)];
+		var pnts2 = [P(0, 0), P(w, 0), P(w, 0), P(0, 0)];
+
+		var zone1 = Z(pnts1);
+		var zone2 = Z(pnts2);
+
+		frameNew1.zone = zone1;
+		frameNew2.zone = zone2;
+
+		var action1 = new FTPhotoFrame.PointMoveSlowDown3X([R(200), 1000], P2, P(0, h/2), pnts1[0]);
+		var action2 = new FTPhotoFrame.PointMoveSlowDown3X([R(200), 1000], P3, P(w, h/2), pnts1[1]);
+
+		var action3 = new FTPhotoFrame.PointMoveSlowDown3X([500, 1300 + R(200)], P0, P(0, h/2), pnts2[3]);
+		var action4 = new FTPhotoFrame.PointMoveSlowDown3X([R(500) + R(200), 1500], P1, P(w, h/2), pnts2[2]);
+
+		var action5 = new FTPhotoFrame.PointMoveSlowDown3X([1500, 2000 + R(500)], P(0, h/2), P2, pnts2[3]);
+		var action6 = new FTPhotoFrame.PointMoveSlowDown3X([1500 + R(200), 2500], P(w, h/2), P3, pnts2[2]);
+
+		var actionManager = M(15000, 17500);
+		actionManager.pushArr([action1, action2, action3, action4, action5, action6]);
+
+		scene.push(frameNew1, frameNew2, actionManager);
+
+
+
 	}
 
 	if(timeStamp && timeStamp > 0)

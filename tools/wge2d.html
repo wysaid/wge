@@ -1,0 +1,51 @@
+<title>WGE 2d 代码合集</title>
+<meta charset="utf-8">
+<h1>下方为WGE 2d 公共部分全部代码</h1>
+<hr>
+<script type="text/javascript" src="../wgeCore.js"></script>
+
+<textarea id="text" style="width:100%; height:auto"></textarea>
+
+<script type="text/javascript">
+
+var txtDOM = WGE.ID('text');
+
+if(window.location.protocol == "file:")
+{
+	txtDOM.value = "请在web环境下打开，否则无法显示";
+}
+else
+{
+	//按照正确顺序填写
+	var scriptURLs =
+	[
+	"../wgeCore.js",
+	"../wgeAlgorithm.js",
+	"../wgeAnimation.js",
+	"../wgeGUI.js",
+	"../wgeParticleSystem.js",
+	"../wgeFont.js",
+	"../2d/wgeSprite.js",
+	"../2d/wgeFilters.js",
+	"../2d/wgeSlideshow.js",
+	"../extends/wgeExtendActions.js",
+	"../extends/wgeExtendFunctions.js",	
+	"../extends/wgeFotorSlideshowInterface.js",
+	];
+
+
+
+	var text = "";
+
+	for(var i in scriptURLs)
+	{
+		var url = scriptURLs[i];
+		text += "//" + url + "\n";
+		text += WGE.requestTextByURL(url + "?" + Math.random()) + "\n\n";
+	}
+
+	txtDOM.value = text;
+	txtDOM.style.height = (txtDOM.scrollHeight + 100) + "px";
+}
+
+</script>

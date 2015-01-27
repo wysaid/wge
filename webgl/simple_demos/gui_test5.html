@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>simpleDemo</title>
+<title>stencil_test</title>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeAlgorithm.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
@@ -167,6 +167,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);		
 		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 		this.useBlend(false);
+		this.setupStencil();
 		this.eye.data[2] = this.zHeight;
 		this.updateView();
 	},
@@ -184,6 +185,12 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 			return !!this.context;
 		}
 		return false;
+	},
+
+	setupStencil : function()
+	{
+		// var context = this.context;
+		// context.
 	},
 
 	initSprites : function()

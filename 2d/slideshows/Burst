@@ -1,0 +1,6 @@
+//这里统一时间线，音乐等，继承公共类SlideshowInterface
+WGE.Burst(WGE.SlideshowInterface,
+{
+	
+
+});

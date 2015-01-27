@@ -1,0 +1,51 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../wgeScene.js"></script>
+<script type="text/javascript" src="../wgeSprite2d.js"></script>
+<script type="text/javascript" src="../models/cube.js"></script>
+<script type="text/javascript" src="../models/teapot-streams.js"></script>
+</head>
+
+<body onload="main()">
+<script type="text/javascript">
+
+function main()
+{
+	var div = WGE.CE('div');
+	document.body.appendChild(div);
+	div.setAttribute('style', "width: 100%; height:100%;");
+	var cvs = WGE.CE('canvas');
+	cvs.width = 800;
+	cvs.height = 600;
+	var ctx = cvs.getContext('experimental-webgl', {stencil:true});
+	div.appendChild(cvs);
+
+	var sprite = new WGE.Sprite2d(cvs, ctx);
+	sprite.initSprite(WGE.ID("test0"));
+	sprite.scaleTo(0.5, 0.5);
+	sprite.moveTo(400, 300);
+	sprite.render();
+	ctx.enable(ctx.STENCIL_TEST);
+	ctx.clearStencil(0);
+	ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.STENCIL_BUFFER_BIT);
+	
+	ctx.stencilFunc(ctx.NEVER, 1, 0xff);
+	ctx.stencilOp(ctx.REPLACE, ctx.REPLACE, ctx.REPLACE);
+	
+	ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
+	sprite.scaleTo(1.0, 1.0);
+	ctx.stencilFunc(ctx.NOTEQUAL, 1, 0xff);
+	sprite.render();
+}
+</script>
+<div style="display:none">
+<img src="../../res/comic0.jpg" id="test0">
+</div>
+</body>
+</html>
