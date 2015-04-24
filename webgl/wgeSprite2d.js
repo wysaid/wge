@@ -133,7 +133,7 @@ WGE.Sprite2d = WGE.Class(
 		this._updateTranslation();
 		this.texture.bindToIndex(0);
 		webgl.uniform1i(this._textureLoc, 0);
-		webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+		webgl.drawArrays(webgl.TRIANGLE_FAN, 0, 4);
 	},
 
 	//适应某些渲染位置离散的情况
@@ -152,7 +152,7 @@ WGE.Sprite2d = WGE.Class(
 		this._context.uniform2f(this._translationLoc, x, y);
 		this.texture.bindToIndex(0);
 		webgl.uniform1i(this._textureLoc, 0);
-		webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+		webgl.drawArrays(webgl.TRIANGLE_FAN, 0, 4);
 	},
 
 	setZ : function(z)
@@ -293,12 +293,10 @@ WGE.Sprite2d = WGE.Class(
 		context.uniform1f(this._alphaLoc, this._alpha);
 		context.uniform1f(this._zIndexLoc, this.zIndex);
 		
-		var verticesData = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0];
-
 		var buffer = context.createBuffer();
 		this._vertexBuffer = buffer;
 		context.bindBuffer(context.ARRAY_BUFFER, buffer);
-		context.bufferData(context.ARRAY_BUFFER, new Float32Array(verticesData), context.STATIC_DRAW);
+		context.bufferData(context.ARRAY_BUFFER, new Float32Array(WGE.Sprite2d.VerticesData), context.STATIC_DRAW);
 
 		WGE.checkGLErr("WGE.Sprite2d - init program", this._context);
 		return true;
@@ -397,6 +395,8 @@ WGE.Sprite2dExt = WGE.Class(WGE.Sprite2d,
 		this._context.uniformMatrix3fv(this._rotationLoc, false, this.rot.data);
 	}
 });
+
+WGE.Sprite2d.VerticesData = [-1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0];
 
 WGE.Sprite2d.VertexShader = "attribute vec2 aPosition;varying vec2 vTextureCoord;uniform mat4 m4Projection;uniform vec2 v2HalfTexSize;uniform float rotation;uniform vec2 v2Scaling;uniform vec2 v2Translation;uniform vec2 v2Hotspot;uniform vec2 canvasflip;uniform vec2 spriteflip;uniform float zIndex;mat3 mat3ZRotation(float rad){float cosRad = cos(rad);float sinRad = sin(rad);return mat3(cosRad,sinRad,0.0,-sinRad,cosRad,0.0,0.0,0.0,1.0);}void main(){vTextureCoord = (aPosition.xy * spriteflip + 1.0) / 2.0;vec3 pos = mat3ZRotation(rotation) * vec3((aPosition - v2Hotspot) * v2HalfTexSize,zIndex);pos.xy = (pos.xy + v2Hotspot * v2HalfTexSize);pos.xy *= v2Scaling;pos.xy += v2Translation - v2Scaling * v2HalfTexSize * v2Hotspot;gl_Position = m4Projection * vec4(pos,1.0);gl_Position.xy *= canvasflip;}";
 

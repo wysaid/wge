@@ -1,7 +1,7 @@
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+﻿<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8" />
-<title>WGE - Slideshow demos</title>
+<title>WGE - demos</title>
 <script type="text/javascript">
 var gFrameHeight = "100%";
 
@@ -17,18 +17,24 @@ function bodyResize()
 <div id="__father" style="width:100%; height:100%; position:relative;">
 
 <div style="width:200px;border:groove;" id="demoView">
-<h1>WGE GUI测试</h1>
+<h1>WGE Tests</h1>
 <script type="text/javascript">
 var testNames = 
-[
-'gui_test1', 'gui_test2', 'gui_test3',
-'gui_test4', 'gui_test5', 'stencil_test', 'cubemap_test'
-];
+{
+'2D Sprite 1' : 'sprite2dtest1.html',
+'2D Sprite 2': 'sprite2dtest2.html',
+'Alpha Blend' : 'alphaBlendTest.html',
+'SceneRoaming 1' : 'sceneRoamingTest1.html',
+'SceneRoaming 2': 'sceneRoamingTest2.html',
+'stencil test' : 'stencilTest.html',
+'TeapotPerVertex': 'TeapotPerVertex.html',
+'TeapotPerPixel': 'TeapotPerPixel.html',
+};
 var demoView = document.getElementById("demoView");
-for(var i = 0; i < testNames.length; ++i)
+for(var i in testNames)
 {
     var item = document.createElement("p");
-    var text = "<h2><a href = './" + testNames[i] + ".html' target='demos'>" + testNames[i] + "</a></h2>";
+    var text = "<h4><a href = './" + testNames[i] + "' target='demos'>" + i + "</a></h4>";
     item.setAttribute("style", "margin:10px;text-align:center;background-color: #abcdef; margin 10px;");
     item.innerHTML = text;
     demoView.appendChild(item);

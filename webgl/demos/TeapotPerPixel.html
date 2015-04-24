@@ -1,0 +1,106 @@
+﻿<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../wgeSprite3d.js"></script>
+</head>
+
+<body>
+
+<script type="text/javascript">
+"use strict";
+
+WGE.Sprite3d.ShaderDir = "../";
+
+var Teapot = WGE.Class(WGE.Sprite3d,
+{
+   initialize : function(canvas, ctx)
+   {
+        
+   }
+
+});
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
+{
+    context : undefined,
+    isMouseDown : false,
+    teapot : null,
+    deltaTime : 10,
+    x : 0,
+    y : 0,
+
+    bindFather : function(fatherObj)
+    {
+        if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+        {
+            var context = this.canvas.getContext('experimental-webgl');
+            if(!context)
+            {
+                alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+            }
+            this.context = context;
+            context.enable(context.BLEND);
+            context.blendFunc(context.ONE, context.ONE);
+            return !!this.context;
+        }
+        return false;
+    },
+
+    initSprites : function()
+    {
+        this.teapot;
+        this.context.clearColor(0.0, 0.0, 0.0, 1.0);
+    },
+
+    update : function(dt)
+    {
+        this.deltaTime = dt;
+    },
+
+    render : function()
+    {
+        this.context.clear(this.context.COLOR_BUFFER_BIT);
+        
+    },
+
+    mouseMoveEvent : function(e, x, y)
+    {
+        this.x = x;
+        this.y = y;
+    },
+
+    resizeEvent : function()
+    {
+        if(this.context)
+        {
+            this.context.viewport(0, 0, this.canvas.width, this.canvas.height);
+            var sprites = this.sprites;
+            for(var i in sprites)
+            {
+                sprites[i].onCanvasResize();
+            }
+        }
+    }
+});
+
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+var gui = new MyGUI(div);
+
+function updateSpritesAndFPS()
+{
+    WGE.ID('totalSprites').innerHTML = "Total Sprites: " + runningSpriteNum + "<br>" + "FPS " + (1000/gui.deltaTime).toFixed(1);
+}
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(updateSpritesAndFPS, 1000);");
+
+</script>
+</body>
+</html>

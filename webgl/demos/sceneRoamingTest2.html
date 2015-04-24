@@ -1,7 +1,7 @@
-<html>
+﻿<html>
 <head>
 <meta charset="utf-8">
-<title>simpleDemo</title>
+<title>SceneRoaming Test2</title>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeAlgorithm.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
@@ -9,6 +9,7 @@
 <script type="text/javascript" src="../wgeScene.js"></script>
 <script type="text/javascript" src="../wgeSprite3d.js"></script>
 <script type="text/javascript" src="../models/cube.js"></script>
+<script type="text/javascript" src="../models/teapot-streams.js"></script>
 </head>
 
 <body>
@@ -18,9 +19,9 @@
 
 document.body.oncontextmenu=function(){ return false;} 
 
-var maxCacheSpriteNum = 1000;
+var maxCacheSpriteNum = 2000;
 var maxSpriteNum = 10;
-var runningSpriteNum = 3;
+var runningSpriteNum = 2;
 
 WGE.Sprite3d.ShaderDir = "../";
 
@@ -48,6 +49,8 @@ var MyBoundingBox = WGE.Class(WGE.Sprite3d,
 		this.alpha = alpha;
 	}
 });
+
+var TeapotVSH = "varying vec2 vTextureCoord;attribute vec4 aPosition;attribute vec4 aTexCoord;uniform mat4 mvp;void main(){gl_Position = mvp * aPosition;vTextureCoord = aTexCoord.st - floor(aTexCoord.st);}";
 
 var MySprite = WGE.Class(WGE.Sprite3d,
 {
@@ -80,12 +83,11 @@ var MySprite = WGE.Class(WGE.Sprite3d,
 		this.drz = (Math.random() - 0.5) * 10 + 0.1;
 		this.dRot = Math.PI * Math.random() * 0.01 + 0.01;
 
-		this.scaling = Math.random() * 10 + 3;
+		this.scaling = Math.random() * 0.5 + 0.5;
 	},
 
 	update : function(dt, boundingX, boundingY, boundingZ)
 	{
-		dt *= 60 / 1000;
 		this.x += this.dx * dt;
 		this.y += this.dy * dt;
 		this.z += this.dz * dt;
@@ -154,6 +156,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 	sprites : null,
 	textures : null,
 
+	updating : true,
+
 	initialize : function()
 	{
 		WGE.GUIInterface.initialize.apply(this, arguments);
@@ -163,6 +167,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);		
 		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 		this.useBlend(false);
+		this.setupStencil();
 		this.eye.data[2] = this.zHeight;
 		this.updateView();
 	},
@@ -180,6 +185,12 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 			return !!this.context;
 		}
 		return false;
+	},
+
+	setupStencil : function()
+	{
+		// var context = this.context;
+		// context.
 	},
 
 	initSprites : function()
@@ -205,12 +216,14 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 
 		for(var i = 0; i != maxSpriteNum; ++i)
 		{
-			var sprite = new MySprite(this.canvas, this.context);
-			sprite.initSprite(WGE.CubeModel.mesh, 3, WGE.CubeModel.texMesh, 2, WGE.CubeModel.meshIndex, textures[parseInt(Math.random() * textures.length)]);
+			var sprite = new MySprite(this.canvas, this.context, TeapotVSH, WGE.Sprite3d.FragmentShader);
+			sprite.initSprite(WGE.TeapotModel.positions, 3, WGE.TeapotModel.texCoords, 3, WGE.TeapotModel.indices, textures[parseInt(Math.random() * textures.length)]);
 
 			sprite.randomize();
+			if(Math.random() > 0.5)
+				sprite.renderMethod = context.LINE_STRIP;
 			sprites.push(sprite);
-		}		
+		}
 	},
 
 	addSprite : function(n)
@@ -257,8 +270,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 	update : function(dt)
 	{
 		this.deltaTime = dt;
+		dt *= 60 / 1000;
 
-		var motion = 1;
+		var motion = dt;
 		var needUpdateView = false;
 
 		if(this.isForwarding || this.isBacking || this.isGoingLeft || this.isGoingRight)
@@ -293,8 +307,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 			}
 			else
 			{
-				this.dz += this.ddz;
-				eye[2] += this.dz;
+				this.dz += this.ddz * dt;
+				eye[2] += this.dz * dt;
 				needUpdateView = true;
 			}
 		}
@@ -303,6 +317,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface, WGE.SceneInterface,
 		{
 			this.updateView();
 		}
+
+		if(!this.updating)
+			return ;
 
 		var sprites = this.sprites;
 		for(var i = 0; i < runningSpriteNum; ++i)
@@ -493,6 +510,8 @@ WGE demo操作说明:<br>
 使用键盘w,a,s,d控制场景漫游，
 空格键为跳跃。
 </div>
+<input type="button" value="画面·静止" style="width:100px" onclick="gui.updating = false;"><br>
+<input type="button" value="画面·继续" style="width:100px" onclick="gui.updating = true;"><br>
 
 <input type="button" value="Sprite +10" style="width:100px" onclick="gui.addSprite(10);"><br>
 <input type="button" value="Sprite -10" style="width:100px" onclick="gui.decSprite(10);"><br>
