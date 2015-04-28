@@ -31,9 +31,14 @@ WGE.SceneInterface = WGE.Class(
 	lookDir : null,
 	dirLen : 1000,
 
-	fovyRad : Math.PI/3,  //视景体的视野的角度（弧度）
+	fovyRad : Math.PI/3.0,  //视景体的视野的角度（单位：弧度）
 	zNear : 1.0,          //透视投影近裁剪面
 	zFar : 10000.0,       //透视投影远裁剪面
+
+	aspect : 1.0,         //保存显示区域宽高比
+	upDirRot : 0.0,       //向上仰角旋转弧度
+
+	maxLookUp : Math.PI/2.4, //最大仰角
 
 	initialize : function(w, h)
 	{
@@ -56,8 +61,40 @@ WGE.SceneInterface = WGE.Class(
 		var centerX = eye[0] + lookDir[0], centerY = eye[1] + lookDir[1];
 		var len = Math.sqrt(centerX*centerX + centerY*centerY);
 		var tmp = -lookDir[2] / len;
-		var dirBackX = centerX * tmp, dirBackY = centerY * tmp;
-		this.modelViewMatrix = WGE.makeLookAt(eye[0], eye[1], eye[2], centerX, centerY, lookDir[2], dirBackX, dirBackY, len);
+		var dirBackX = lookDir[0] * tmp, dirBackY = lookDir[1] * tmp;
+		var upDir = new WGE.Vec3(dirBackX, dirBackY, len);
+		
+		var upDirData;
+
+		if(this.upDirRot)
+		{
+			upDirData = WGE.mat3MulVec3(WGE.mat3Rotation(this.upDirRot, lookDir[0], lookDir[1], lookDir[2]), upDir).data;
+		}
+		else
+			upDirData = upDir.data;
+
+		this.modelViewMatrix = WGE.makeLookAt(eye[0], eye[1], eye[2], centerX, centerY, eye[2] + lookDir[2], upDirData[0], upDirData[1], upDirData[2]);
+	},
+
+	//默认透视投影
+	resize : function(w, h)
+	{
+		this.aspect = w / h;
+		this.updatePerspective();
+	},
+
+	updatePerspective : function()
+	{
+		this.projectionMatrix = WGE.makePerspective(this.fovyRad, this.aspect, this.zNear, this.zFar);
+	},
+
+	//设置视点位置
+	setEye : function(x, y, z)
+	{
+		var eye = this.eye.data;
+		eye[0] = x;
+		eye[1] = y;
+		eye[2] = z;
 	},
 
 	//向右转（弧度）， 负值将向左转.
@@ -73,52 +110,54 @@ WGE.SceneInterface = WGE.Class(
 	turnRightTo : function(rad)
 	{
 		var d = this.lookDir.data;
-		var v = WGE.mat2MulVec2(WGE.mat2Rotation(rad), new WGE.Vec2(0, 1)).data;
-		d[0] = v[0];
-		d[1] = v[1];
+		d[0] = Math.sin(rad) * this.dirLen;
+		d[1] = Math.cos(rad) * this.dirLen;
 	},
 
 	//向上观察， motion计算关系：
 	//向上弧度计算公式为 arctan(tan("当前向上弧度") + motion) - "当前向上弧度"
 	lookUp : function(motion)
 	{
-		this.lookDir.data[2] += motion * this.dirLen;
+		var z = this.lookDir.data[2] + motion * this.dirLen;
 		var lookUpMax = this.dirLen * 3.732; //tan(PI / 75);
-		if(this.lookDir.data[2] > lookUpMax) 
-		this.lookDir.data[2] = lookUpMax;
-		else if(this.lookDir.data[2] < -lookUpMax)
-			this.lookDir.data[2] = -lookUpMax;
+		if(z > lookUpMax) 
+			z = lookUpMax;
+		else if(z < -lookUpMax)
+			z = -lookUpMax;
+		this.lookDir.data[2] = z;
 	},
 
 	//向上观察到（弧度），直接仰视到所看弧度
 	//范围[-PI/2.4, PI/2.4] ，约正负75度角
 	lookUpTo : function(rad)
 	{
-		if(rad > Math.PI / 2.4)
-			rad = Math.PI / 2.4;
-		else if(rad < -Math.PI / 2.4)
-			rad = -Math.PI / 2.4;
+		if(rad > this.maxLookUp)
+			rad = this.maxLookUp;
+		else if(rad < -this.maxLookUp)
+			rad = -this.maxLookUp;
 		this.lookDir.data[2] = Math.tan(rad) * this.dirLen;
 	},
 
-	//视野角度（弧度）， 
+	//视野角度（弧度）， 范围[PI/100, PI/2.0]
 	lookIn : function(rad)
 	{
 		this.fovyRad += rad;
-		if(this.fovyRad < Math.PI / 10)
-			this.fovyRad = Math.PI / 10;
-		else if(this.fovyRad > Math.PI / 2.4)
-			this.fovyRad = Math.PI / 2.4;
+		if(this.fovyRad < Math.PI / 100.0)
+			this.fovyRad = Math.PI / 100.0;
+		else if(this.fovyRad > Math.PI / 2.0)
+			this.fovyRad = Math.PI / 2.0;
+		this.updatePerspective();
 	},
 
-	//视野角度， 范围[PI/10, PI/2.4]
+	//视野角度， 范围[PI/100, PI/2.0]
 	lookInTo : function(rad)
 	{
-		if(rad < Math.PI / 10)
-			rad = Math.PI / 10;
-		else if(rad > Math.PI / 2.4)
-			rad = Math.PI / 2.4;
+		if(rad < Math.PI / 100.0)
+			rad = Math.PI / 100.0;
+		else if(rad > Math.PI / 2.0)
+			rad = Math.PI / 2.0;
 		this.fovyRad = rad;
+		this.updatePerspective();
 	},
 
 	//向前移动
@@ -152,11 +191,5 @@ WGE.SceneInterface = WGE.Class(
 		this.eye.data[0] += this.lookDir.data[1] * m;
 		this.eye.data[1] -= this.lookDir.data[0] * m;
 	},
-
-	//默认透视投影
-	resize : function(w, h)
-	{
-		this.projectionMatrix = WGE.makePerspective(this.fovyRad, w / h, this.zNear, this.zFar);
-	}
 
 });
