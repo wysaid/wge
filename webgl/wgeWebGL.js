@@ -260,7 +260,7 @@ WGE.Program = WGE.Class(
 		if(!(vsh && fsh))
 			return false;
 		return this.vertShader.loadShaderCode(vsh) &&
-				this.fragShader.loadShaderCode(fsh);
+				this.fragShader.loadShaderCode(fsh) && this.link();
 	},
 
 	initWithShaderTag : function(vshTag, fshTag)
@@ -268,7 +268,7 @@ WGE.Program = WGE.Class(
 		if(!(vsh && fsh))
 			return false;
 		return this.vertShader.loadShaderFromTag(vshTag) &&
-				this.fragShader.loadShaderFromTag(fshTag);
+				this.fragShader.loadShaderFromTag(fshTag) && this.link();
 	},
 
 	initWithShaderURL : function(vshURL, fshURL)
@@ -276,7 +276,7 @@ WGE.Program = WGE.Class(
 		if(!vshURL && fshURL)
 			return false;
 		return this.vertShader.loadShaderFromURL(vshURL) &&
-				this.fragShader.loadShaderFromURL(fshURL);
+				this.fragShader.loadShaderFromURL(fshURL) && this.link();
 	},
 
 	loadFragmentShaderCode : function(shaderCode)

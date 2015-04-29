@@ -6,7 +6,66 @@
 <script type="text/javascript" src="../../wgeAlgorithm.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
 <script type="text/javascript" src="../wgeWebGL.js"></script>
-<script type="text/javascript" src="../wgeSprite3d.js"></script>
+<script type="text/javascript" src="../models/teapot-streams.js"></script>
+<script type="text/javascript" src="../models/cube.js"></script>
+
+<script id="vshTeapot" type="x-shader/x-vertex">
+attribute vec4 v4Position;
+attribute vec3 v3Normal;
+uniform mat4 m4ModelView;
+uniform mat4 m4MVP;
+
+
+varying vec3 transformedNorm;
+varying vec3 position;
+
+void main()
+{
+    vec4 pos = m4MVP * v4Position;
+    position = pos.xyz;
+    gl_Position = pos;
+    transformedNorm = normalize(m4ModelView * vec4(v3Normal, 1.0)).xyz;
+}
+</script>
+
+<script id="fshTeapot" type="x-shader/x-fragment">
+precision mediump float;
+
+varying vec3 transformedNorm;
+varying vec3 position;
+
+struct Light
+{
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 position;    
+    vec3 halfVector;
+};
+
+struct Material
+{
+    mediump vec3 emission;
+    mediump vec3 ambient;
+    mediump vec3 diffuse;
+    mediump vec3 specular;
+    mediump float shininess;
+};
+
+uniform Light light;
+uniform Material material;
+
+void main()
+{
+    vec3 lightDirNorm = normalize(position - light.position);
+    vec3 reflectionVec = normalize(reflect(-lightDirNorm, transformedNorm));
+    float specularLightWeight = pow(max(dot(reflectionVec, lightDirNorm), 0.0), material.shininess);
+    float posLightWeight = max(dot(transformedNorm, lightDirNorm), 0.0);
+    vec3 color = material.ambient * (light.diffuse * posLightWeight + light.specular * specularLightWeight + light.ambient);
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
 </head>
 
 <body>
@@ -14,15 +73,176 @@
 <script type="text/javascript">
 "use strict";
 
-WGE.Sprite3d.ShaderDir = "../";
+document.body.oncontextmenu=function(){ return false;} 
 
-var Teapot = WGE.Class(WGE.Sprite3d,
+var ShadeSprite = WGE.Class(
 {
-   initialize : function(canvas, ctx)
-   {
-        
-   }
+    modelMatrix : null,  //4x4模型矩阵，内含sprite3d所包含模型所进行的所有矩阵转换操作。
 
+    context : null,
+    program : null,
+
+    //attribute locations
+    _vertAttribLoc : 0,
+    _normAttribLoc : 1,
+
+    //uniform locations
+    _modelViewMatLoc : null,
+    _mvpMatLoc : null,
+
+    //索引数据
+    _meshIndexVBO : null,
+    _meshIndexSize : 0,
+    _meshIndexDataType : null,
+
+    //顶点数据
+    _meshVBO : null,
+    _meshDataSize : 0,
+    _meshDataType : null,
+
+    //法线数据
+    _normVBO : null,
+    _normDataSize : 0,
+    _normDataType : null,
+
+    //光照
+    light : {
+        ambient : "light.ambient",
+        diffuse : "light.diffuse",
+        specular : "light.specular",
+        position : "light.position",
+        halfVector : "light.halfVector"
+    },
+
+    //材质
+    material : {
+        emission : "material.emission",
+        ambient : "material.ambient",
+        diffuse : "material.diffuse",
+        specular : "material.specular",
+        shininess : "material.shininess"
+    },
+
+    initialize : function(ctx, vsh , fsh)
+    {
+        this.modelMatrix = WGE.mat4Identity();
+        this.context = ctx;
+        this._initProgram(vsh, fsh);
+
+        this._meshVBO = ctx.createBuffer();
+        this._normVBO = ctx.createBuffer();
+        this._meshIndexVBO = ctx.createBuffer();
+        
+        this._meshDataType = ctx.FLOAT;
+        this._normDataType = ctx.FLOAT;
+        this._meshIndexDataType = ctx.UNSIGNED_SHORT;
+
+        this.setupBuffers();
+    },
+
+    //本demo示例直接初始化方法
+    setupBuffers : function()
+    {
+        var gl = this.context;
+        var model = WGE.TeapotModel;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+        gl.bufferData(gl.ARRAY_BUFFER, model.positions, gl.STATIC_DRAW);
+        this._meshDataSize = 3;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
+        gl.bufferData(gl.ARRAY_BUFFER, model.normals, gl.STATIC_DRAW);
+        this._normDataSize = 3;
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indices, gl.STATIC_DRAW);
+        this._meshIndexSize = model.indices.length;
+
+        // var model = WGE.CubeModel;
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+        // gl.bufferData(gl.ARRAY_BUFFER, model.mesh, gl.STATIC_DRAW);
+        // this._meshDataSize = 3;
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
+        // gl.bufferData(gl.ARRAY_BUFFER, model.normals, gl.STATIC_DRAW);
+        // this._normDataSize = 3;
+
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.meshIndex, gl.STATIC_DRAW);
+        // this._meshIndexSize = model.meshIndex.length;
+    },
+
+    _initProgram : function(vsh, fsh)
+    {
+        var context = this.context;
+        var program = new WGE.Program(context);
+        this.program = program;
+
+        program.bindAttribLocation("v4Position", this._vertAttribLoc);
+        program.bindAttribLocation("v3Normal", this._normAttribLoc);
+
+        if(!program.initWithShaderCode(vsh, fsh))
+        {
+            console.log("ShadeSprite init failed!");
+            return false;
+        }
+
+        program.bind();
+        this._setDefaultLight();
+        this._initUniformLocations();
+        return true;
+    },
+
+    _initUniformLocations : function()
+    {
+        var program = this.program;
+        this._mvpMatLoc = program.uniformLocation("m4MVP");
+        this._modelViewMatLoc = program.uniformLocation("m4ModelView");
+    },
+
+    _setDefaultLight : function()
+    {
+        var program = this.program;
+        program.sendUniform3f(this.light.position, 30.0, 0.0, 100.0);
+        program.sendUniform3f(this.light.diffuse, 0.8, 0.8, 0.8);
+        program.sendUniform3f(this.light.ambient, 0.0, 0.0, 0.0);
+        program.sendUniform3f(this.light.specular, 1.5, 0.5, 0.0);
+        
+        program.sendUniform1f(this.material.shininess, 32.0);
+        program.sendUniform3f(this.material.ambient, 1.0, 0.7, 0.5);
+    },
+
+    update : function(proj, modelView)
+    {
+        var gl = this.context;
+        var program = this.program;
+        var mvp = WGE.mat4Mul(proj, modelView);
+
+        program.bind();
+        gl.uniformMatrix4fv(this._mvpMatLoc, false, mvp.data);
+        gl.uniformMatrix4fv(this._modelViewMatLoc, false, modelView.data);
+    },
+
+    render : function()
+    {
+        var gl = this.context;
+        this.program.bind();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+        gl.enableVertexAttribArray(this._vertAttribLoc);
+        gl.vertexAttribPointer(this._vertAttribLoc, this._meshDataSize, this._meshDataType, false, 0, 0)
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
+        gl.enableVertexAttribArray(this._normAttribLoc);
+        gl.vertexAttribPointer(this._normAttribLoc, this._normDataSize, this._normDataType, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+        gl.drawElements(gl.TRIANGLES, this._meshIndexSize, this._meshIndexDataType, 0);
+        
+        var err = gl.getError();
+        if(err) console.log(err);
+    }
 });
 
 var MyGUI = WGE.Class(WGE.GUIInterface, 
@@ -31,8 +251,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     isMouseDown : false,
     teapot : null,
     deltaTime : 10,
-    x : 0,
-    y : 0,
+
+    modelViewMatrix : null,
+    projectionMatrix : null,
 
     bindFather : function(fatherObj)
     {
@@ -44,8 +265,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
                 alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
             }
             this.context = context;
-            context.enable(context.BLEND);
-            context.blendFunc(context.ONE, context.ONE);
+            context.disable(context.BLEND);
+            context.enable(context.DEPTH_TEST);
             return !!this.context;
         }
         return false;
@@ -53,19 +274,30 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 
     initSprites : function()
     {
-        this.teapot;
-        this.context.clearColor(0.0, 0.0, 0.0, 1.0);
+        var gl = this.context;
+        var teapot = new ShadeSprite(gl, WGE.getContentByID("vshTeapot"), WGE.getContentByID("fshTeapot"));
+        this.teapot = teapot;
+        gl.clearColor(0.0, 0.0, 0.1, 1.0);
+        this.modelViewMatrix = WGE.makeLookAt(0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        this.projectionMatrix = WGE.makePerspective(Math.PI / 4.0, this.canvas.width / this.canvas.height, 1.0, 10000.0);
+
+        // this.modelViewMatrix = WGE.mat4Identity();
+        // this.projectionMatrix = WGE.makeOrtho(-this.canvas.width / 2, this.canvas.width / 2, -this.canvas.height, this.canvas.height, 1000.0, -1000.0);
     },
 
     update : function(dt)
     {
         this.deltaTime = dt;
+
+        this.teapot.update(this.projectionMatrix, this.modelViewMatrix);
     },
 
     render : function()
     {
-        this.context.clear(this.context.COLOR_BUFFER_BIT);
-        
+        var gl = this.context;
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        this.teapot.render();
     },
 
     mouseMoveEvent : function(e, x, y)
@@ -74,16 +306,23 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         this.y = y;
     },
 
+    mouseDownEvent : function(e, x, y)
+    {
+
+    },
+
+    mouseUpEvent : function(e, x, y)
+    {
+        this.modelViewMatrix = WGE.mat4Mul(this.modelViewMatrix, WGE.mat4Rotation(0.1, 1.0, 0.0, 0.0));
+    },
+
     resizeEvent : function()
     {
-        if(this.context)
+        var gl = this.context;
+        if(gl)
         {
-            this.context.viewport(0, 0, this.canvas.width, this.canvas.height);
-            var sprites = this.sprites;
-            for(var i in sprites)
-            {
-                sprites[i].onCanvasResize();
-            }
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            this.projectionMatrix = WGE.makePerspective(Math.PI / 4.0, this.canvas.width / this.canvas.height, 1.0, 10000.0);
         }
     }
 });
@@ -93,13 +332,9 @@ document.body.appendChild(div);
 div.setAttribute('style', "width: 100%; height:100%;");
 var gui = new MyGUI(div);
 
-function updateSpritesAndFPS()
-{
-    WGE.ID('totalSprites').innerHTML = "Total Sprites: " + runningSpriteNum + "<br>" + "FPS " + (1000/gui.deltaTime).toFixed(1);
-}
 
 document.body.setAttribute("onresize", "gui.onresize(event);");
-document.body.setAttribute("onload", "gui.initSprites();gui.start();setInterval(updateSpritesAndFPS, 1000);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();");
 
 </script>
 </body>

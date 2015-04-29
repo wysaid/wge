@@ -263,12 +263,10 @@ WGE.Sprite3d = WGE.Class(
 		var program = new WGE.Program(gl);
 		this._program = program;
 
-		program.initWithShaderCode(vsh, fsh);
-
 		program.bindAttribLocation(WGE.Sprite3d.AttribVertexName, this._vertAttribLoc);
 		program.bindAttribLocation(WGE.Sprite3d.AttribTextureName, this._texAttribLoc);
 
-		if(!program.link())
+		if(!program.initWithShaderCode(vsh, fsh))
 		{
 			console.error("WGE.Sprite3d : Program link Failed!");
 			return false;

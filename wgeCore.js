@@ -166,7 +166,7 @@ WGE.rotateArray = function(arr)
 
 WGE.getContentByID = function(tagID)
 {
-	var content = document.getElementById(scriptID);
+	var content = document.getElementById(tagID);
 	if (!content) return "";
 	return content.textContent || content.text || content.innerText || content.innerHTML;
 };

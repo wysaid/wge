@@ -264,10 +264,9 @@ WGE.Sprite2d = WGE.Class(
 		var program = new WGE.Program(context);
 
 		this._program = program;
-
-		program.initWithShaderCode(vsh, fsh);
+        		
 		program.bindAttribLocation(WGE.Sprite2d.AttribPositionName, this._posAttribLocation);
-		if(!program.link())
+		if(!program.initWithShaderCode(vsh, fsh))
 		{
 			console.error("WGE.Sprite2d : Program link Failed!");
 			return false;
