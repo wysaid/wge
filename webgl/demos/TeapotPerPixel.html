@@ -16,8 +16,8 @@ uniform mat4 m4ModelMatrix;
 uniform mat4 m4ModelViewProjection;
 
 
-varying vec3 transformedNorm;
-varying vec3 position;
+varying mediump vec3 transformedNorm;
+varying mediump vec3 position;
 
 void main()
 {
@@ -32,8 +32,8 @@ void main()
 <script id="fshTeapot" type="x-shader/x-fragment">
 precision mediump float;
 
-varying vec3 transformedNorm;
-varying vec3 position;
+varying mediump vec3 transformedNorm;
+varying mediump vec3 position;
 
 struct Light
 {

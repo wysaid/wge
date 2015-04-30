@@ -15,7 +15,7 @@ attribute vec3 v3Normal;
 uniform mat4 m4ModelMatrix;
 uniform mat4 m4ModelViewProjection;
 
-varying vec3 color;
+varying mediump vec3 color;
 
 struct Light
 {
@@ -55,7 +55,7 @@ void main()
 
 <script id="fshTeapot" type="x-shader/x-fragment">
 precision mediump float;
-varying vec3 color;
+varying mediump vec3 color;
 
 void main()
 {    
