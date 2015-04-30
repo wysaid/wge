@@ -12,8 +12,8 @@
 <script id="vshTeapot" type="x-shader/x-vertex">
 attribute vec4 v4Position;
 attribute vec3 v3Normal;
-uniform mat4 m4ModelView;
-uniform mat4 m4MVP;
+uniform mat4 m4ModelMatrix;
+uniform mat4 m4ModelViewProjection;
 
 
 varying vec3 transformedNorm;
@@ -21,11 +21,11 @@ varying vec3 position;
 
 void main()
 {
-    //vec4 pos = m4MVP * vec4(v4Position.xyz * 10.0, 1.0);
-    vec4 pos = m4MVP * v4Position;
+    vec4 pos = m4ModelMatrix * v4Position;
     position = pos.xyz;
-    gl_Position = pos;
-    transformedNorm = normalize(m4ModelView * vec4(v3Normal, 1.0)).xyz;
+    transformedNorm = normalize(m4ModelMatrix * vec4(v3Normal, 1.0)).xyz;
+
+    gl_Position = m4ModelViewProjection * v4Position;
 }
 </script>
 
@@ -46,11 +46,11 @@ struct Light
 
 struct Material
 {
-    mediump vec3 emission;
-    mediump vec3 ambient;
-    mediump vec3 diffuse;
-    mediump vec3 specular;
-    mediump float shininess;
+    vec3 emission;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
 };
 
 uniform Light light;
@@ -76,10 +76,11 @@ void main()
 
 document.body.oncontextmenu=function(){ return false;} 
 
+//选择使用平行投影还是透视投影。
+var usePerspective = true;
+
 var ShadeSprite = WGE.Class(
 {
-    modelMatrix : null,  //4x4模型矩阵，内含sprite3d所包含模型所进行的所有矩阵转换操作。
-
     context : null,
     program : null,
 
@@ -88,8 +89,8 @@ var ShadeSprite = WGE.Class(
     _normAttribLoc : 1,
 
     //uniform locations
-    _modelViewMatLoc : null,
-    _mvpMatLoc : null,
+    _modelMatLoc : null,
+    _mvpMatrixLoc : null,
 
     //索引数据
     _meshIndexVBO : null,
@@ -126,7 +127,6 @@ var ShadeSprite = WGE.Class(
 
     initialize : function(ctx, vsh , fsh)
     {
-        this.modelMatrix = WGE.mat4Identity();
         this.context = ctx;
         this._initProgram(vsh, fsh);
 
@@ -139,6 +139,12 @@ var ShadeSprite = WGE.Class(
         this._meshIndexDataType = ctx.UNSIGNED_SHORT;
 
         this.setupBuffers();
+    },
+
+    setModelMatrix : function(matrix)
+    {
+        this.program.bind();
+        this.context.uniformMatrix4fv(this._modelMatLoc, false, matrix.data);
     },
 
     //本demo示例直接初始化方法
@@ -198,14 +204,14 @@ var ShadeSprite = WGE.Class(
     _initUniformLocations : function()
     {
         var program = this.program;
-        this._mvpMatLoc = program.uniformLocation("m4MVP");
-        this._modelViewMatLoc = program.uniformLocation("m4ModelView");
+        this._mvpMatrixLoc = program.uniformLocation("m4ModelViewProjection");
+        this._modelMatLoc = program.uniformLocation("m4ModelMatrix");
     },
 
     _setDefaultLight : function()
     {
         var program = this.program;
-        program.sendUniform3f(this.light.position, 50.0, 0.0, 150.0);
+        program.sendUniform3f(this.light.position, 50.0, 0.0, 2000.0);
         program.sendUniform3f(this.light.diffuse, 0.8, 0.8, 0.8);
         program.sendUniform3f(this.light.ambient, 0.0, 0.0, 0.0);
         program.sendUniform3f(this.light.specular, 1.5, 0.5, 0.0);
@@ -214,15 +220,13 @@ var ShadeSprite = WGE.Class(
         program.sendUniform3f(this.material.ambient, 1.0, 0.7, 0.5);
     },
 
-    update : function(proj, modelView)
+    update : function(mvp)
     {
         var gl = this.context;
         var program = this.program;
-        var mvp = WGE.mat4Mul(proj, modelView);
 
         program.bind();
-        gl.uniformMatrix4fv(this._mvpMatLoc, false, mvp.data);
-        gl.uniformMatrix4fv(this._modelViewMatLoc, false, modelView.data);
+        gl.uniformMatrix4fv(this._mvpMatrixLoc, false, mvp.data);
     },
 
     render : function()
@@ -253,7 +257,8 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     teapot : null,
     deltaTime : 10,
 
-    modelViewMatrix : null,
+    viewMatrix : null,
+    modelMatrix : null,
     projectionMatrix : null,
 
     bindFather : function(fatherObj)
@@ -275,8 +280,15 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 
      _setProjection : function()
     {
-        //this.projectionMatrix = WGE.makeOrtho(-this.canvas.width / 2, this.canvas.width / 2, -this.canvas.height / 2, this.canvas.height / 2, -1000.0, 1000.0);
-        this.projectionMatrix = WGE.makePerspective(Math.PI / 4.0, this.canvas.width / this.canvas.height, 1.0, 10000.0);
+        if(usePerspective)
+        {
+            this.projectionMatrix = WGE.makePerspective(Math.PI / 6.0, this.canvas.width / this.canvas.height, 1.0, 10000.0);
+        }
+        else
+        {
+            this.projectionMatrix = WGE.makeOrtho(-this.canvas.width / 2, this.canvas.width / 2, -this.canvas.height / 2, this.canvas.height / 2, -10000.0, 10000.0);
+        }
+        
     },
 
     initSprites : function()
@@ -284,9 +296,13 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         var gl = this.context;
         var teapot = new ShadeSprite(gl, WGE.getContentByID("vshTeapot"), WGE.getContentByID("fshTeapot"));
         this.teapot = teapot;
+
+        this.modelMatrix = WGE.mat4Scale(10.0, 10.0, 10.0);
+        teapot.setModelMatrix(this.modelMatrix);
+
+
         gl.clearColor(0.0, 0.0, 0.1, 1.0);
-        this.modelViewMatrix = WGE.makeLookAt(0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-        //this.modelViewMatrix = WGE.mat4Identity();
+        this.viewMatrix = WGE.makeLookAt(0.0, 0.0, 1000.0, 0.0, 0.0, -1000.0, 0.0, 1.0, 0.0);
         this._setProjection();
     },   
 
@@ -294,7 +310,11 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     {
         this.deltaTime = dt;
 
-        this.teapot.update(this.projectionMatrix, this.modelViewMatrix);
+        this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4ZRotation(Math.PI * dt / 10000.0));
+        this.teapot.setModelMatrix(this.modelMatrix);
+
+        var mvp = WGE.mat4Mul(this.projectionMatrix, WGE.mat4Mul(this.viewMatrix, this.modelMatrix));
+        this.teapot.update(mvp);
     },
 
     render : function()
@@ -309,8 +329,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     {
         if(this.isMouseDown)
         {
-            this.modelViewMatrix = WGE.mat4Mul(this.modelViewMatrix, WGE.mat4XRotation((y - this.y) / 100.0));
-            this.modelViewMatrix = WGE.mat4Mul(this.modelViewMatrix, WGE.mat4YRotation((x - this.x) / 100.0));
+            this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4XRotation((y - this.y) / 100.0));
+            this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4YRotation((x - this.x) / 100.0));
+            this.teapot.setModelMatrix(this.modelMatrix);
             this.x = x;
             this.y = y;
         }
