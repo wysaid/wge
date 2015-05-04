@@ -7,7 +7,6 @@
 <script type="text/javascript" src="../../wgeGUI.js"></script>
 <script type="text/javascript" src="../wgeWebGL.js"></script>
 <script type="text/javascript" src="../models/teapot-streams.js"></script>
-<script type="text/javascript" src="../models/cube.js"></script>
 
 <script id="vshTeapot" type="x-shader/x-vertex">
 attribute vec4 v4Position;
@@ -160,20 +159,6 @@ var ShadeSprite = WGE.Class(
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indices, gl.STATIC_DRAW);
         this._meshIndexSize = model.indices.length;
-
-        // var model = WGE.CubeModel;
-
-        // gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
-        // gl.bufferData(gl.ARRAY_BUFFER, model.mesh, gl.STATIC_DRAW);
-        // this._meshDataSize = 3;
-
-        // gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
-        // gl.bufferData(gl.ARRAY_BUFFER, model.normals, gl.STATIC_DRAW);
-        // this._normDataSize = 3;
-
-        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
-        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.meshIndex, gl.STATIC_DRAW);
-        // this._meshIndexSize = model.meshIndex.length;
     },
 
     _initProgram : function(vsh, fsh)
