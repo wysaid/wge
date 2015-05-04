@@ -18,6 +18,7 @@ var MySprite = WGE.Class(WGE.Sprite,
 
 	initialize : function(img, w, h)
 	{
+	    WGE.Sprite.initialize.apply(this, arguments);
 		this.initSprite(img, w, h);
 		this.matrix = new WGE.mat2Identity();
 	},
