@@ -366,5 +366,77 @@ document.body.setAttribute("onresize", "gui.onresize(event);");
 document.body.setAttribute("onload", "gui.initSprites();gui.start();");
 
 </script>
+
+<div style="position:absolute;left:10px;top:10px;width:170px;height:auto;background-color:#f00">
+<div style="position:relative;">
+
+<div style="margin:5px;">
+Light Position:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="50" id="light-pos-x" style="width:30%;">
+<input type="number" value="0" id="light-pos-y" style="width:30%;">
+<input type="number" value="2000" id="light-pos-z" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Light Diffuse:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="0.8" id="light-diffuse-r" style="width:30%;">
+<input type="number" value="0.8" id="light-diffuse-g" style="width:30%;">
+<input type="number" value="0.8" id="light-diffuse-b" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Light Ambient:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="0.0" id="light-ambient-r" style="width:30%;">
+<input type="number" value="0.0" id="light-ambient-g" style="width:30%;">
+<input type="number" value="0.0" id="light-ambient-b" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Light Specular:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="1.5" id="light-specular-r" style="width:30%;">
+<input type="number" value="0.5" id="light-specular-g" style="width:30%;">
+<input type="number" value="0.0" id="light-specular-b" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Material Ambient:<br>
+<input type="number" value="1.0" id="material-ambient-r" style="width:30%;">
+<input type="number" value="0.7" id="material-ambient-g" style="width:30%;">
+<input type="number" value="0.5" id="material-ambient-b" style="width:30%;">
+</div>
+
+<div style="margin:5px;">
+Material Shininess:<br>
+<input type="number" value="32.0" id="material-shininess">
+</div>
+
+<div align="center" style="margin:10px">
+    <input type="button" value="apply" onclick="setArgs()">
+</div>
+<script type="text/javascript">
+function setArgs()
+{
+    var teapot = gui.teapot;
+    var program = teapot.program;
+    program.bind();
+    program.sendUniform3f(teapot.light.position, WGE.ID('light-pos-x').value, WGE.ID('light-pos-y').value, WGE.ID('light-pos-z').value);
+    program.sendUniform3f(teapot.light.diffuse, WGE.ID('light-diffuse-r').value, WGE.ID('light-diffuse-g').value, WGE.ID('light-diffuse-b').value);
+    program.sendUniform3f(teapot.light.ambient, WGE.ID('light-ambient-r').value, WGE.ID('light-ambient-g').value, WGE.ID('light-ambient-b').value);
+    program.sendUniform3f(teapot.light.specular, WGE.ID('light-specular-r').value, WGE.ID('light-specular-g').value, WGE.ID('light-specular-b').value);
+    
+    program.sendUniform1f(teapot.material.shininess, WGE.ID('material-shininess').value);
+    program.sendUniform3f(teapot.material.ambient, WGE.ID('material-ambient-r').value, WGE.ID('material-ambient-g').value, WGE.ID('material-ambient-b').value);
+}
+</script>
+</div>
+</div>
 </body>
 </html>
