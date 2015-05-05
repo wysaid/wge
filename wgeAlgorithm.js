@@ -689,7 +689,95 @@ WGE.mat4ZRotation = function(rad)
 
 WGE.mat4Inverse = function(m4)
 {
+	var dt = m4.data;
+	var mat = new WGE.Mat4();
+	var mData = mat.data;
 
+	var tmp_0 = dt[10] * dt[15];
+    var tmp_1 = dt[14] * dt[11];
+    var tmp_2 = dt[6] * dt[15];
+    var tmp_3 = dt[14] * dt[7];
+    var tmp_4 = dt[6] * dt[11];
+    var tmp_5 = dt[10] * dt[7];
+    var tmp_6 = dt[2] * dt[15];
+    var tmp_7 = dt[14] * dt[3];
+    var tmp_8 = dt[2] * dt[11];
+    var tmp_9 = dt[10] * dt[3];
+    var tmp_10 = dt[2] * dt[7];
+    var tmp_11 = dt[6] * dt[3];
+    var tmp_12 = dt[8] * dt[13];
+    var tmp_13 = dt[12] * dt[9];
+    var tmp_14 = dt[4] * dt[13];
+    var tmp_15 = dt[12] * dt[5];
+    var tmp_16 = dt[4] * dt[9];
+    var tmp_17 = dt[8] * dt[5];
+    var tmp_18 = dt[0] * dt[13];
+    var tmp_19 = dt[12] * dt[1]
+    var tmp_20 = dt[0] * dt[9];
+    var tmp_21 = dt[8] * dt[1];
+    var tmp_22 = dt[0] * dt[5];
+    var tmp_23 = dt[4] * dt[1];
+
+    var t0 = ((tmp_0 * dt[5] + tmp_3 * dt[9] + tmp_4 * dt[13]) -
+              (tmp_1 * dt[5] + tmp_2 * dt[9] + tmp_5 * dt[13]));
+    var t1 = ((tmp_1 * dt[1] + tmp_6 * dt[9] + tmp_9 * dt[13]) -
+              (tmp_0 * dt[1] + tmp_7 * dt[9] + tmp_8 * dt[13]));
+    var t2 = ((tmp_2 * dt[1] + tmp_7 * dt[5] + tmp_10 * dt[13]) -
+              (tmp_3 * dt[1] + tmp_6 * dt[5] + tmp_11 * dt[13]));
+    var t3 = ((tmp_5 * dt[1] + tmp_8 * dt[5] + tmp_11 * dt[9]) -
+              (tmp_4 * dt[1] + tmp_9 * dt[5] + tmp_10 * dt[9]));
+
+    var d = 1.0 / (dt[0] * t0 + dt[4] * t1 + dt[8] * t2 + dt[12] * t3);
+
+    var out_00 = d * t0;
+    var out_01 = d * t1;
+    var out_02 = d * t2;
+    var out_03 = d * t3;
+
+    var out_10 = d * ((tmp_1 * dt[4] + tmp_2 * dt[8] + tmp_5 * dt[12]) -
+                      (tmp_0 * dt[4] + tmp_3 * dt[8] + tmp_4 * dt[12]));
+    var out_11 = d * ((tmp_0 * dt[0] + tmp_7 * dt[8] + tmp_8 * dt[12]) -
+                      (tmp_1 * dt[0] + tmp_6 * dt[8] + tmp_9 * dt[12]));
+    var out_12 = d * ((tmp_3 * dt[0] + tmp_6 * dt[4] + tmp_11 * dt[12]) -
+                      (tmp_2 * dt[0] + tmp_7 * dt[4] + tmp_10 * dt[12]));
+    var out_13 = d * ((tmp_4 * dt[0] + tmp_9 * dt[4] + tmp_10 * dt[8]) -
+                      (tmp_5 * dt[0] + tmp_8 * dt[4] + tmp_11 * dt[8]));
+
+    var out_20 = d * ((tmp_12 * dt[7] + tmp_15 * dt[11] + tmp_16 * dt[15]) -
+                      (tmp_13 * dt[7] + tmp_14 * dt[11] + tmp_17 * dt[15]));
+    var out_21 = d * ((tmp_13 * dt[3] + tmp_18 * dt[11] + tmp_21 * dt[15]) -
+                      (tmp_12 * dt[3] + tmp_19 * dt[11] + tmp_20 * dt[15]));
+    var out_22 = d * ((tmp_14 * dt[3] + tmp_19 * dt[7] + tmp_22 * dt[15]) -
+                      (tmp_15 * dt[3] + tmp_18 * dt[7] + tmp_23 * dt[15]));
+    var out_23 = d * ((tmp_17 * dt[3] + tmp_20 * dt[7] + tmp_23 * dt[11]) -
+                      (tmp_16 * dt[3] + tmp_21 * dt[7] + tmp_22 * dt[11]));
+    
+    var out_30 = d * ((tmp_14 * dt[10] + tmp_17 * dt[14] + tmp_13 * dt[6]) -
+                      (tmp_16 * dt[14] + tmp_12 * dt[6] + tmp_15 * dt[10]));
+    var out_31 = d * ((tmp_20 * dt[14] + tmp_12 * dt[2] + tmp_19 * dt[10]) -
+                      (tmp_18 * dt[10] + tmp_21 * dt[14] + tmp_13 * dt[2]));
+    var out_32 = d * ((tmp_18 * dt[6] + tmp_23 * dt[14] + tmp_15 * dt[2]) -
+                      (tmp_22 * dt[14] + tmp_14 * dt[2] + tmp_19 * dt[6]));
+    var out_33 = d * ((tmp_22 * dt[10] + tmp_16 * dt[2] + tmp_21 * dt[6]) -
+                      (tmp_20 * dt[6] + tmp_23 * dt[10] + tmp_17 * dt[2]));
+
+    mData[0] = out_00;
+    mData[1] = out_01;
+    mData[2] = out_02;
+    mData[3] = out_03;
+    mData[4] = out_10;
+    mData[5] = out_11;
+    mData[6] = out_12;
+    mData[7] = out_13;
+    mData[8] = out_20;
+    mData[9] = out_21;
+    mData[10] = out_22;
+    mData[11] = out_23;
+    mData[12] = out_30;
+    mData[13] = out_31;
+    mData[14] = out_32;
+    mData[15] = out_33;
+    return mat;
 };
 
 WGE.makePerspective = function(fovyRad, aspect, nearZ, farZ)
