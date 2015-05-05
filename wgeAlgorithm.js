@@ -302,7 +302,10 @@ WGE.Mat2 = WGE.Class(
 
 	initialize : function(m00, m01, m10, m11)
 	{
-		this.data = new Float32Array([m00, m01, m10, m11]);
+		if(arguments.length != 4)
+			this.data = new Float32Array(4);
+		else
+			this.data = new Float32Array([m00, m01, m10, m11]);
 	},
 
 	rotate : function(rad)
@@ -358,7 +361,10 @@ WGE.Mat3 = WGE.Class(
 
     initialize: function (m00, m01, m02, m10, m11, m12, m20, m21, m22)
     {
-        this.data = new Float32Array([m00, m01, m02, m10, m11, m12, m20, m21, m22]);
+    	if(arguments.length != 9)
+    		this.data = new Float32Array(9);
+    	else
+    		this.data = new Float32Array([m00, m01, m02, m10, m11, m12, m20, m21, m22]);
     },
 
     transpose: function ()
@@ -478,17 +484,19 @@ WGE.mat3ZRotation = function (rad)
 
 WGE.mat3Mul = function (mat3Left, mat3Right)
 {
-    return new WGE.Mat3(mat3Left.data[0] * mat3Right.data[0] + mat3Left.data[3] * mat3Right.data[1] + mat3Left.data[6] * mat3Right.data[2],
-		mat3Left.data[1] * mat3Right.data[0] + mat3Left.data[4] * mat3Right.data[1] + mat3Left.data[7] * mat3Right.data[2],
-		mat3Left.data[2] * mat3Right.data[0] + mat3Left.data[5] * mat3Right.data[1] + mat3Left.data[8] * mat3Right.data[2],
+	var data1 = mat3Left.data;
+	var data2 = mat3Right.data;
+    return new WGE.Mat3(data1[0] * data2[0] + data1[3] * data2[1] + data1[6] * data2[2],
+		data1[1] * data2[0] + data1[4] * data2[1] + data1[7] * data2[2],
+		data1[2] * data2[0] + data1[5] * data2[1] + data1[8] * data2[2],
 
-		mat3Left.data[0] * mat3Right.data[3] + mat3Left.data[3] * mat3Right.data[4] + mat3Left.data[6] * mat3Right.data[5],
-		mat3Left.data[1] * mat3Right.data[3] + mat3Left.data[4] * mat3Right.data[4] + mat3Left.data[7] * mat3Right.data[5],
-		mat3Left.data[2] * mat3Right.data[3] + mat3Left.data[5] * mat3Right.data[4] + mat3Left.data[8] * mat3Right.data[5],
+		data1[0] * data2[3] + data1[3] * data2[4] + data1[6] * data2[5],
+		data1[1] * data2[3] + data1[4] * data2[4] + data1[7] * data2[5],
+		data1[2] * data2[3] + data1[5] * data2[4] + data1[8] * data2[5],
 
-		mat3Left.data[0] * mat3Right.data[6] + mat3Left.data[3] * mat3Right.data[7] + mat3Left.data[6] * mat3Right.data[8],
-		mat3Left.data[1] * mat3Right.data[6] + mat3Left.data[4] * mat3Right.data[7] + mat3Left.data[7] * mat3Right.data[8],
-		mat3Left.data[2] * mat3Right.data[6] + mat3Left.data[5] * mat3Right.data[7] + mat3Left.data[8] * mat3Right.data[8]);
+		data1[0] * data2[6] + data1[3] * data2[7] + data1[6] * data2[8],
+		data1[1] * data2[6] + data1[4] * data2[7] + data1[7] * data2[8],
+		data1[2] * data2[6] + data1[5] * data2[7] + data1[8] * data2[8]);
 };
 
 WGE.mat3MulVec3 = function (mat3, vec3)
@@ -509,7 +517,9 @@ WGE.Mat4 = WGE.Class(
 
 	initialize : function(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33)
 	{
-		this.data = new Float32Array([m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]);
+		if(arguments.length != 16)
+			this.data = new Float32Array(16);
+		else this.data = new Float32Array([m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33]);
 	},
 
 	transpose : function()
@@ -677,6 +687,11 @@ WGE.mat4ZRotation = function(rad)
 		0.0, 0.0, 0.0, 1.0);
 };
 
+WGE.mat4Inverse = function(m4)
+{
+
+};
+
 WGE.makePerspective = function(fovyRad, aspect, nearZ, farZ)
 {
 	var cotan = 1.0 / Math.tan(fovyRad / 2.0);
@@ -736,22 +751,24 @@ WGE.makeLookAt = function(eyeX, eyeY, eyeZ, centerX, centerY, centerZ,	upX, upY,
 
 WGE.mat4Mul = function(mat4Left, mat4Right)
 {
-	return new WGE.Mat4(mat4Left.data[0] * mat4Right.data[0] + mat4Left.data[4] * mat4Right.data[1] + mat4Left.data[8] * mat4Right.data[2] + mat4Left.data[12] * mat4Right.data[3],
-		mat4Left.data[1] * mat4Right.data[0] + mat4Left.data[5] * mat4Right.data[1] + mat4Left.data[9] * mat4Right.data[2] + mat4Left.data[13] * mat4Right.data[3],
-		mat4Left.data[2] * mat4Right.data[0] + mat4Left.data[6] * mat4Right.data[1] + mat4Left.data[10] * mat4Right.data[2] + mat4Left.data[14] * mat4Right.data[3],
-		mat4Left.data[3] * mat4Right.data[0] + mat4Left.data[7] * mat4Right.data[1] + mat4Left.data[11] * mat4Right.data[2] + mat4Left.data[15] * mat4Right.data[3],
-		mat4Left.data[0] * mat4Right.data[4] + mat4Left.data[4] * mat4Right.data[5] + mat4Left.data[8] * mat4Right.data[6] + mat4Left.data[12] * mat4Right.data[7],
-		mat4Left.data[1] * mat4Right.data[4] + mat4Left.data[5] * mat4Right.data[5] + mat4Left.data[9] * mat4Right.data[6] + mat4Left.data[13] * mat4Right.data[7],
-		mat4Left.data[2] * mat4Right.data[4] + mat4Left.data[6] * mat4Right.data[5] + mat4Left.data[10] * mat4Right.data[6] + mat4Left.data[14] * mat4Right.data[7],
-		mat4Left.data[3] * mat4Right.data[4] + mat4Left.data[7] * mat4Right.data[5] + mat4Left.data[11] * mat4Right.data[6] + mat4Left.data[15] * mat4Right.data[7],
-		mat4Left.data[0] * mat4Right.data[8] + mat4Left.data[4] * mat4Right.data[9] + mat4Left.data[8] * mat4Right.data[10] + mat4Left.data[12] * mat4Right.data[11],
-		mat4Left.data[1] * mat4Right.data[8] + mat4Left.data[5] * mat4Right.data[9] + mat4Left.data[9] * mat4Right.data[10] + mat4Left.data[13] * mat4Right.data[11],
-		mat4Left.data[2] * mat4Right.data[8] + mat4Left.data[6] * mat4Right.data[9] + mat4Left.data[10] * mat4Right.data[10] + mat4Left.data[14] * mat4Right.data[11],
-		mat4Left.data[3] * mat4Right.data[8] + mat4Left.data[7] * mat4Right.data[9] + mat4Left.data[11] * mat4Right.data[10] + mat4Left.data[15] * mat4Right.data[11],
-		mat4Left.data[0] * mat4Right.data[12] + mat4Left.data[4] * mat4Right.data[13] + mat4Left.data[8] * mat4Right.data[14] + mat4Left.data[12] * mat4Right.data[15],			
-		mat4Left.data[1] * mat4Right.data[12] + mat4Left.data[5] * mat4Right.data[13] + mat4Left.data[9] * mat4Right.data[14] + mat4Left.data[13] * mat4Right.data[15],			
-		mat4Left.data[2] * mat4Right.data[12] + mat4Left.data[6] * mat4Right.data[13] + mat4Left.data[10] * mat4Right.data[14] + mat4Left.data[14] * mat4Right.data[15],			
-		mat4Left.data[3] * mat4Right.data[12] + mat4Left.data[7] * mat4Right.data[13] + mat4Left.data[11] * mat4Right.data[14] + mat4Left.data[15] * mat4Right.data[15]);
+	var data1 = mat4Left.data;
+	var data2 = mat4Right.data;
+	return new WGE.Mat4(data1[0] * data2[0] + data1[4] * data2[1] + data1[8] * data2[2] + data1[12] * data2[3],
+		data1[1] * data2[0] + data1[5] * data2[1] + data1[9] * data2[2] + data1[13] * data2[3],
+		data1[2] * data2[0] + data1[6] * data2[1] + data1[10] * data2[2] + data1[14] * data2[3],
+		data1[3] * data2[0] + data1[7] * data2[1] + data1[11] * data2[2] + data1[15] * data2[3],
+		data1[0] * data2[4] + data1[4] * data2[5] + data1[8] * data2[6] + data1[12] * data2[7],
+		data1[1] * data2[4] + data1[5] * data2[5] + data1[9] * data2[6] + data1[13] * data2[7],
+		data1[2] * data2[4] + data1[6] * data2[5] + data1[10] * data2[6] + data1[14] * data2[7],
+		data1[3] * data2[4] + data1[7] * data2[5] + data1[11] * data2[6] + data1[15] * data2[7],
+		data1[0] * data2[8] + data1[4] * data2[9] + data1[8] * data2[10] + data1[12] * data2[11],
+		data1[1] * data2[8] + data1[5] * data2[9] + data1[9] * data2[10] + data1[13] * data2[11],
+		data1[2] * data2[8] + data1[6] * data2[9] + data1[10] * data2[10] + data1[14] * data2[11],
+		data1[3] * data2[8] + data1[7] * data2[9] + data1[11] * data2[10] + data1[15] * data2[11],
+		data1[0] * data2[12] + data1[4] * data2[13] + data1[8] * data2[14] + data1[12] * data2[15],
+		data1[1] * data2[12] + data1[5] * data2[13] + data1[9] * data2[14] + data1[13] * data2[15],
+		data1[2] * data2[12] + data1[6] * data2[13] + data1[10] * data2[14] + data1[14] * data2[15],
+		data1[3] * data2[12] + data1[7] * data2[13] + data1[11] * data2[14] + data1[15] * data2[15]);
 };
 
 WGE.mat4MulVec4 = function(mat4, vec4)
@@ -812,7 +829,7 @@ WGE.projectMat4 = function(obj, modelViewMat, projMat, viewport, winCoord)
 
 	winCoord.data[0] = viewport.data[0] + (1.0 + result.data[0]) * viewport.data[2] / 2.0;
 	winCoord.data[1] = viewport.data[1] + (1.0 + result.data[1]) * viewport.data[3] / 2.0;
-	if(winCoord.data[2])
+	if(winCoord.data[2].length >= 3)
 		winCoord.data[2] = (1.0 + result.data[2]) / 2.0;
 	return true;
 };
