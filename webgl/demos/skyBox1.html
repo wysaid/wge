@@ -1,0 +1,489 @@
+﻿<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../wgeSprite2d.js"></script>
+<script type="text/javascript" src="../models/teapot-streams.js"></script>
+
+<script id="vshTeapot" type="x-shader/x-vertex">
+attribute vec4 v4Position;
+attribute vec3 v3Normal;
+
+uniform mat4 m4ModelViewProjection;
+
+void main()
+{
+    gl_Position = m4ModelViewProjection * v4Position;
+}
+</script>
+
+<script id="fshTeapot" type="x-shader/x-fragment">
+precision mediump float;
+
+void main()
+{
+    gl_FragColor = vec4(1.0);
+}
+</script>
+
+<script id="vshBox" type="x-shader/x-vertex">
+attribute vec4 v4Position;
+
+varying vec2 texCoord;
+
+uniform mat4 m4ModelMatrix;
+uniform mat4 m4ViewProjection;
+
+void main()
+{
+    texCoord = vec2(v4Position.x + 1.0, 1.0 - v4Position.y) / 2.0;
+    //texCoord = (v4Position.xy + 1.0) / 2.0;
+    gl_Position = m4ViewProjection * (m4ModelMatrix * v4Position);
+}
+</script>
+
+<script id="fshBox" type="x-shader/x-fragment">
+precision mediump float;
+
+varying vec2 texCoord;
+uniform sampler2D tex;
+
+void main()
+{
+    gl_FragColor = texture2D(tex, texCoord);
+}
+</script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+"use strict";
+
+document.body.oncontextmenu=function(){ return false;} 
+
+//选择使用平行投影还是透视投影。
+var usePerspective = true;
+
+var ShadeSprite = WGE.Class(
+{
+    context : null,
+    program : null,
+
+    //attribute locations
+    _vertAttribLoc : 0,
+    _normAttribLoc : 1,
+
+    //uniform locations
+    _modelMatLoc : null,
+    _mvpMatrixLoc : null,
+
+    //索引数据
+    _meshIndexVBO : null,
+    _meshIndexSize : 0,
+    _meshIndexDataType : null,
+
+    //顶点数据
+    _meshVBO : null,
+    _meshDataSize : 0,
+    _meshDataType : null,
+
+    //法线数据
+    _normVBO : null,
+    _normDataSize : 0,
+    _normDataType : null,
+
+    //光照
+    light : {
+        ambient : "light.ambient",
+        diffuse : "light.diffuse",
+        specular : "light.specular",
+        position : "light.position",
+        halfVector : "light.halfVector"
+    },
+
+    //材质
+    material : {
+        emission : "material.emission",
+        ambient : "material.ambient",
+        diffuse : "material.diffuse",
+        specular : "material.specular",
+        shininess : "material.shininess"
+    },
+
+    initialize : function(ctx, vsh , fsh)
+    {
+        this.context = ctx;
+        this._initProgram(vsh, fsh);
+
+        this._meshVBO = ctx.createBuffer();
+        this._normVBO = ctx.createBuffer();
+        this._meshIndexVBO = ctx.createBuffer();
+        
+        this._meshDataType = ctx.FLOAT;
+        this._normDataType = ctx.FLOAT;
+        this._meshIndexDataType = ctx.UNSIGNED_SHORT;
+
+        this.setupBuffers();
+    },
+
+    setModelMatrix : function(matrix)
+    {
+        this.program.bind();
+        this.context.uniformMatrix4fv(this._modelMatLoc, false, matrix.data);
+    },
+
+    //本demo示例直接初始化方法
+    setupBuffers : function()
+    {
+        var gl = this.context;
+        var model = WGE.TeapotModel;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+        gl.bufferData(gl.ARRAY_BUFFER, model.positions, gl.STATIC_DRAW);
+        this._meshDataSize = 3;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
+        gl.bufferData(gl.ARRAY_BUFFER, model.normals, gl.STATIC_DRAW);
+        this._normDataSize = 3;
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indices, gl.STATIC_DRAW);
+        this._meshIndexSize = model.indices.length;
+    },
+
+    _initProgram : function(vsh, fsh)
+    {
+        var context = this.context;
+        var program = new WGE.Program(context);
+        this.program = program;
+
+        program.bindAttribLocation("v4Position", this._vertAttribLoc);
+        program.bindAttribLocation("v3Normal", this._normAttribLoc);
+
+        if(!program.initWithShaderCode(vsh, fsh))
+        {
+            console.log("ShadeSprite init failed!");
+            return false;
+        }
+
+        program.bind();
+        this._setDefaultLight();
+        this._initUniformLocations();
+        return true;
+    },
+
+    _initUniformLocations : function()
+    {
+        var program = this.program;
+        this._mvpMatrixLoc = program.uniformLocation("m4ModelViewProjection");
+        this._modelMatLoc = program.uniformLocation("m4ModelMatrix");
+    },
+
+    _setDefaultLight : function()
+    {
+        var program = this.program;
+        program.sendUniform3f(this.light.position, 50.0, 0.0, 2000.0);
+        program.sendUniform3f(this.light.diffuse, 0.8, 0.8, 0.8);
+        program.sendUniform3f(this.light.ambient, 0.0, 0.0, 0.0);
+        program.sendUniform3f(this.light.specular, 1.5, 0.5, 0.0);
+        
+        program.sendUniform1f(this.material.shininess, 32.0);
+        program.sendUniform3f(this.material.ambient, 1.0, 0.7, 0.5);
+    },
+
+    update : function(mvp)
+    {
+        var gl = this.context;
+        var program = this.program;
+
+        program.bind();
+        gl.uniformMatrix4fv(this._mvpMatrixLoc, false, mvp.data);
+    },
+
+    render : function()
+    {
+        var gl = this.context;
+        this.program.bind();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+        gl.enableVertexAttribArray(this._vertAttribLoc);
+        gl.vertexAttribPointer(this._vertAttribLoc, this._meshDataSize, this._meshDataType, false, 0, 0)
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
+        gl.enableVertexAttribArray(this._normAttribLoc);
+        gl.vertexAttribPointer(this._normAttribLoc, this._normDataSize, this._normDataType, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+        gl.drawElements(gl.TRIANGLES, this._meshIndexSize, this._meshIndexDataType, 0);
+        
+        var err = gl.getError();
+        if(err) console.log(err);
+    }
+});
+
+var BoxSprite = WGE.Class(
+{
+    context : null,
+    program : null,
+    
+    _vertAttribLoc : 0,
+
+    _modelMatLoc : null,
+    _vpMatrixLoc : null,
+
+    textures : null,
+    modelMatrices : null,
+
+    _vertexBuffer : null,
+
+    initialize : function(ctx)
+    {
+        this.context = ctx;
+        this._initProgram(WGE.getContentByID('vshBox'), WGE.getContentByID('fshBox'));
+
+        this.textures = [];
+        var i;
+        for(i = 0; i != 6; ++i)
+        {
+            var tex = new WGE.Texture2D(ctx);
+            tex.initWithTag('test' + i);
+            this.textures.push(tex);
+        }
+
+        this.modelMatrices = [];
+        var scaling = 150.0;
+        //创建包围盒显示
+        for(i = 0; i != 6; ++i)
+        {
+            this.modelMatrices.push(WGE.makeMat4(
+                    scaling, 0.0, 0.0, 0.0,
+                    0.0, scaling, 0.0, 0.0,
+                    0.0, 0.0, scaling, 0.0,
+                    0.0, 0.0, 0.0, 1.0
+                ));
+        }
+
+        var mat = this.modelMatrices;
+
+        mat[1].rotateY(Math.PI);
+
+        mat[2].rotateY(-Math.PI / 2.0);
+        mat[3].rotateY(Math.PI / 2.0);
+
+        mat[4].rotateX(-Math.PI / 2.0);
+        mat[4].rotateZ(Math.PI);
+
+        mat[5].rotateX(Math.PI / 2.0);
+        mat[5].rotateZ(Math.PI);
+
+        for(var i = 0; i != 6; ++i)
+        {
+            mat[i].translateZ(1);
+        }
+
+        var buffer = ctx.createBuffer();
+        this._vertexBuffer = buffer;
+        ctx.bindBuffer(ctx.ARRAY_BUFFER, buffer);
+        ctx.bufferData(ctx.ARRAY_BUFFER, new Float32Array(WGE.Sprite2d.VerticesData), ctx.STATIC_DRAW);
+        WGE.checkGLErr("BoxSprite - initialize", this.context);
+    },
+
+    _initProgram : function(vsh, fsh)
+    {
+        var gl = this.context;
+        var program = new WGE.Program(gl);
+        this.program = program;
+
+        program.bindAttribLocation("v4Position", this._vertAttribLoc);
+
+        if(!program.initWithShaderCode(vsh, fsh))
+        {
+            console.log("BoxSprite init failed!");
+            return false;
+        }
+
+        program.bind();
+        this._modelMatLoc = program.uniformLocation('m4ModelMatrix');
+        this._vpMatrixLoc = program.uniformLocation('m4ViewProjection');
+
+        return true;
+    },
+
+    update : function(mvp)
+    {
+        var gl = this.context;
+        var program = this.program;
+        program.bind();
+        gl.uniformMatrix4fv(this._vpMatrixLoc, false, mvp.data);
+    },
+
+    render : function()
+    {
+        var gl = this.context;
+        var program = this.program;
+        var matrices = this.modelMatrices;
+        var textures = this.textures;
+
+        program.bind();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
+        gl.enableVertexAttribArray(this._vertAttribLoc);
+        gl.vertexAttribPointer(this._vertAttribLoc, 2, gl.FLOAT, false, 0, 0);
+
+        for(var i=0; i != 6; ++i)
+        {
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, textures[i].texture);
+            gl.uniformMatrix4fv(this._modelMatLoc, false, matrices[i].data);
+            gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+        }
+    }
+
+});
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
+{
+    context : undefined,
+    isMouseDown : false,
+    teapot : null,
+    deltaTime : 10,
+
+    viewMatrix : null,
+    modelMatrix : null,
+    projectionMatrix : null,
+
+    boundingSprite : null,
+
+    bindFather : function(fatherObj)
+    {
+        if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+        {
+            var context = this.canvas.getContext('experimental-webgl');
+            if(!context)
+            {
+                alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+            }
+            this.context = context;
+            context.disable(context.BLEND);
+            context.enable(context.DEPTH_TEST);
+            //context.enable(context.CULL_FACE);
+            return !!this.context;
+        }
+        return false;
+    },
+
+     _setProjection : function()
+    {
+        if(usePerspective)
+        {
+            this.projectionMatrix = WGE.makePerspective(Math.PI / 6.0, this.canvas.width / this.canvas.height, 1.0, 10000.0);
+        }
+        else
+        {
+            this.projectionMatrix = WGE.makeOrtho(-this.canvas.width / 2, this.canvas.width / 2, -this.canvas.height / 2, this.canvas.height / 2, -10000.0, 10000.0);
+        }
+        
+    },
+
+    initSprites : function()
+    {
+        var gl = this.context;
+        var teapot = new ShadeSprite(gl, WGE.getContentByID("vshTeapot"), WGE.getContentByID("fshTeapot"));
+        this.teapot = teapot;
+
+        this.modelMatrix = WGE.mat4Scale(8.0, 8.0, 8.0);
+        teapot.setModelMatrix(this.modelMatrix);
+
+
+        gl.clearColor(0.0, 0.0, 0.1, 1.0);
+        this.viewMatrix = WGE.makeLookAt(0.0, 0.0, 1200.0, 0.0, 0.0, -1000.0, 0.0, 1.0, 0.0);
+        this._setProjection();
+
+        this.boundingSprite = new BoxSprite(gl);
+    },   
+
+    update : function(dt)
+    {
+        this.deltaTime = dt;
+
+        this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4YRotation(Math.PI * dt / 10000.0));
+        this.teapot.setModelMatrix(this.modelMatrix);
+
+        var mvp = WGE.mat4Mul(this.projectionMatrix, WGE.mat4Mul(this.viewMatrix, this.modelMatrix));
+        this.teapot.update(mvp);
+        this.boundingSprite.update(mvp);
+    },
+
+    render : function()
+    {
+        var gl = this.context;
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        this.teapot.render();
+        this.boundingSprite.render();
+
+    },
+
+    mouseMoveEvent : function(e, x, y)
+    {
+        if(this.isMouseDown)
+        {
+            this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4XRotation((y - this.y) / 100.0));
+            this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4YRotation((x - this.x) / 100.0));
+            //this.teapot.setModelMatrix(this.modelMatrix);
+            this.x = x;
+            this.y = y;
+        }
+    },
+
+    mouseDownEvent : function(e, x, y)
+    {
+        this.x = x;
+        this.y = y;
+        this.isMouseDown = true;
+    },
+
+    mouseUpEvent : function(e, x, y)
+    {
+        this.isMouseDown = false;
+    },
+
+    resizeEvent : function()
+    {
+        var gl = this.context;
+        if(gl)
+        {
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            this._setProjection();
+        }
+    }
+});
+
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+var gui = new MyGUI(div);
+
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();");
+
+</script>
+
+<div style="display:none">
+<img src="../../res/box/skycubemap_front.jpg" id="test0">
+<img src="../../res/box/skycubemap_back.jpg" id="test1">
+<img src="../../res/box/skycubemap_left.jpg" id="test2">
+<img src="../../res/box/skycubemap_right.jpg" id="test3">
+<img src="../../res/box/skycubemap_up.jpg" id="test4">
+<img src="../../res/box/skycubemap_down.jpg" id="test5">
+</div>
+
+</body>
+</html>
