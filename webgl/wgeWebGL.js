@@ -25,20 +25,23 @@ WGE.bindContext = function(ctx)
 WGE.checkGLErr = function(tag, context)
 {
 	var ctx = context || WGE.webgl;
-	for (var error = ctx.getError(); error; error = ctx.getError())
-	{		
-		var msg;
-		switch (error) 
-		{
-			case ctx.INVALID_ENUM: msg = "invalid enum"; break;
-			case ctx.INVALID_FRAMEBUFFER_OPERATION: msg = "invalid framebuffer operation"; break;
-			case ctx.INVALID_OPERATION: msg = "invalid operation"; break;
-			case ctx.INVALID_VALUE: msg = "invalid value"; break;
-			case ctx.OUT_OF_MEMORY: msg = "out of memory"; break;
-			default: msg = "unknown error";
+	if(ctx)
+	{
+		for (var error = ctx.getError(); error; error = ctx.getError())
+		{		
+			var msg;
+			switch (error) 
+			{
+				case ctx.INVALID_ENUM: msg = "invalid enum"; break;
+				case ctx.INVALID_FRAMEBUFFER_OPERATION: msg = "invalid framebuffer operation"; break;
+				case ctx.INVALID_OPERATION: msg = "invalid operation"; break;
+				case ctx.INVALID_VALUE: msg = "invalid value"; break;
+				case ctx.OUT_OF_MEMORY: msg = "out of memory"; break;
+				default: msg = "unknown error";
+			}
+			console.error(tag, msg, error);
 		}
-		console.error(tag, msg, error);
-	}
+	}	
 };
 
 WGE.Texture2D = WGE.Class(

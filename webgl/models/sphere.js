@@ -8,18 +8,10 @@
 
 //@_@吃水不忘挖井人， 参考自 apple inc. 文档
 
-WGE.Sphere = {};
-
 WGE.makeSphere = function(rad, lats, height)
 {
-	var sphere = {};
-	sphere.positions = [];
-	sphere.normals = [];
-	sphere.texCoords = [];
-	sphere.indices = [];
-
-	var pos = sphere.positions, norm = sphere.normals,
-	    tex = sphere.texCoords, indices = sphere.indices;
+	var pos = [], norm = [],
+	    tex = [], indices = [];
 
 	for (var i = 0; i <= lats; ++i) {
         for (var j = 0; j <= height; ++j) {
@@ -60,5 +52,11 @@ WGE.makeSphere = function(rad, lats, height)
             indices.push(first+1);
         }
     }
-    return sphere;
+
+    return {
+		positions : new Float32Array(pos),
+		normals : new Float32Array(norm),
+		texCoords : new Float32Array(tex),
+		indices : new Uint16Array(indices)
+	};
 };
