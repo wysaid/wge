@@ -11,6 +11,8 @@
 <script type="text/javascript" src="../models/sphere.js"></script>
 
 <script id="vshTeapot" type="x-shader/x-vertex">
+precision mediump float;
+
 attribute vec4 v4Position;
 attribute vec3 v3Normal;
 
@@ -40,6 +42,8 @@ varying vec3 norm;
 
 uniform samplerCube envSampler;
 
+uniform mat4 m4ModelMatrix;
+
 
 void main()
 {
@@ -47,6 +51,7 @@ void main()
     vec3 lookup = reflect(viewDir, norm);
 
     vec4 color = textureCube(envSampler, lookup);
+    //增强饱和度
     vec3 lum = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
     gl_FragColor = vec4(mix(lum, color.xyz, 3.0), 1.0);
 }
@@ -400,9 +405,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     initSprites : function()
     {
         var gl = this.context;
-        var eyePos = [0.0, 0.0, 1200.0];
+        var eyePos = [0.0, 0.0, 300.0];
 
-        this.modelMatrix = WGE.mat4Scale(8.0, 8.0, 8.0);
+        this.modelMatrix = WGE.mat4Scale(2.0, 2.0, 2.0);
 
         gl.clearColor(0.0, 0.0, 0.1, 1.0);
         this.viewMatrix = WGE.makeLookAt(eyePos[0], eyePos[1], eyePos[2], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
@@ -535,8 +540,8 @@ document.body.setAttribute("onload", "gui.initSprites();gui.start();");
 <!--
 <img src="../../res/box/mountain_pos_x.jpg" id="test0">
 <img src="../../res/box/mountain_neg_x.jpg" id="test1">
-<img src="../../res/box/mountain_pos_y.jpg" id="test3">
-<img src="../../res/box/mountain_neg_y.jpg" id="test2">
+<img src="../../res/box/mountain_pos_y.jpg" id="test2">
+<img src="../../res/box/mountain_neg_y.jpg" id="test3">
 <img src="../../res/box/mountain_pos_z.jpg" id="test4">
 <img src="../../res/box/mountain_neg_z.jpg" id="test5">
 -->
@@ -544,8 +549,8 @@ document.body.setAttribute("onload", "gui.initSprites();gui.start();");
 <!--
 <img src="../../res/box/bridge_posx.jpg" id="test0">
 <img src="../../res/box/bridge_negx.jpg" id="test1">
-<img src="../../res/box/bridge_posy.jpg" id="test3">
-<img src="../../res/box/bridge_negy.jpg" id="test2">
+<img src="../../res/box/bridge_posy.jpg" id="test2">
+<img src="../../res/box/bridge_negy.jpg" id="test3">
 <img src="../../res/box/bridge_posz.jpg" id="test4">
 <img src="../../res/box/bridge_negz.jpg" id="test5">
 -->
