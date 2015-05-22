@@ -16,9 +16,7 @@ precision mediump float;
 attribute vec4 v4Position;
 attribute vec3 v3Normal;
 
-varying vec3 transformedPos;
-varying vec3 eye;
-varying vec3 norm;
+varying vec3 lookup;
 
 uniform mat4 m4ModelViewProjection;
 uniform mat4 m4ModelMatrix;
@@ -27,31 +25,27 @@ uniform vec3 eyePos;
 void main()
 {
     gl_Position = m4ModelViewProjection * v4Position;
-    transformedPos = (m4ModelMatrix * v4Position).xyz;
-    norm = normalize(m4ModelMatrix * vec4(v3Normal, 1.0)).xyz;
-    eye = eyePos;
+    vec3 transformedPos = (m4ModelMatrix * v4Position).xyz;
+    vec3 norm = normalize(m4ModelMatrix * vec4(v3Normal, 1.0)).xyz;
+
+    vec3 viewDir = normalize(transformedPos - eyePos);
+    lookup = reflect(viewDir, norm);
 }
 </script>
 
 <script id="fshTeapot" type="x-shader/x-fragment">
 precision mediump float;
 
-varying vec3 transformedPos;
-varying vec3 eye;
-varying vec3 norm;
+varying vec3 lookup;
 
 uniform samplerCube envSampler;
-
 uniform mat4 m4ModelMatrix;
 
 
 void main()
 {
-    vec3 viewDir = normalize(transformedPos - eye);
-    vec3 lookup = reflect(viewDir, norm);
-
     vec4 color = textureCube(envSampler, lookup);
-    //增强饱和度
+    //增强饱和度norm
     vec3 lum = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
     gl_FragColor = vec4(mix(lum, color.xyz, 3.0), 1.0);
 }
@@ -405,9 +399,9 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     initSprites : function()
     {
         var gl = this.context;
-        var eyePos = [0.0, 0.0, 300.0];
+        var eyePos = [0.0, 0.0, 200.0];
 
-        this.modelMatrix = WGE.mat4Mul(WGE.mat4Rotation(-Math.PI / 3.0, 1.0, 1.0, 1.0), WGE.mat4Scale(2.0, 2.0, 2.0));
+        this.modelMatrix = WGE.mat4Scale(2.0, 2.0, 2.0);
 
         gl.clearColor(0.0, 0.0, 0.1, 1.0);
         this.viewMatrix = WGE.makeLookAt(eyePos[0], eyePos[1], eyePos[2], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
@@ -458,6 +452,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         var mvp = WGE.mat4Mul(this.projectionMatrix, WGE.mat4Mul(this.viewMatrix, this.modelMatrix));
         this.boundingSprite.update(mvp);
         WGE.checkGLErr("create cube map", gl);
+        this.modelMatrix = WGE.mat4Mul(WGE.mat4Rotation(-Math.PI / 3.0, 1.0, 1.0, 1.0), this.modelMatrix);
     },   
 
     update : function(dt)

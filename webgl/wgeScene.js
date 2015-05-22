@@ -59,7 +59,7 @@ WGE.SceneInterface = WGE.Class(
 	{
 		var eye = this.eye.data, lookDir = this.lookDir.data;
 		var centerX = eye[0] + lookDir[0], centerY = eye[1] + lookDir[1];
-		var len = Math.sqrt(centerX*centerX + centerY*centerY);
+		var len = Math.sqrt(lookDir[0]*lookDir[0] + lookDir[1]*lookDir[1]);
 		var tmp = -lookDir[2] / len;
 		var dirBackX = lookDir[0] * tmp, dirBackY = lookDir[1] * tmp;
 		var upDir = new WGE.Vec3(dirBackX, dirBackY, len);
