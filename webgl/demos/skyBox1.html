@@ -407,7 +407,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         var gl = this.context;
         var eyePos = [0.0, 0.0, 300.0];
 
-        this.modelMatrix = WGE.mat4Scale(2.0, 2.0, 2.0);
+        this.modelMatrix = WGE.mat4Mul(WGE.mat4Rotation(-Math.PI / 3.0, 1.0, 1.0, 1.0), WGE.mat4Scale(2.0, 2.0, 2.0));
 
         gl.clearColor(0.0, 0.0, 0.1, 1.0);
         this.viewMatrix = WGE.makeLookAt(eyePos[0], eyePos[1], eyePos[2], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);

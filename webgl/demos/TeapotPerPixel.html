@@ -282,7 +282,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         var teapot = new ShadeSprite(gl, WGE.getContentByID("vshTeapot"), WGE.getContentByID("fshTeapot"));
         this.teapot = teapot;
 
-        this.modelMatrix = WGE.mat4Scale(10.0, 10.0, 10.0);
+        this.modelMatrix = WGE.mat4Mul(WGE.mat4Rotation(-Math.PI / 2.0, 1.0, 0.0, 1.0), WGE.mat4Scale(10.0, 10.0, 10.0));
         teapot.setModelMatrix(this.modelMatrix);
 
 
