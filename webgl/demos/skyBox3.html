@@ -32,7 +32,8 @@ void main()
     //vec3 norm = normalize(m4ModelMatrix * vec4(v3Normal, 1.0)).xyz;
 
     vec3 viewDir = normalize(transformedPos - eyePos);
-    lookup = reflect(viewDir, norm);
+    //lookup = reflect(viewDir, norm);
+    lookup = refract(viewDir, norm, 0.90);
 }
 </script>
 
@@ -47,10 +48,12 @@ uniform mat4 m4ModelMatrix;
 
 void main()
 {
-    vec4 color = textureCube(envSampler, lookup);
-    //增强饱和度norm
-    vec3 lum = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
-    gl_FragColor = vec4(mix(lum, color.xyz, 3.0), 1.0);
+    // vec4 color = textureCube(envSampler, lookup);
+    // //增强饱和度norm
+    // vec3 lum = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
+    // gl_FragColor = vec4(mix(lum, color.xyz, 3.0), 1.0);
+
+    gl_FragColor = textureCube(envSampler, lookup);
 }
 </script>
 
@@ -390,7 +393,6 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
             WGE.bindContext(context);
             context.disable(context.BLEND);
             context.enable(context.DEPTH_TEST);
-            //context.enable(context.CULL_FACE);
             return !!this.context;
         }
         return false;
@@ -412,7 +414,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     initSprites : function()
     {
         var gl = this.context;
-        this.eyePos = [this.viewDis, this.viewDis, 0.0];
+        this.eyePos = [this.viewDis, 0.0, 0.0];
         var eyePos = this.eyePos;
 
         this.modelMatrix = WGE.mat4Scale(2.0, 2.0, 2.0);
@@ -465,7 +467,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 
         var mvp = WGE.mat4Mul(this.projectionMatrix, this.viewMatrix);
         this.boundingSprite.update(mvp);
-        this.modelMatrix = WGE.mat4Mul(WGE.mat4XRotation(-Math.PI / 2.0), this.modelMatrix);
+        //this.modelMatrix = WGE.mat4Mul(WGE.mat4XRotation(-Math.PI / 2.0), this.modelMatrix);
         WGE.checkGLErr("create cube map", gl);
     },   
 
@@ -491,6 +493,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         this.teapot.render();
         gl.enable(gl.CULL_FACE);
         this.boundingSprite.render();
+
     },
 
     mouseMoveEvent : function(e, x, y)
@@ -552,12 +555,14 @@ document.body.setAttribute("onload", "gui.initSprites();gui.start();");
 
 <div style="display:none">
 
+<!--
 <img src="../../res/box/skycubemap_left.jpg" id="test0">
 <img src="../../res/box/skycubemap_right.jpg" id="test1">
 <img src="../../res/box/skycubemap_up.jpg" id="test2">
 <img src="../../res/box/skycubemap_down.jpg" id="test3">
 <img src="../../res/box/skycubemap_back.jpg" id="test4">
 <img src="../../res/box/skycubemap_front.jpg" id="test5">
+-->
 
 <!--
 <img src="../../res/box/mountain_pos_x.jpg" id="test0">
@@ -568,14 +573,13 @@ document.body.setAttribute("onload", "gui.initSprites();gui.start();");
 <img src="../../res/box/mountain_neg_z.jpg" id="test5">
 -->
 
-<!--
 <img src="../../res/box/bridge_posx.jpg" id="test0">
 <img src="../../res/box/bridge_negx.jpg" id="test1">
 <img src="../../res/box/bridge_posy.jpg" id="test2">
 <img src="../../res/box/bridge_negy.jpg" id="test3">
 <img src="../../res/box/bridge_posz.jpg" id="test4">
 <img src="../../res/box/bridge_negz.jpg" id="test5">
--->
+
 </div>
 
 </body>
