@@ -10,13 +10,22 @@ function bodyResize()
 	var frame = document.getElementById("itemView");
 	var father = document.getElementById("__father");
 	frame.setAttribute("style", "position:absolute;background-color:#d0d0d0;border:groove;top:0px;left:220px;width:" + (father.clientWidth - 230) + "px;height:" + father.clientHeight + "px;");
+
+	var demoView = document.getElementById("demoView");
+	demoView.style.height = null;
+	var hBar = parseInt(demoView.clientHeight);
+	var hContent = parseInt(document.getElementById('itemView').clientHeight);
+	if(hBar > hContent)
+	{
+		demoView.style.height = (hContent-20) + "px";
+	}
 }
 </script>
 </head>
 <body onload="bodyResize()" onresize="bodyResize()">
 <div id="__father" style="width:100%; height:100%; position:relative;">
 
-<div style="width:200px;border:groove;" id="demoView">
+<div style="width:200px;border:groove; overflow:auto;" id="demoView">
 <h1>WGE Tests</h1>
 <script type="text/javascript">
 var testNames = 
