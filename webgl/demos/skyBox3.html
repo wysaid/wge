@@ -27,9 +27,9 @@ void main()
     gl_Position = m4ModelViewProjection * v4Position;
     vec3 transformedPos = (m4ModelMatrix * v4Position).xyz;
 
-    vec3 targetPos = (m4ModelMatrix * (v4Position + vec4(v3Normal, 0.0))).xyz;
-    vec3 norm = normalize(targetPos - transformedPos);
-    //vec3 norm = normalize(m4ModelMatrix * vec4(v3Normal, 1.0)).xyz;
+    //vec3 targetPos = (m4ModelMatrix * (v4Position + vec4(v3Normal, 0.0))).xyz;
+    //vec3 norm = normalize(targetPos - transformedPos);
+    vec3 norm = normalize(m4ModelMatrix * vec4(v3Normal, 1.0)).xyz;
 
     vec3 viewDir = normalize(transformedPos - eyePos);
     //lookup = reflect(viewDir, norm);
