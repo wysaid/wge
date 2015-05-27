@@ -1,0 +1,475 @@
+﻿<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+<script type="text/javascript" src="../models/teapot-streams.js"></script>
+
+<script id="vshTeapot" type="x-shader/x-vertex">
+attribute vec4 v4Position;
+attribute vec3 v3Normal;
+attribute vec3 v3TexCoord;
+
+uniform mat4 m4ModelMatrix;
+uniform mat4 m4ModelViewProjection;
+
+
+varying vec3 transformedNorm;
+varying vec3 position;
+varying vec2 texCoord;
+
+void main()
+{
+    texCoord = v3TexCoord.xy;
+
+    vec4 pos = m4ModelMatrix * v4Position;
+    position = pos.xyz;
+    transformedNorm = normalize(m4ModelMatrix * vec4(v3Normal, 1.0)).xyz;
+
+    gl_Position = m4ModelViewProjection * v4Position;
+}
+</script>
+
+<script id="fshTeapot" type="x-shader/x-fragment">
+precision mediump float;
+
+varying vec3 transformedNorm;
+varying vec3 position;
+varying vec2 texCoord;
+
+struct Light
+{
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    vec3 position;
+    vec3 halfVector;
+};
+
+struct Material
+{
+    vec3 emission;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+
+uniform Light light;
+uniform Material material;
+
+uniform sampler2D normalSampler;
+
+const float bumpHeight = 0.2;
+
+void main()
+{
+    vec3 texColor = texture2D(normalSampler, texCoord).rgb;
+    vec3 lightDirNorm = normalize(light.position - position);
+    vec3 reflectionVec = normalize(reflect(-lightDirNorm, transformedNorm));
+    float specularLightWeight = pow(max(dot(reflectionVec, lightDirNorm), 0.0), material.shininess);
+    float posLightWeight = max(dot(transformedNorm, lightDirNorm), 0.0);
+    vec3 color = material.ambient * (light.diffuse * posLightWeight + light.specular * specularLightWeight + light.ambient);
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+"use strict";
+
+document.body.oncontextmenu=function(){ return false;} 
+
+//选择使用平行投影还是透视投影。
+var usePerspective = true;
+
+var ShadeSprite = WGE.Class(
+{
+    context : null,
+    program : null,
+
+    //attribute locations
+    _vertAttribLoc : 0,
+    _normAttribLoc : 1,
+    _texAttribLoc : 2,
+
+    //uniform locations
+    _modelMatLoc : null,
+    _mvpMatrixLoc : null,
+
+    //索引数据
+    _meshIndexVBO : null,
+    _meshIndexSize : 0,
+    _meshIndexDataType : null,
+
+    //顶点数据
+    _meshVBO : null,
+    _meshDataSize : 0,
+    _meshDataType : null,
+
+    //法线数据
+    _normVBO : null,
+    _normDataSize : 0,
+    _normDataType : null,
+
+    //纹理顶点数据
+    _texCoordVBO : null,
+    _texCoordDataSize : 0,
+    _texCoordDataType : null,
+
+    //光照
+    light : {
+        ambient : "light.ambient",
+        diffuse : "light.diffuse",
+        specular : "light.specular",
+        position : "light.position",
+        halfVector : "light.halfVector"
+    },
+
+    //材质
+    material : {
+        emission : "material.emission",
+        ambient : "material.ambient",
+        diffuse : "material.diffuse",
+        specular : "material.specular",
+        shininess : "material.shininess"
+    },
+
+    texture : null,
+
+    initialize : function(ctx, vsh , fsh)
+    {
+        this.context = ctx;
+        this._initProgram(vsh, fsh);
+
+        this._meshVBO = ctx.createBuffer();
+        this._normVBO = ctx.createBuffer();
+        this._meshIndexVBO = ctx.createBuffer();
+        this._texCoordVBO = ctx.createBuffer();
+        
+        this._meshDataType = ctx.FLOAT;
+        this._normDataType = ctx.FLOAT;
+        this._texCoordDataType = ctx.FLOAT;
+        this._meshIndexDataType = ctx.UNSIGNED_SHORT;
+
+        this.setupBuffers();
+
+        this.texture = new WGE.Texture2D(ctx, {
+            TEXTURE_MIN_FILTER : 'LINEAR',
+            TEXTURE_MAG_FILTER : 'LINEAR',
+            TEXTURE_WRAP_S : 'REPEAT',
+            TEXTURE_WRAP_T : 'REPEAT'});
+        this.texture.initWithTag('bumpImg');
+    },
+
+    setModelMatrix : function(matrix)
+    {
+        this.program.bind();
+        this.context.uniformMatrix4fv(this._modelMatLoc, false, matrix.data);
+    },
+
+    //本demo示例直接初始化方法
+    setupBuffers : function()
+    {
+        var gl = this.context;
+        var model = WGE.TeapotModel;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+        gl.bufferData(gl.ARRAY_BUFFER, model.positions, gl.STATIC_DRAW);
+        this._meshDataSize = 3;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
+        gl.bufferData(gl.ARRAY_BUFFER, model.normals, gl.STATIC_DRAW);
+        this._normDataSize = 3;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._texCoordVBO);
+        gl.bufferData(gl.ARRAY_BUFFER, model.texCoords, gl.STATIC_DRAW);
+        this._texCoordDataSize = 3;
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indices, gl.STATIC_DRAW);
+        this._meshIndexSize = model.indices.length;
+    },
+
+    _initProgram : function(vsh, fsh)
+    {
+        var context = this.context;
+        var program = new WGE.Program(context);
+        this.program = program;
+
+        program.bindAttribLocation("v4Position", this._vertAttribLoc);
+        program.bindAttribLocation("v3Normal", this._normAttribLoc);
+        program.bindAttribLocation("v3TexCoord", this._texAttribLoc);
+
+        if(!program.initWithShaderCode(vsh, fsh))
+        {
+            console.log("ShadeSprite init failed!");
+            return false;
+        }
+
+        program.bind();
+        this._setDefaultLight();
+        this._initUniformLocations();
+        program.sendUniform1i('normalSampler', 0);
+        return true;
+    },
+
+    _initUniformLocations : function()
+    {
+        var program = this.program;
+        this._mvpMatrixLoc = program.uniformLocation("m4ModelViewProjection");
+        this._modelMatLoc = program.uniformLocation("m4ModelMatrix");
+    },
+
+    _setDefaultLight : function()
+    {
+        var program = this.program;
+        program.sendUniform3f(this.light.position, 50.0, 0.0, 2000.0);
+        program.sendUniform3f(this.light.diffuse, 0.8, 0.8, 0.8);
+        program.sendUniform3f(this.light.ambient, 0.0, 0.0, 0.0);
+        program.sendUniform3f(this.light.specular, 1.5, 0.5, 0.0);
+        
+        program.sendUniform1f(this.material.shininess, 32.0);
+        program.sendUniform3f(this.material.ambient, 1.0, 0.7, 0.5);
+    },
+
+    update : function(mvp)
+    {
+        var gl = this.context;
+        var program = this.program;
+
+        program.bind();
+        gl.uniformMatrix4fv(this._mvpMatrixLoc, false, mvp.data);
+    },
+
+    render : function()
+    {
+        var gl = this.context;
+        this.program.bind();
+
+        this.texture.bindToIndex(0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._meshVBO);
+        gl.enableVertexAttribArray(this._vertAttribLoc);
+        gl.vertexAttribPointer(this._vertAttribLoc, this._meshDataSize, this._meshDataType, false, 0, 0)
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._normVBO);
+        gl.enableVertexAttribArray(this._normAttribLoc);
+        gl.vertexAttribPointer(this._normAttribLoc, this._normDataSize, this._normDataType, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._texCoordVBO);
+        gl.enableVertexAttribArray(this._texAttribLoc);
+        gl.vertexAttribPointer(this._texAttribLoc, this._texCoordDataSize, this._texCoordDataType, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._meshIndexVBO);
+        gl.drawElements(gl.TRIANGLES, this._meshIndexSize, this._meshIndexDataType, 0);
+        
+        var err = gl.getError();
+        if(err) console.log(err);
+    }
+});
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
+{
+    context : undefined,
+    isMouseDown : false,
+    teapot : null,
+    deltaTime : 10,
+
+    viewMatrix : null,
+    modelMatrix : null,
+    projectionMatrix : null,
+
+    bindFather : function(fatherObj)
+    {
+        if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+        {
+            var context = this.canvas.getContext('experimental-webgl');
+            if(!context)
+            {
+                alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+            }
+            this.context = context;
+            context.disable(context.BLEND);
+            context.enable(context.DEPTH_TEST);
+            return !!this.context;
+        }
+        return false;
+    },
+
+     _setProjection : function()
+    {
+        if(usePerspective)
+        {
+            this.projectionMatrix = WGE.makePerspective(Math.PI / 6.0, this.canvas.width / this.canvas.height, 1.0, 10000.0);
+        }
+        else
+        {
+            this.projectionMatrix = WGE.makeOrtho(-this.canvas.width / 2, this.canvas.width / 2, -this.canvas.height / 2, this.canvas.height / 2, -10000.0, 10000.0);
+        }
+        
+    },
+
+    initSprites : function()
+    {
+        var gl = this.context;
+        var teapot = new ShadeSprite(gl, WGE.getContentByID("vshTeapot"), WGE.getContentByID("fshTeapot"));
+        this.teapot = teapot;
+
+        this.modelMatrix = WGE.mat4Mul(WGE.mat4Rotation(-Math.PI / 2.0, 1.0, 0.0, 1.0), WGE.mat4Scale(10.0, 10.0, 10.0));
+        teapot.setModelMatrix(this.modelMatrix);
+
+
+        gl.clearColor(0.0, 0.0, 0.1, 1.0);
+        this.viewMatrix = WGE.makeLookAt(0.0, 0.0, 1200.0, 0.0, 0.0, -1000.0, 0.0, 1.0, 0.0);
+        this._setProjection();
+    },   
+
+    update : function(dt)
+    {
+        this.deltaTime = dt;
+
+        this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4ZRotation(Math.PI * dt / 10000.0));
+        this.teapot.setModelMatrix(this.modelMatrix);
+
+        var mvp = WGE.mat4Mul(this.projectionMatrix, WGE.mat4Mul(this.viewMatrix, this.modelMatrix));
+        this.teapot.update(mvp);
+    },
+
+    render : function()
+    {
+        var gl = this.context;
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        this.teapot.render();
+    },
+
+    mouseMoveEvent : function(e, x, y)
+    {
+        if(this.isMouseDown)
+        {
+            this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4XRotation((y - this.y) / 100.0));
+            this.modelMatrix = WGE.mat4Mul(this.modelMatrix, WGE.mat4YRotation((x - this.x) / 100.0));
+            this.teapot.setModelMatrix(this.modelMatrix);
+            this.x = x;
+            this.y = y;
+        }
+    },
+
+    mouseDownEvent : function(e, x, y)
+    {
+        this.x = x;
+        this.y = y;
+        this.isMouseDown = true;
+    },
+
+    mouseUpEvent : function(e, x, y)
+    {
+        this.isMouseDown = false;
+    },
+
+    resizeEvent : function()
+    {
+        var gl = this.context;
+        if(gl)
+        {
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+            this._setProjection();
+        }
+    }
+});
+
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+var gui = new MyGUI(div);
+
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.initSprites();gui.start();");
+
+</script>
+
+<div style="position:absolute;left:10px;top:10px;width:170px;height:auto;background-color:#f00">
+<div style="position:relative;">
+
+<div style="margin:5px;">
+Light Position:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="50" id="light-pos-x" style="width:30%;">
+<input type="number" value="0" id="light-pos-y" style="width:30%;">
+<input type="number" value="2000" id="light-pos-z" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Light Diffuse:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="0.8" id="light-diffuse-r" style="width:30%;">
+<input type="number" value="0.8" id="light-diffuse-g" style="width:30%;">
+<input type="number" value="0.8" id="light-diffuse-b" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Light Ambient:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="0.0" id="light-ambient-r" style="width:30%;">
+<input type="number" value="0.0" id="light-ambient-g" style="width:30%;">
+<input type="number" value="0.0" id="light-ambient-b" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Light Specular:<br>
+<div style="position:relative;width:100%;">
+<input type="number" value="1.5" id="light-specular-r" style="width:30%;">
+<input type="number" value="0.5" id="light-specular-g" style="width:30%;">
+<input type="number" value="0.0" id="light-specular-b" style="width:30%;">
+</div>
+</div>
+
+<div style="margin:5px;">
+Material Ambient:<br>
+<input type="number" value="1.0" id="material-ambient-r" style="width:30%;">
+<input type="number" value="0.7" id="material-ambient-g" style="width:30%;">
+<input type="number" value="0.5" id="material-ambient-b" style="width:30%;">
+</div>
+
+<div style="margin:5px;">
+Material Shininess:<br>
+<input type="number" value="32.0" id="material-shininess" style="width:100%">
+</div>
+
+<div align="center" style="margin:10px">
+    <input type="button" value="apply" onclick="setArgs()">
+</div>
+<script type="text/javascript">
+function setArgs()
+{
+    var teapot = gui.teapot;
+    var program = teapot.program;
+    program.bind();
+    program.sendUniform3f(teapot.light.position, WGE.ID('light-pos-x').value, WGE.ID('light-pos-y').value, WGE.ID('light-pos-z').value);
+    program.sendUniform3f(teapot.light.diffuse, WGE.ID('light-diffuse-r').value, WGE.ID('light-diffuse-g').value, WGE.ID('light-diffuse-b').value);
+    program.sendUniform3f(teapot.light.ambient, WGE.ID('light-ambient-r').value, WGE.ID('light-ambient-g').value, WGE.ID('light-ambient-b').value);
+    program.sendUniform3f(teapot.light.specular, WGE.ID('light-specular-r').value, WGE.ID('light-specular-g').value, WGE.ID('light-specular-b').value);
+    
+    program.sendUniform1f(teapot.material.shininess, WGE.ID('material-shininess').value);
+    program.sendUniform3f(teapot.material.ambient, WGE.ID('material-ambient-r').value, WGE.ID('material-ambient-g').value, WGE.ID('material-ambient-b').value);
+}
+</script>
+</div>
+</div>
+
+<div style="display:none">
+    <img src="../../res/box/bump.jpg" id="bumpImg">
+</div>
+</body>
+</html>
