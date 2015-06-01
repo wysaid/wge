@@ -1,5 +1,7 @@
 # **Web Graphics Engine 正在编写中** #
 
+在线查看： <a href="http://wge.wysaid.org/" target="_blank">wge.wysaid.org</a>
+
 ## 2d Version ##
 
 <img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/2d_gui_test2.jpg">
