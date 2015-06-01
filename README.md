@@ -5,17 +5,17 @@
 <img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/2d_gui_test2.jpg">
 
 ## WebGL Version ##
-### [WebGL GUI测试1](http://wge.wysaid.org/webgl/simple_demos/gui_test.html) ###
+### [WebGL Sprite Test 1](http://wge.wysaid.org/webgl/simple_demos/sprite2dtest1.html) ###
 <img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/webgl_gui_test1.jpg">
 
-### [WebGL GUI测试2](http://wge.wysaid.org/webgl/simple_demos/gui_test2.html) ###
+### [WebGL Sprite Test 2](http://wge.wysaid.org/webgl/simple_demos/sprite2dtest2.html) ###
 <img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/webgl_gui_test2.jpg">
 
-### [WebGL GUI测试3](http://wge.wysaid.org/webgl/simple_demos/gui_test3.html) ###
-<img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/webgl_gui_test3.jpg">
-
-### [WebGL GUI测试4](http://wge.wysaid.org/webgl/simple_demos/gui_test4.html) ###
-### [WebGL GUI测试5](http://wge.wysaid.org/webgl/simple_demos/gui_test5.html) ###
+### [WebGL Scene Roaming Test](http://wge.wysaid.org/webgl/simple_demos/sceneRoamingTest2.html) ###
 <img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/webgl_gui_test4.jpg">
 
+### [WebGL Cube Map Test 1](http://wge.wysaid.org/webgl/simple_demos/skyBox2.html) ###
+<img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/cube_map_reflect.jpg">
 
+### [WebGL Cube Map Test 2](http://wge.wysaid.org/webgl/simple_demos/skyBox5.html) ###
+<img src= "https://raw.githubusercontent.com/wysaid/wge/gh-pages/screenshots/cube_map_refract.jpg">
