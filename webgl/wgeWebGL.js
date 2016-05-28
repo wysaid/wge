@@ -51,6 +51,7 @@ WGE.genCommonQuadArrayBuffer = function(context)
 	var buffer = context.createBuffer();
 	context.bindBuffer(context.ARRAY_BUFFER, buffer);
 	context.bufferData(context.ARRAY_BUFFER, WGE.CommonQuadVertArray, context.STATIC_DRAW);
+	return buffer;
 };
 
 WGE.genTexture = function(context, imgObj)
@@ -63,6 +64,7 @@ WGE.genTexture = function(context, imgObj)
 	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.LINEAR);
 	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
 	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
+	return tex;
 }
 
 WGE.Texture2D = WGE.Class(
@@ -530,7 +532,7 @@ WGE.TextureDrawer = WGE.Class({
 		context.enableVertexAttribArray(0);
 		context.vertexAttribPointer(0, 2, context.FLOAT, false, 0, 0);
 
-		this.program.bind();
+		this._program.bind();
 		context.drawArrays(context.TRIANGLE_FAN, 0, 4);
 	},
 
