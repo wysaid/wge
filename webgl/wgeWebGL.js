@@ -44,6 +44,27 @@ WGE.checkGLErr = function(tag, context)
 	}	
 };
 
+WGE.CommonQuadVertArray = new Float32Array([-1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0]);
+
+WGE.genCommonQuadArrayBuffer = function(context)
+{
+	var buffer = context.createBuffer();
+	context.bindBuffer(context.ARRAY_BUFFER, buffer);
+	context.bufferData(context.ARRAY_BUFFER, WGE.CommonQuadVertArray, context.STATIC_DRAW);
+};
+
+WGE.genTexture = function(context, imgObj)
+{
+	var tex = context.createTexture();
+	context.bindTexture(context.TEXTURE_2D, tex);
+	context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, imgObj);
+
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.LINEAR);
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.LINEAR);
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
+}
+
 WGE.Texture2D = WGE.Class(
 {
 	texture : null,
@@ -420,15 +441,6 @@ WGE.Program = WGE.Class(
 	}
 
 });
-
-WGE.CommonQuadVertArray = new Float32Array([-1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0]);
-
-WGE.genCommonQuadArrayBuffer = function(context)
-{
-	var buffer = context.createBuffer();
-	context.bindBuffer(context.ARRAY_BUFFER, buffer);
-	context.bufferData(context.ARRAY_BUFFER, WGE.CommonQuadVertArray, context.STATIC_DRAW);
-}
 
 WGE.TextureDrawer = WGE.Class({
 
