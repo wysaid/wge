@@ -420,3 +420,142 @@ WGE.Program = WGE.Class(
 	}
 
 });
+
+WGE.CommonQuadVertArray = new Float32Array([-1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0]);
+
+WGE.genCommonQuadArrayBuffer = function(context)
+{
+	var buffer = context.createBuffer();
+	context.bindBuffer(context.ARRAY_BUFFER, buffer);
+	context.bufferData(context.ARRAY_BUFFER, WGE.CommonQuadVertArray, context.STATIC_DRAW);
+}
+
+WGE.TextureDrawer = WGE.Class({
+
+	vsh : "attribute vec2 vPosition;\n"+
+		"varying vec2 texCoord;\n"+
+		"uniform mat2 rotation;\n"+
+		"uniform vec2 flipScale;\n"+
+		"void main()\n"+
+		"{\n"+
+		"   gl_Position = vec4(vPosition, 0.0, 1.0);\n"+
+		"   texCoord = flipScale * (vPosition / 2.0 * rotation) + 0.5;\n"+
+		"}",
+
+	fsh : "precision mediump float;\n" +
+        "varying vec2 texCoord;\n" +
+        "uniform sampler2D inputImageTexture;\n" +
+        "void main()\n" +
+        "{\n" +
+        "   gl_FragColor = texture2D(inputImageTexture, texCoord);\n" +
+        "}",	
+
+	_context : null,
+
+	_rotLoc : null,
+	_flipScaleLoc : null,
+	_vertBuffer : null,
+	_program : null,
+
+	initialize : function(ctx)
+	{
+		this._context = ctx;
+		this._vertBuffer = WGE.genCommonQuadArrayBuffer(ctx);
+
+		var program = new WGE.Program(ctx);
+		this._program = program;
+
+		program.bindAttribLocation("vPosition", 0);
+		if(!program.initWithShaderCode(this.vsh, this.fsh))
+		{
+			console.error("TextureDrawer : Link Program Failed!");
+			return false;
+		}
+
+		program.bind();
+
+		this._rotLoc = program.uniformLocation("rotation");
+		this._flipScaleLoc = program.uniformLocation("flipScale");
+
+		if(!(this._rotLoc && this._flipScaleLoc))
+		{
+			console.warn("TextureDrawer : Not all uniform locations are right!");
+		}
+
+		this.setRotation(0.0);
+		this.setFlipScale(1.0, 1.0);
+
+	},
+
+	release : function()
+	{
+		if(this._context)
+		{
+			if(this._program)
+			{
+				this._program.release();
+				this._program = null;
+			}
+
+			if(this._vertBuffer)
+			{
+				this._context.deleteBuffer(this._vertBuffer);
+				this._vertBuffer = null;
+			}
+
+			this._context = null;
+		}
+	},
+
+	drawTexture : function(texID)
+	{
+		var context = this._context;
+
+		context.activeTexture(context.TEXTURE0);
+		context.bindTexture(context.TEXTURE_2D, texID);
+
+		context.bindBuffer(context.ARRAY_BUFFER, this._vertBuffer);
+		context.enableVertexAttribArray(0);
+		context.vertexAttribPointer(0, 2, context.FLOAT, false, 0, 0);
+
+		this.program.bind();
+		context.drawArrays(context.TRIANGLE_FAN, 0, 4);
+	},
+
+	setRotation : function(rad)
+	{
+		var mat2 = WGE.mat2Rotation(rad);
+		this._context.uniformMatrix2fv(this._rotLoc, false, mat2.data);
+	},
+
+	setFlipScale : function(x, y)
+	{
+		this._context.uniform2f(this._flipScaleLoc, x, y);
+	},
+
+	bindVertexBuffer : function()
+	{
+		this._context.bindBuffer(this._context.ARRAY_BUFFER, this._vertBuffer);
+	},
+
+	getProgram : function()
+	{
+		return this._program;
+	},
+
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
