@@ -82,6 +82,12 @@ WGE.Sprite2d = WGE.Class(
 			this.texture.release();
 		this._program.release();
 		this.canvas = this.texture = this._program = this._context = null;
+
+		if(this._vertexBuffer)
+		{
+			this._context.deleteBuffer(this._vertexBuffer);
+			this._vertexBuffer = null;
+		}
 	},
 
 	//如果canvas的大小在初始化sprite之后可能出现变动，则在每一次变动时，必须call 'onCanvasResize'
