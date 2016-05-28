@@ -1,0 +1,142 @@
+﻿<html>
+<head>
+<meta charset="utf-8">
+<title>simpleDemo</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+
+<script id="vshTeapot" type="x-shader/x-vertex">
+
+</script>
+
+<script id="fshTeapot" type="x-shader/x-fragment">
+
+</script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+"use strict";
+
+document.body.oncontextmenu=function(){ return false;} 
+
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
+{
+    context : undefined,
+    isMouseDown : false,
+    drawer : null,
+    faceTex : null,
+
+    bindFather : function(fatherObj)
+    {
+        if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+        {
+            var context = this.canvas.getContext('experimental-webgl');
+            if(!context)
+            {
+                alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+                return false;
+            }
+            
+            this.context = context;
+            context.disable(context.BLEND);
+            context.enable(context.DEPTH_TEST);
+
+            return true;
+        }
+        return false;
+    },
+
+    setup : function()
+    {
+    	this.drawer = new WGE.TextureDrawer(this.context);
+    	this.faceTex = WGE.genTexture(this.context, WGE.ID('test0'));
+    	this.drawer.setFlipScale(1.0, -1.0);
+    },
+
+    release : function()
+    {
+    	if(this.context)
+    	{
+    		this.drawer.release();
+    		this.drawer = null;
+    	}
+
+    	WGE.GUIInterface.call(this);
+    },
+
+    update : function(dt)
+    {
+
+    },
+
+    render : function()
+    {
+        var gl = this.context;
+
+        gl.clearColor(1.0, 0.0, 0.0, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        this.drawer.drawTexture(this.faceTex);
+    },
+
+    mouseMoveEvent : function(e, x, y)
+    {
+        if(this.isMouseDown)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    },
+
+    mouseDownEvent : function(e, x, y)
+    {
+        this.x = x;
+        this.y = y;
+        this.isMouseDown = true;
+    },
+
+    mouseUpEvent : function(e, x, y)
+    {
+        this.isMouseDown = false;
+    },
+
+    resizeEvent : function()
+    {
+        var gl = this.context;
+        if(gl)
+        {
+            gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+        }
+    }
+});
+
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+var gui = new MyGUI(div);
+
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.setup();gui.render();");
+
+</script>
+
+</script>
+<div style="display:none">
+<img src="../../res/maskFace.jpg" id="test0">
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
