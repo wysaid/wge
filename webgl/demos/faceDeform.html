@@ -7,11 +7,31 @@
 <script type="text/javascript" src="../../wgeGUI.js"></script>
 <script type="text/javascript" src="../wgeWebGL.js"></script>
 
-<script id="vshTeapot" type="x-shader/x-vertex">
-
+<script id="vsh" type="x-shader/x-vertex">
+ attribute vec2 vPosition;
+ attribute vec2 vTransformPos;
+ varying vec2 faceTexCoord;
+ 
+ uniform vec2 faceSize;
+ 
+ void main()
+{
+    gl_Position = vec4(vTransformPos / faceSize * 2.0 - 1.0, 0.0, 1.0);
+    gl_Position.y = -gl_Position.y;
+    faceTexCoord = vPosition / faceSize;
+}
 </script>
 
-<script id="fshTeapot" type="x-shader/x-fragment">
+<script id="fsh" type="x-shader/x-fragment">
+precision mediump float;
+varying vec2 faceTexCoord;
+ uniform sampler2D faceTexture;
+ 
+ void main()
+{
+    gl_FragColor = texture2D(faceTexture, faceTexCoord);
+    gl_FragColor.ga = vec2(1.0);
+}
 
 </script>
 
@@ -24,6 +44,11 @@
 
 document.body.oncontextmenu=function(){ return false;} 
 
+var faceInternalData = null;
+var faceMeshIndices = null;
+
+var faceWidth = 450.0;
+var faceHeight = 500.0
 
 var MyGUI = WGE.Class(WGE.GUIInterface, 
 {
@@ -31,6 +56,11 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     isMouseDown : false,
     drawer : null,
     faceTex : null,
+
+    faceArrayBuffer : null,
+    faceIndexBuffer : null,
+
+    deformProgram : null,
 
     bindFather : function(fatherObj)
     {
@@ -45,7 +75,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
             
             this.context = context;
             context.disable(context.BLEND);
-            context.enable(context.DEPTH_TEST);
+            context.disable(context.DEPTH_TEST);
 
             return true;
         }
@@ -54,9 +84,29 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 
     setup : function()
     {
-    	this.drawer = new WGE.TextureDrawer(this.context);
-    	this.faceTex = WGE.genTexture(this.context, WGE.ID('test0'));
+    	var context = this.context;
+    	this.drawer = new WGE.TextureDrawer(context);
+    	this.faceTex = WGE.genTexture(context, WGE.ID('test0'));
     	this.drawer.setFlipScale(1.0, -1.0);
+    	this.faceArrayBuffer = WGE.genBuffer(context, context.ARRAY_BUFFER, faceInternalData, context.STATIC_DRAW);
+    	this.faceIndexBuffer = WGE.genBuffer(context, context.ELEMENT_ARRAY_BUFFER, faceMeshIndices, context.STATIC_DRAW);
+
+    	var program = new WGE.Program(context);
+        this.deformProgram = program;
+
+        program.bindAttribLocation("vPosition", 0);
+        program.bindAttribLocation("vTransformPos", 1);
+
+        if(!program.initWithShaderCode(WGE.getContentByID("vsh"), WGE.getContentByID("fsh")))
+        {
+            console.error("gui - setup : Link Program Failed!");
+            return false;
+        }
+
+        program.bind();
+        program.sendUniform2f("faceSize", faceWidth, faceHeight);
+
+        return true;
     },
 
     release : function()
@@ -83,6 +133,22 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         this.drawer.drawTexture(this.faceTex);
+
+        this.deformProgram.bind();
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.faceTex);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.faceArrayBuffer);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+        gl.enableVertexAttribArray(1);
+        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.faceIndexBuffer);
+        gl.drawElements(gl.LINE_STRIP, faceMeshIndices.length, gl.UNSIGNED_SHORT, 0);
+        gl.finish();
     },
 
     mouseMoveEvent : function(e, x, y)
@@ -123,11 +189,385 @@ var gui = new MyGUI(div);
 
 
 document.body.setAttribute("onresize", "gui.onresize(event);");
-document.body.setAttribute("onload", "gui.setup();gui.render();");
+document.body.setAttribute("onload", "gui.setup();gui.start();");
+
+faceInternalData = new Float32Array(
+[
+53.8141, 188.299,
+54.189, 211.482,
+55.658, 234.27,
+58.8087, 256.591,
+63.5344, 278.504,
+69.2948, 300.166,
+75.9558, 321.526,
+83.448, 342.725,
+92.3616, 363.461,
+103.612, 383.001,
+116.893, 401.167,
+131.867, 417.987,
+148.268, 433.375,
+165.443, 448.063,
+184.989, 458.873,
+206.685, 463.908,
+228.909, 465.827,
+251.03, 461.73,
+272.313, 454.21,
+291.189, 441.78,
+307.681, 426.158,
+323.169, 409.689,
+337.05, 391.847,
+349.159, 372.789,
+359.038, 352.489,
+366.47, 331.102,
+372.359, 309.321,
+377.329, 287.35,
+381.474, 265.2,
+384.683, 242.842,
+386.316, 220.236,
+386.29, 197.487,
+385.061, 174.546,
+56.6163, 152.884,
+79.139, 130.316,
+112.843, 125.774,
+145.814, 131.951,
+174.246, 143.909,
+251.401, 141.667,
+278.778, 127.423,
+310.774, 118.53,
+343.859, 119.747,
+367.304, 138.918,
+213.77, 175.414,
+214.786, 206.829,
+215.968, 238.54,
+217.422, 271.651,
+184.418, 301.197,
+201.786, 302.966,
+218.862, 305.8,
+235.85, 301.021,
+253.309, 296.8,
+84.8151, 186.074,
+106.969, 167.085,
+136.325, 167.593,
+158.799, 191.21,
+134.856, 196.034,
+106.386, 196.417,
+269.309, 185.15,
+289.762, 160.106,
+318.369, 156.63,
+341.613, 172.879,
+321.717, 185.669,
+293.892, 187.957,
+80.8156, 148.19,
+112.473, 145.204,
+143.864, 150.249,
+171.596, 156.723,
+255.021, 154.68,
+281.752, 145.324,
+312.206, 137.653,
+343.542, 137.144,
+121.657, 165.102,
+120.592, 197.78,
+124.766, 179.568,
+303.867, 156.138,
+308.023, 188.319,
+302.503, 170.647,
+186.249, 183.222,
+241.25, 180.369,
+181.819, 259.851,
+252.516, 256.557,
+167.103, 290.69,
+268.623, 284.884,
+165.024, 370.669,
+183.324, 352.124,
+204.709, 339.744,
+221.109, 343.687,
+236.626, 337.777,
+258.878, 347.083,
+279.767, 362.972,
+261.917, 384.402,
+241.937, 395.57,
+224.311, 399.041,
+206.45, 398.844,
+185.18, 390.668,
+175.664, 369.596,
+205.462, 361.647,
+221.912, 361.589,
+238.145, 359.348,
+269.132, 363.006,
+239.26, 367.961,
+222.586, 370.395,
+205.958, 370.395,
+121.3, 183.412,
+305.819, 174.106
+]);
+
+faceMeshIndices = new Int16Array(
+[
+1,2,52,
+2,57,52,
+2,3,57,
+3,56,57,
+3,44,56,
+3,4,44,
+4,80,44,
+4,5,80,
+5,82,80,
+5,6,82,
+6,7,82,
+7,84,82,
+7,8,84,
+8,9,84,
+9,10,84,
+10,11,84,
+11,95,84,
+11,12,95,
+12,13,95,
+13,94,95,
+13,14,94,
+14,15,94,
+15,93,94,
+15,16,93,
+16,17,93,
+17,92,93,
+17,18,92,
+18,19,92,
+19,91,92,
+19,20,91,
+20,21,91,
+21,90,91,
+21,22,90,
+22,23,90,
+23,24,90,
+24,25,90,
+25,83,90,
+25,26,83,
+26,27,83,
+27,81,83,
+27,28,81,
+28,44,81,
+28,29,44,
+29,63,44,
+29,62,63,
+29,30,62,
+30,61,62,
+30,31,61,
+
+
+//眼睛之上
+
+52,33,1,
+52,64,33,
+52,65,64,
+52,53,65,
+53,66,65,
+53,54,66,
+54,67,66,
+54,55,67,
+55,78,67,
+55,56,44,
+55,44,78,
+78,44,43,
+78,43,67,
+43,68,67,
+43,44,79,
+44,63,58,
+44,58,79,
+79,68,43,
+79,58,68,
+68,58,59,
+68,59,69,
+69,59,60,
+69,60,70,
+70,60,61,
+70,61,71,
+71,61,42,
+42,61,31,
+
+//鼻子
+
+45,44,80,
+45,80,46,
+45,46,81,
+45,81,44,
+46,80,82,
+46,82,47,
+46,47,48,
+46,48,49,
+46,49,50,
+46,50,51,
+46,51,83,
+46,83,81,
+
+//鼻子嘴之间
+
+84,47,82,
+84,85,47,
+85,48,47,
+85,86,48,
+86,49,48,
+86,87,49,
+87,88,49,
+88,50,49,
+88,89,50,
+89,51,50,
+89,90,51,
+90,83,51,
+
+//上嘴唇
+
+84,96,85,
+85,96,97,
+85,97,86,
+86,97,98,
+86,98,87,
+87,98,88,
+88,98,99,
+88,99,89,
+89,99,100,
+89,100,90,
+
+//下嘴唇
+90,100,91,
+100,101,91,
+101,92,91,
+101,102,92,
+102,93,92,
+102,94,93,
+102,103,94,
+103,95,94,
+103,96,95,
+96,84,95,
+
+//左眉毛
+33,64,34,
+34,64,65,
+34,65,35,
+35,65,36,
+36,65,66,
+36,66,37,
+37,66,67,
+
+//右眉毛
+68,69,38,
+38,69,39,
+39,69,70,
+40,39,70,
+41,40,70,
+41,70,71,
+41,71,42,
+
+//两侧眉毛之间
+37,67,68,
+37,68,38,
+
+//左眼内
+52,57,53,
+53,57,54,
+54,57,56,
+54,56,55,
+
+//右眼内
+58,63,59,
+59,63,62,
+60,59,62,
+60,62,61,
+
+//嘴巴里面
+96,103,97,
+97,103,102,
+98,97,102,
+98,102,99,
+99,102,101,
+99,101,100,
+
+//延长线 - 头
+
+// 106, 1, 33,
+// 106, 33, 34,
+// 106, 34, 107,
+// 107, 34, 35,
+// 107, 35, 108,
+// 108, 35, 36,
+// 108, 36, 37,
+// 108, 37, 109,
+// 109, 37, 38,
+// 109, 38, 39,
+// 109, 39, 110,
+// 110, 39, 40,
+// 110, 40, 41,
+// 110, 41, 111,
+// 111, 41, 42,
+// 111, 42, 31,
+
+// //延长线 - 下巴
+
+// 1, 106, 112,
+// 1, 112, 113,
+// 1, 113, 2,
+// 2, 113, 114,
+// 2, 114, 3,
+// 3, 114, 115,
+// 3, 115, 4,
+// 4, 115, 116,
+// 4, 116, 5,
+// 5, 116, 117,
+// 5, 117, 6,
+// 6, 117, 118,
+// 6, 118, 7,
+// 7, 118, 119,
+// 7, 119, 8,
+// 8, 119, 120,
+// 8, 120, 9,
+// 9, 120, 121,
+// 9, 121, 10,
+// 10, 121, 122,
+// 10, 122, 11,
+// 11, 122, 123,
+// 11, 123, 12,
+// 12, 123, 124,
+// 12, 124, 13,
+// 13, 124, 125,
+// 13, 125, 14,
+// 14, 125, 126,
+// 14, 126, 15,
+// 15, 126, 127,
+// 15, 127, 16,
+// 16, 127, 128,
+// 16, 128, 17,
+// 17, 128, 129,
+// 17, 129, 18,
+// 18, 129, 130,
+// 18, 130, 19,
+// 19, 130, 131,
+// 19, 131, 20,
+// 20, 131, 132,
+// 20, 132, 21,
+// 21, 132, 133,
+// 21, 133, 22,
+// 22, 133, 134,
+// 22, 134, 23,
+// 23, 134, 135,
+// 23, 135, 24,
+// 24, 135, 136,
+// 24, 136, 25,
+// 25, 136, 137,
+// 25, 137, 26,
+// 26, 137, 138,
+// 26, 138, 27,
+// 27, 138, 139,
+// 27, 139, 28,
+// 28, 139, 140,
+// 28, 140, 29,
+// 29, 140, 141,
+// 29, 141, 30,
+// 30, 141, 142,
+// 30, 142, 31,
+// 31, 142, 111
+
+]);
 
 </script>
 
-</script>
 <div style="display:none">
 <img src="../../res/maskFace.jpg" id="test0">
 </div>

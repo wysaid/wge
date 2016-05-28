@@ -54,6 +54,14 @@ WGE.genCommonQuadArrayBuffer = function(context)
 	return buffer;
 };
 
+WGE.genBuffer = function(context, type, data, usage)
+{
+	var buffer = context.createBuffer();
+	context.bindBuffer(type, buffer);
+	context.bufferData(type, data, usage);
+	return buffer;
+}
+
 WGE.genTexture = function(context, imgObj)
 {
 	var tex = context.createTexture();
