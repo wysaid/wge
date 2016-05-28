@@ -162,7 +162,7 @@ WGE.GUIInterface = WGE.Class(
 			return false;
 		}
 
-		this.release();
+		WGE.GUIInterface.release.call(this);
 
 		if(width && height)
 		{
