@@ -58,6 +58,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     faceTex : null,
 
     faceArrayBuffer : null,
+    faceArrayTransformBuffer : null,
     faceIndexBuffer : null,
 
     deformProgram : null,
@@ -89,6 +90,11 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     	this.faceTex = WGE.genTexture(context, WGE.ID('test0'));
     	this.drawer.setFlipScale(1.0, -1.0);
     	this.faceArrayBuffer = WGE.genBuffer(context, context.ARRAY_BUFFER, faceInternalData, context.STATIC_DRAW);
+
+        var buffer2 = faceInternalData;
+        buffer2[160] -= 20;
+        buffer2[162] += 20;
+        this.faceArrayTransformBuffer = WGE.genBuffer(context, context.ARRAY_BUFFER, buffer2, context.STATIC_DRAW);
     	this.faceIndexBuffer = WGE.genBuffer(context, context.ELEMENT_ARRAY_BUFFER, faceMeshIndices, context.STATIC_DRAW);
 
     	var program = new WGE.Program(context);
@@ -143,11 +149,13 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         gl.enableVertexAttribArray(0);
         gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.faceArrayTransformBuffer);
         gl.enableVertexAttribArray(1);
         gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.faceIndexBuffer);
-        gl.drawElements(gl.LINE_STRIP, faceMeshIndices.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, faceMeshIndices.length, gl.UNSIGNED_SHORT, 0);
+        // gl.drawElements(gl.LINE_STRIP, faceMeshIndices.length, gl.UNSIGNED_SHORT, 0);
         gl.finish();
     },
 
