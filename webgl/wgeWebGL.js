@@ -479,7 +479,7 @@ WGE.TextureDrawer = WGE.Class({
 	_vertBuffer : null,
 	_program : null,
 
-	initialize : function(ctx)
+	initialize : function(ctx, vsh, fsh)
 	{
 		this._context = ctx;
 		this._vertBuffer = WGE.genCommonQuadArrayBuffer(ctx);
@@ -488,7 +488,7 @@ WGE.TextureDrawer = WGE.Class({
 		this._program = program;
 
 		program.bindAttribLocation("vPosition", 0);
-		if(!program.initWithShaderCode(this.vsh, this.fsh))
+		if(!program.initWithShaderCode(vsh ? vsh : this.vsh, fsh ? fsh : this.fsh))
 		{
 			console.error("TextureDrawer : Link Program Failed!");
 			return false;
