@@ -75,6 +75,19 @@ WGE.genTexture = function(context, imgObj)
 	return tex;
 }
 
+WGE.genBlankTexture = function(context, width, height)
+{
+	var tex = context.createTexture();
+	context.bindTexture(context.TEXTURE_2D, tex);
+	context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, width, height, 0, context.RGBA, context.UNSIGNED_BYTE, null);
+
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.LINEAR);
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.LINEAR);
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
+	context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
+	return tex;
+}
+
 WGE.Texture2D = WGE.Class(
 {
 	texture : null,
@@ -193,6 +206,18 @@ WGE.Framebuffer = WGE.Class(
 	bind : function()
 	{
 		this._context.bindFramebuffer(this._context.FRAMEBUFFER, this.framebuffer);
+	},
+
+	bindColorTexture : function(texObj)
+	{
+		var webgl = this._context;
+		webgl.bindFramebuffer(webgl.FRAMEBUFFER, this.framebuffer);
+		webgl.framebufferTexture2D(webgl.FRAMEBUFFER, webgl.COLOR_ATTACHMENT0, webgl.TEXTURE_2D, texObj, 0);
+
+		if(webgl.checkFramebufferStatus(webgl.FRAMEBUFFER) != webgl.FRAMEBUFFER_COMPLETE)
+ 		{
+		    console.error("WGE.Framebuffer - bindTexture2D - Frame buffer is not completed.");
+ 		}
 	},
 
 	bindTexture2D : function(texObj, attachment)
@@ -552,6 +577,7 @@ WGE.TextureDrawer = WGE.Class({
 
 	setFlipScale : function(x, y)
 	{
+		this._program.bind();
 		this._context.uniform2f(this._flipScaleLoc, x, y);
 	},
 

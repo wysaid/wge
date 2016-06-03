@@ -1,7 +1,7 @@
 ﻿<html>
 <head>
 <meta charset="utf-8">
-<title>simpleDemo</title>
+<title>faceDeform</title>
 <script type="text/javascript" src="../../wgeCore.js"></script>
 <script type="text/javascript" src="../../wgeAlgorithm.js"></script>
 <script type="text/javascript" src="../../wgeGUI.js"></script>
@@ -152,8 +152,10 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     {
     	var context = this.context;
     	this.drawer = new WGE.TextureDrawer(context, WGE.getContentByID("drawerVSH"));
+        this.drawer.setFlipScale(0.5, -0.5);
+        
     	this.faceTex = WGE.genTexture(context, WGE.ID('test0'));
-    	this.drawer.setFlipScale(0.5, -0.5);
+    	
     	this.faceArrayBuffer = WGE.genBuffer(context, context.ARRAY_BUFFER, faceInternalData, context.STATIC_DRAW);
 
         this.faceArrayTransformBuffer = WGE.genBuffer(context, context.ARRAY_BUFFER, faceInternalData.length * 4, context.DYNAMIC_DRAW);
@@ -190,7 +192,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     		this.drawer = null;
     	}
 
-    	WGE.GUIInterface.call(this);
+    	WGE.GUIInterface.release.call(this);
     },
 
     update : function(dt)
