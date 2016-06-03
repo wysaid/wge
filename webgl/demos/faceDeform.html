@@ -153,7 +153,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
     	var context = this.context;
     	this.drawer = new WGE.TextureDrawer(context, WGE.getContentByID("drawerVSH"));
         this.drawer.setFlipScale(0.5, -0.5);
-        
+
     	this.faceTex = WGE.genTexture(context, WGE.ID('test0'));
     	
     	this.faceArrayBuffer = WGE.genBuffer(context, context.ARRAY_BUFFER, faceInternalData, context.STATIC_DRAW);
