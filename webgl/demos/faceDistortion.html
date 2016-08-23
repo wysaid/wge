@@ -105,7 +105,7 @@ void main()
         float percent;
         
         //点在直线上的投影不在范围内
-        if(projVec.x < v2Min.x || projVec.x > v2Min.x || projVec.y < v2Min.y || projVec.y > v2Max.y)
+        if(projVec.x < v2Min.x || projVec.x > v2Max.x || projVec.y < v2Min.y || projVec.y > v2Max.y)
         {
             //判断是否在离端点radius范围内
             float dis2 = length(realPosition - keyPoint);
