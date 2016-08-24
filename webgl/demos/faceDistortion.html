@@ -59,7 +59,7 @@ uniform float radius;
 uniform vec2 imageSteps;
 uniform vec2 keyPoint;
 uniform vec2 keyPoint2;
-uniform vec2 dirStep;
+uniform mat2 dirMat;
 
 void main()
 {
@@ -128,7 +128,7 @@ void main()
         
         percent = smoothstep(0.0, 1.0, percent) * intensity;
         
-        offset += (keyPoint - keyPoint2) * dirStep * percent;
+        offset += dirMat * (keyPoint - keyPoint2) * imageSteps * percent;
     }
 
     gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
@@ -242,7 +242,8 @@ var DistortionWrapper_Forward = WGE.Class(DistortionWrapper, {
         this.end = end;
         this.radius = radius;
 
-        this.distortionProgram.sendUniform2f("dirStep", 1.0 / faceWidth, 1.0 / faceHeight);
+        var m = WGE.mat2Identity();
+        this.distortionProgram.sendUniformMat2("dirMat", false, m.data);
     },
 
     update : function(context, data, len)
@@ -275,8 +276,8 @@ var DistortionWrapper_Left = WGE.Class(DistortionWrapper_Forward, {
     {
         DistortionWrapper_Forward.initialize.call(this, context, start, end, radius);
 
-        var v = WGE.mat2MulVec2(WGE.mat2Rotation(-Math.PI * 0.5), new WGE.Vec2(1.0 / faceWidth, 1.0 / faceHeight));
-        this.distortionProgram.sendUniform2f("dirStep", v.data[0], v.data[1]);
+        var m = WGE.mat2Rotation(-Math.PI * 0.5);
+        this.distortionProgram.sendUniformMat2("dirMat", false, m.data);
     }
 
 
@@ -581,6 +582,14 @@ document.body.setAttribute("onload", "gui.setup();gui.render();");
 "target" : "105",
 "intensity" : -1.0,
 "radius" : 0.7
+},
+
+{
+"type" : "left",
+"start" : "104",
+"end" : "105",
+"intensity" : -0.25,
+"radius" : 1.0
 }
 </textarea>
 
