@@ -59,6 +59,7 @@ uniform float radius;
 uniform vec2 imageSteps;
 uniform vec2 keyPoint;
 uniform vec2 keyPoint2;
+uniform vec2 dirStep;
 
 void main()
 {
@@ -127,7 +128,7 @@ void main()
         
         percent = smoothstep(0.0, 1.0, percent) * intensity;
         
-        offset += (keyPoint - keyPoint2) * imageSteps * percent;
+        offset += (keyPoint - keyPoint2) * dirStep * percent;
     }
 
     gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
@@ -240,6 +241,8 @@ var DistortionWrapper_Forward = WGE.Class(DistortionWrapper, {
         this.start = start;
         this.end = end;
         this.radius = radius;
+
+        this.distortionProgram.sendUniform2f("dirStep", 1.0 / faceWidth, 1.0 / faceHeight);
     },
 
     update : function(context, data, len)
@@ -257,6 +260,23 @@ var DistortionWrapper_Forward = WGE.Class(DistortionWrapper, {
         program.sendUniform1f("radius", this.radius * len);
 
         context.drawArrays(context.TRIANGLE_FAN, 0, 4);
+    }
+
+
+});
+
+var DistortionWrapper_Left = WGE.Class(DistortionWrapper_Forward, {
+
+    start : -1,
+    end : -1,
+    radius : 0.0,
+
+    initialize : function(context, start, end, radius)
+    {
+        DistortionWrapper_Forward.initialize.call(this, context, start, end, radius);
+
+        var v = WGE.mat2MulVec2(WGE.mat2Rotation(-Math.PI * 0.5), new WGE.Vec2(1.0 / faceWidth, 1.0 / faceHeight));
+        this.distortionProgram.sendUniform2f("dirStep", v.data[0], v.data[1]);
     }
 
 
@@ -303,7 +323,12 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
                 wrapper = new DistortionWrapper_Forward(this.context, d.start, d.end, d.radius);
                 wrapper.setIntensity(d.intensity);
             }
-            else if(d.type = "bloatWrinkle")
+            else if(d.type == "left")
+            {
+                wrapper = new DistortionWrapper_Left(this.context, d.start, d.end, d.radius);
+                wrapper.setIntensity(d.intensity);
+            }
+            else if(d.type == "bloatWrinkle")
             {
                 wrapper = new DistortionWrapper_BloatWrinkle(this.context, d.target, d.radius);
                 wrapper.setIntensity(d.intensity);
