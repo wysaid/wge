@@ -159,8 +159,8 @@ void main()
 var faceInternalData = null;
 var faceMeshIndices = null;
 
-var faceWidth = 450.0;
-var faceHeight = 500.0
+var faceWidth = 936.0;
+var faceHeight = 1404.0
 
 var DistortionWrapper = WGE.Class({
 
@@ -428,7 +428,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
             this.swapTexture();
             this.framebuffer.bindColorTexture(this.faceTextures[0]);
             gl.bindTexture(gl.TEXTURE_2D, this.faceTextures[1]);
-            this.distortions[distortion].update(gl, faceInternalData, 300.0);
+            this.distortions[distortion].update(gl, faceInternalData, 293.061427);
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -521,41 +521,33 @@ document.body.setAttribute("onload", "gui.setup();gui.render();");
 
 <textarea style="width:170px;height:200px;" id="distortionConfig">
 {
+"type" : "bloatWrinkle",
+"target" : "95",
+"intensity" : -0.7,
+"radius" : 1.0
+},
+
+{
+"type" : "bloatWrinkle",
+"target" : "96",
+"intensity" : -0.7,
+"radius" : 1.0
+},
+
+{
 "type" : "forward",
-"start" : "10",
-"end" : "84",
-"intensity" : -0.6,
+"start" : "5",
+"end" : "75",
+"intensity" : 0.2,
 "radius" : 0.8
 },
 
 {
 "type" : "forward",
-"start" : "22",
-"end" : "90",
-"intensity" : -0.6,
+"start" : "13",
+"end" : "81",
+"intensity" : 0.2,
 "radius" : 0.8
-},
-
-{
-"type" : "forward",
-"start" : "16",
-"end" : "93",
-"intensity" : 0.5,
-"radius" : 1.5
-},
-
-{
-"type" : "bloatWrinkle",
-"target" : "104",
-"intensity" : -1.0,
-"radius" : 0.7
-},
-
-{
-"type" : "bloatWrinkle",
-"target" : "105",
-"intensity" : -1.0,
-"radius" : 0.7
 }
 </textarea>
 
