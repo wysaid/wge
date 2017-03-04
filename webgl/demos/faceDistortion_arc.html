@@ -420,7 +420,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         gl.clearColor(0.0, 0.0, 0.0, 0.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        gl.viewport(400, 0, 450, 800);
+        gl.viewport(200, 0, this.canvas.width - 200, this.canvas.height);
 
         this.drawer.drawTexture(this.faceTexOrigin);
 
@@ -437,7 +437,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
 
         var gl = this.context;
 
-        gl.viewport(400, 0, 450, 800);
+        gl.viewport(0, 0, faceWidth, faceHeight);
 
         this.drawer.setFlipScale(1.0, 1.0);
 
@@ -461,7 +461,7 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
         gl.clearColor(0.0, 0.0, 0.0, 0.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        gl.viewport(400, 0, 450, 800);
+        gl.viewport(200, 0, this.canvas.width - 200, this.canvas.height);
 
         this.drawer.setFlipScale(1.0, -1.0);
         this.drawer.drawTexture(this.faceTextures[0]);
