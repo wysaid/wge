@@ -49,6 +49,55 @@ void main()
 
 </script>
 
+<script id="fshBloatWrinkle2" type="x-shader/x-fragment">
+precision highp float;
+varying vec2 textureCoordinate;
+uniform sampler2D inputImageTexture;
+
+uniform float intensity;
+uniform vec4 innerRadius; //内圈(内圈以内无渐变, 特殊用法, xy 分别为椭圆xy轴的半径, zw为半径的平方
+uniform vec4 outerRadius; //外圈(外圈以外无渐变, 内外圈之间渐变, 四个值同上.
+uniform vec2 imageSteps;
+uniform vec2 keyPoint;
+// const mat2 mRot = mat2(1, 0, 0, 1); //计算人头部旋转值
+
+void main()
+{
+    vec2 realPosition = textureCoordinate / imageSteps;
+    vec2 pos = keyPoint - realPosition;
+    vec2 dis = pos;// * mRot;
+    vec2 offset;
+
+    if(length(dis / innerRadius.xy) < 1.0)
+    {
+        offset = intensity * pos * imageSteps;
+    }
+    else if(length(dis / outerRadius.xy) < 1.0)
+    {
+        if(abs(dis.x) < 0.001) dis.x = 0.001;
+        float r = length(dis);
+        float k = dis.y / dis.x;
+        float k2 = k * k;
+        float rr = dis.x / r;
+
+        float sxPoint = sqrt(innerRadius.z * innerRadius.w / (innerRadius.w + innerRadius.z * k2));
+        float sRadius = abs(sxPoint / rr);
+
+        float exPoint = sqrt(outerRadius.z * outerRadius.w / (outerRadius.w + outerRadius.z * k2));
+        float eRadius = abs(exPoint / rr);
+
+        float fac = 1.0 - (r - sRadius) / (eRadius - sRadius);
+        offset = intensity * pos * imageSteps * fac * fac;
+    }
+    else
+    {
+        offset = vec2(0.0);
+    }
+
+    gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
+}
+</script>
+
 <script id="fshPushForward" type="x-shader/x-fragment">
 precision highp float;
 varying vec2 textureCoordinate;
@@ -227,6 +276,41 @@ var DistortionWrapper_BloatWrinkle = WGE.Class(DistortionWrapper, {
 
 });
 
+var DistortionWrapper_BloatWrinkle2 = WGE.Class(DistortionWrapper, {
+
+    keyPoint : -1,
+    innerRadius : null,
+    outerRadius : null,
+
+    initialize : function(context, keyPoint, innerRadius, outerRadius)
+    {
+        DistortionWrapper.initialize.call(this, context, WGE.getContentByID("vshDistortion"), WGE.getContentByID("fshBloatWrinkle2"));
+
+        this.keyPoint = keyPoint;
+        this.innerRadius = innerRadius;
+        this.outerRadius = outerRadius;
+    },
+
+    update : function(context, data, len)
+    {
+        var program = this.distortionProgram;
+
+        var pntX = data[this.keyPoint * 2];
+        var pntY = data[this.keyPoint * 2 + 1];
+
+        program.bind();
+        program.sendUniform2f("keyPoint", pntX, pntY);
+
+        var innerRadiusX = len * this.innerRadius[0], innerRadiusY = len * this.innerRadius[1];
+        var outerRadiusX = len * this.outerRadius[0], outerRadiusY = len * this.outerRadius[1];
+        program.sendUniform4f("innerRadius", innerRadiusX, innerRadiusY, innerRadiusX * innerRadiusX, innerRadiusY * innerRadiusY);
+        program.sendUniform4f("outerRadius", outerRadiusX, outerRadiusY, outerRadiusX * outerRadiusX, outerRadiusY * outerRadiusY);
+
+        context.drawArrays(context.TRIANGLE_FAN, 0, 4);
+    }
+
+});
+
 var DistortionWrapper_Forward = WGE.Class(DistortionWrapper, {
 
     start : -1,
@@ -322,21 +406,23 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
             if(d.type == "forward")
             {
                 wrapper = new DistortionWrapper_Forward(this.context, d.start, d.end, d.radius);
-                wrapper.setIntensity(d.intensity);
             }
             else if(d.type == "left")
             {
                 wrapper = new DistortionWrapper_Left(this.context, d.start, d.end, d.radius);
-                wrapper.setIntensity(d.intensity);
             }
             else if(d.type == "bloatWrinkle")
             {
                 wrapper = new DistortionWrapper_BloatWrinkle(this.context, d.target, d.radius);
-                wrapper.setIntensity(d.intensity);
+            }
+            else if(d.type == "bloatWrinkle2")
+            {
+                wrapper = new DistortionWrapper_BloatWrinkle2(this.context, d.target, d.innerRadius, d.outerRadius);
             }
 
             if(wrapper != null)
             {
+                wrapper.setIntensity(d.intensity);
                 distortions.push(wrapper);
             }
         }
@@ -574,6 +660,14 @@ document.body.setAttribute("onload", "gui.setup();gui.render();");
 "end" : "81",
 "intensity" : 0.2,
 "radius" : 0.8
+},
+
+{
+"type" : "bloatWrinkle2",
+"target" : "97",
+"intensity" : 0.3,
+"outerRadius" : [1.0, 1.6],
+"innerRadius" : [0.5, 0.8]
 }
 </textarea>
 
