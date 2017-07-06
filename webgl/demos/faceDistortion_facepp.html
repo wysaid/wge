@@ -1,0 +1,820 @@
+﻿<html>
+<head>
+<meta charset="utf-8">
+<title>faceDistortion</title>
+<script type="text/javascript" src="../../wgeCore.js"></script>
+<script type="text/javascript" src="../../wgeAlgorithm.js"></script>
+<script type="text/javascript" src="../../wgeGUI.js"></script>
+<script type="text/javascript" src="../wgeWebGL.js"></script>
+
+<script id="vshDistortion" type="x-shader/x-vertex">
+ attribute vec2 vPosition;
+varying vec2 textureCoordinate;
+void main()
+{
+    gl_Position = vec4(vPosition, 0.0, 1.0);
+    textureCoordinate = (vPosition.xy + 1.0) / 2.0;
+}
+</script>
+
+<script id="fshBloatWrinkle" type="x-shader/x-fragment">
+precision highp float;
+varying vec2 textureCoordinate;
+uniform sampler2D inputImageTexture;
+
+uniform float intensity;
+uniform float radius;
+uniform vec2 imageSteps;
+uniform vec2 keyPoint;
+
+void main()
+{
+    vec2 realPosition = textureCoordinate / imageSteps;
+    vec2 dis = keyPoint - realPosition;
+    float len = length(dis);
+    vec2 offset;
+
+    if(len < radius)
+    {
+        float fac = 1.0 - len / radius;
+        offset = intensity * dis * imageSteps * fac * fac;
+    }
+    else
+    {
+        offset = vec2(0.0);
+    }
+
+    gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
+}
+
+</script>
+
+<script id="fshBloatWrinkle2" type="x-shader/x-fragment">
+precision highp float;
+varying vec2 textureCoordinate;
+uniform sampler2D inputImageTexture;
+
+uniform float intensity;
+uniform vec4 innerRadius; //内圈(内圈以内无渐变, 特殊用法, xy 分别为椭圆xy轴的半径, zw为半径的平方
+uniform vec4 outerRadius; //外圈(外圈以外无渐变, 内外圈之间渐变, 四个值同上.
+uniform vec2 imageSteps;
+uniform vec2 keyPoint;
+// const mat2 mRot = mat2(1, 0, 0, 1); //计算人头部旋转值
+
+void main()
+{
+    vec2 realPosition = textureCoordinate / imageSteps;
+    vec2 pos = keyPoint - realPosition;
+    vec2 dis = pos;// * mRot;
+    vec2 offset;
+
+    if(length(dis / innerRadius.xy) < 1.0)
+    {
+        offset = intensity * pos * imageSteps;
+    }
+    else if(length(dis / outerRadius.xy) < 1.0)
+    {
+        if(abs(dis.x) < 0.001) dis.x = 0.001;
+        float r = length(dis);
+        float k = dis.y / dis.x;
+        float k2 = k * k;
+        float rr = dis.x / r;
+
+        float sxPoint = sqrt(innerRadius.z * innerRadius.w / (innerRadius.w + innerRadius.z * k2));
+        float sRadius = abs(sxPoint / rr);
+
+        float exPoint = sqrt(outerRadius.z * outerRadius.w / (outerRadius.w + outerRadius.z * k2));
+        float eRadius = abs(exPoint / rr);
+
+        float fac = 1.0 - (r - sRadius) / (eRadius - sRadius);
+        offset = intensity * pos * imageSteps * fac * fac;
+    }
+    else
+    {
+        offset = vec2(0.0);
+    }
+
+    gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
+}
+</script>
+
+<script id="fshPushForward" type="x-shader/x-fragment">
+precision highp float;
+varying vec2 textureCoordinate;
+uniform sampler2D inputImageTexture;
+
+uniform float intensity;
+uniform float radius;
+uniform vec2 imageSteps;
+uniform vec2 keyPoint;
+uniform vec2 keyPoint2;
+uniform mat2 dirMat;
+
+void main()
+{
+    float equation[5];
+
+    //直线方程系数， 直线由起始点跟终止点构成。
+    float a = keyPoint.y - keyPoint2.y, b = keyPoint.x - keyPoint2.x, c = keyPoint.x * keyPoint2.y - keyPoint.y * keyPoint2.x;
+    
+    if(abs(b) < 0.001)
+    {
+        equation[0] = 1.0;
+        equation[1] = 0.0;
+        equation[2] = -keyPoint.x;
+    }
+    else
+    {
+        equation[0] = a / b;
+        equation[1] = -1.0;
+        equation[2] = c / b;
+    }
+    equation[4] = equation[0] * equation[0] + equation[1] * equation[1];
+    equation[3] = sqrt(equation[4]);
+
+    vec2 realPosition = textureCoordinate / imageSteps;
+    vec2 offset = vec2(0.0);
+
+    //点到直线距离
+    float disToLine = abs(equation[0] * realPosition.x + equation[1] * realPosition.y + equation[2]) / equation[3];
+
+    if(disToLine < radius)
+    {
+        float eqAB = equation[0] * equation[1];
+        
+        vec2 v2Min = min(keyPoint, keyPoint2);
+        vec2 v2Max = max(keyPoint, keyPoint2);
+        
+        //点在直线方向上的投影坐标
+        vec2 projVec = vec2(
+            (equation[1] * equation[1] * realPosition.x - eqAB * realPosition.y - equation[0] * equation[2]) / equation[4],
+            (equation[0] * equation[0] * realPosition.y - eqAB * realPosition.x - equation[1] * equation[2]) / equation[4]
+            );
+
+        //实际计算距离，若点在投影上则使用点到直线距离，否则使用较近端点距离
+        float percent;
+        
+        //点在直线上的投影不在范围内
+        if(projVec.x < v2Min.x || projVec.x > v2Max.x || projVec.y < v2Min.y || projVec.y > v2Max.y)
+        {
+            //判断是否在离端点radius范围内
+            float dis2 = length(realPosition - keyPoint);
+            float dis3 = length(realPosition - keyPoint2);
+            
+            if(dis2 < radius || dis3 < radius)
+            {
+                percent = (1.0 - min(dis2, dis3) / radius);
+            }
+            else
+            {
+                percent = 0.0;
+            }
+        }
+        else
+        {
+            percent = (1.0 - disToLine / radius);
+        }
+        
+        percent = smoothstep(0.0, 1.0, percent) * intensity;
+        
+        offset += dirMat * (keyPoint - keyPoint2) * imageSteps * percent;
+    }
+
+    gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
+}
+
+</script>
+
+<script id="drawerVSH" type="x-shader/x-fragment">
+attribute vec2 vPosition;
+varying vec2 texCoord;
+uniform mat2 rotation;
+uniform vec2 flipScale;
+void main()
+{
+   gl_Position = vec4(vPosition * flipScale, 0.0, 1.0);
+   texCoord = (vPosition / 2.0 * rotation) + 0.5;
+}
+</script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+"use strict";
+
+// document.body.oncontextmenu=function(){ return false;} 
+
+var faceInternalData = null;
+var faceMeshIndices = null;
+
+var faceWidth = 1440.0;
+var faceHeight = 2560.0;
+
+var DistortionWrapper = WGE.Class({
+
+    distortionProgram : null,
+
+    initialize : function(context, vsh, fsh)
+    {
+        var program = new WGE.Program(context);
+        this.distortionProgram = program;
+
+        program.bindAttribLocation("vPosition", 0);
+
+        if(!program.initWithShaderCode(vsh, fsh))
+        {
+            console.error("gui - setup : Link Program Failed!");
+            return false;
+        }
+
+        program.bind();
+        program.sendUniform2f("imageSteps", 1.0 / faceWidth, 1.0 / faceHeight);
+    },
+
+    setIntensity : function(intensity)
+    {
+        this.distortionProgram.bind();
+        this.distortionProgram.sendUniform1f("intensity", intensity);
+    },
+
+    //update 调用的时候会假设所有参数都已经配置好了
+    update : function(context, data, len)
+    {
+
+    }
+
+});
+
+var DistortionWrapper_BloatWrinkle = WGE.Class(DistortionWrapper, {
+
+    keyPoint : -1,
+    radius : 0.0,
+
+    initialize : function(context, keyPoint, radius)
+    {
+        DistortionWrapper.initialize.call(this, context, WGE.getContentByID("vshDistortion"), WGE.getContentByID("fshBloatWrinkle"));
+
+        this.radius = radius;
+        this.keyPoint = keyPoint;
+    },
+
+    update : function(context, data, len)
+    {
+        var program = this.distortionProgram;
+
+        var pntX = data[this.keyPoint * 2];
+        var pntY = data[this.keyPoint * 2 + 1];
+
+        program.bind();
+        program.sendUniform2f("keyPoint", pntX, pntY);
+        program.sendUniform1f("radius", len * this.radius);
+
+        context.drawArrays(context.TRIANGLE_FAN, 0, 4);
+    }
+
+});
+
+var DistortionWrapper_BloatWrinkle2 = WGE.Class(DistortionWrapper, {
+
+    keyPoint : -1,
+    innerRadius : null,
+    outerRadius : null,
+
+    initialize : function(context, keyPoint, innerRadius, outerRadius)
+    {
+        DistortionWrapper.initialize.call(this, context, WGE.getContentByID("vshDistortion"), WGE.getContentByID("fshBloatWrinkle2"));
+
+        this.keyPoint = keyPoint;
+        this.innerRadius = innerRadius;
+        this.outerRadius = outerRadius;
+    },
+
+    update : function(context, data, len)
+    {
+        var program = this.distortionProgram;
+
+        var pntX = data[this.keyPoint * 2];
+        var pntY = data[this.keyPoint * 2 + 1];
+
+        program.bind();
+        program.sendUniform2f("keyPoint", pntX, pntY);
+
+        var innerRadiusX = len * this.innerRadius[0], innerRadiusY = len * this.innerRadius[1];
+        var outerRadiusX = len * this.outerRadius[0], outerRadiusY = len * this.outerRadius[1];
+        program.sendUniform4f("innerRadius", innerRadiusX, innerRadiusY, innerRadiusX * innerRadiusX, innerRadiusY * innerRadiusY);
+        program.sendUniform4f("outerRadius", outerRadiusX, outerRadiusY, outerRadiusX * outerRadiusX, outerRadiusY * outerRadiusY);
+
+        context.drawArrays(context.TRIANGLE_FAN, 0, 4);
+    }
+
+});
+
+var DistortionWrapper_Forward = WGE.Class(DistortionWrapper, {
+
+    start : -1,
+    end : -1,
+    radius : 0.0,
+
+    initialize : function(context, start, end, radius)
+    {
+        DistortionWrapper.initialize.call(this, context, WGE.getContentByID("vshDistortion"), WGE.getContentByID("fshPushForward"));
+
+        this.radius = radius;
+        this.start = start;
+        this.end = end;
+        this.radius = radius;
+
+        var m = WGE.mat2Identity();
+        this.distortionProgram.sendUniformMat2("dirMat", false, m.data);
+    },
+
+    update : function(context, data, len)
+    {
+        var program = this.distortionProgram;
+
+        var pnt1X = data[this.start * 2];
+        var pnt1Y = data[this.start * 2 + 1];
+        var pnt2X = data[this.end * 2];
+        var pnt2Y = data[this.end * 2 + 1];
+
+        program.bind();
+        program.sendUniform2f("keyPoint", pnt1X, pnt1Y);
+        program.sendUniform2f("keyPoint2", pnt2X, pnt2Y);
+        program.sendUniform1f("radius", this.radius * len);
+
+        context.drawArrays(context.TRIANGLE_FAN, 0, 4);
+    }
+
+
+});
+
+var DistortionWrapper_Left = WGE.Class(DistortionWrapper_Forward, {
+
+    start : -1,
+    end : -1,
+    radius : 0.0,
+
+    initialize : function(context, start, end, radius)
+    {
+        DistortionWrapper_Forward.initialize.call(this, context, start, end, radius);
+
+        var m = WGE.mat2Rotation(-Math.PI * 0.5);
+        this.distortionProgram.sendUniformMat2("dirMat", false, m.data);
+    }
+
+
+});
+
+var MyGUI = WGE.Class(WGE.GUIInterface, 
+{
+    context : undefined,
+    isMouseDown : false,
+
+    faceTexOrigin : null,
+    drawer : null,
+    faceTextures : null,
+    framebuffer : null,
+
+    distortions : null,
+
+    isOrigin : false,
+
+    parseData : function()
+    {
+        var textData = WGE.ID("distortionConfig").value;
+
+        var distortionData = eval("[" + textData + "]");
+
+        console.log("The data: " + distortionData);
+
+        var distortions = this.distortions = [];
+
+        for(var data in distortionData)
+        {
+            var d = distortionData[data];
+            
+            if(!d.type)
+            {
+                alert("格式错误， 请检查!");
+                return ;
+            }
+
+            var wrapper = null;
+
+            if(d.type == "forward")
+            {
+                wrapper = new DistortionWrapper_Forward(this.context, d.start, d.end, d.radius);
+            }
+            else if(d.type == "left")
+            {
+                wrapper = new DistortionWrapper_Left(this.context, d.start, d.end, d.radius);
+            }
+            else if(d.type == "bloatWrinkle")
+            {
+                wrapper = new DistortionWrapper_BloatWrinkle(this.context, d.target, d.radius);
+            }
+            else if(d.type == "bloatWrinkle2")
+            {
+                wrapper = new DistortionWrapper_BloatWrinkle2(this.context, d.target, d.innerRadius, d.outerRadius);
+            }
+
+            if(wrapper != null)
+            {
+                wrapper.setIntensity(d.intensity);
+                distortions.push(wrapper);
+            }
+        }
+    },
+
+    bindFather : function(fatherObj)
+    {
+        if(WGE.GUIInterface.bindFather.call(this, fatherObj));
+        {
+            var context = this.canvas.getContext('experimental-webgl');
+            if(!context)
+            {
+                alert('你的浏览器不支持webgl啊，坟蛋！换一个好吗？');
+                return false;
+            }
+            
+            this.context = context;
+            context.disable(context.BLEND);
+            context.disable(context.DEPTH_TEST);
+
+            return true;
+        }
+        return false;
+    },
+
+    setup : function()
+    {
+        var context = this.context;
+
+        this.drawer = new WGE.TextureDrawer(context, WGE.getContentByID("drawerVSH"));
+        this.framebuffer = new WGE.Framebuffer(context);
+
+        this.faceTexOrigin = WGE.genTexture(context, WGE.ID('test0'));
+        this.faceTextures = [
+            WGE.genBlankTexture(context, faceWidth, faceHeight),
+            WGE.genBlankTexture(context, faceWidth, faceHeight)
+        ];
+
+        this.faceArrayBuffer = WGE.genCommonQuadArrayBuffer(context);
+
+        this.parseData();
+        return true;
+    },
+
+    release : function()
+    {
+        if(this.context)
+        {
+            // No release, flush page!
+        }
+
+        WGE.GUIInterface.release.call(this);
+    },
+
+    update : function(dt)
+    {
+
+    },
+
+    resetTextureCache : function()
+    {
+        this.framebuffer.bindColorTexture(this.faceTextures[0]);
+        this.drawer.drawTexture(this.faceTexOrigin);
+    },
+
+    swapTexture : function()
+    {
+        var tmp = this.faceTextures[0];
+        this.faceTextures[0] = this.faceTextures[1];
+        this.faceTextures[1] = tmp;
+    },
+
+    renderOrigin : function()
+    {
+        var gl = this.context;
+
+        this.drawer.setFlipScale(1.0, -1.0);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.viewport(200, 0, this.canvas.width - 200, this.canvas.height);
+
+        this.drawer.drawTexture(this.faceTexOrigin);
+
+        gl.finish();
+    },
+
+    renderDistortion : function()
+    {
+        if(!(this.distortions instanceof Array) || this.distortions.length == 0)
+        {
+            alert("No distortions applied!");
+            return;
+        }
+
+        var gl = this.context;
+
+        gl.viewport(0, 0, faceWidth, faceHeight);
+
+        this.drawer.setFlipScale(1.0, 1.0);
+
+        this.resetTextureCache();
+
+        gl.activeTexture(gl.TEXTURE0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.faceArrayBuffer);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+        for(var distortion in this.distortions)
+        {
+            this.swapTexture();
+            this.framebuffer.bindColorTexture(this.faceTextures[0]);
+            gl.bindTexture(gl.TEXTURE_2D, this.faceTextures[1]);
+            this.distortions[distortion].update(gl, faceInternalData, 293.061427);
+        }
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        gl.viewport(200, 0, this.canvas.width - 200, this.canvas.height);
+
+        this.drawer.setFlipScale(1.0, -1.0);
+        this.drawer.drawTexture(this.faceTextures[0]);
+
+        gl.finish();
+    },
+
+    render : function()
+    {
+        if(this.isOrigin)
+        {
+            this.renderOrigin();
+        }
+        else
+        {
+            this.renderDistortion();
+        }
+    },
+
+    mouseMoveEvent : function(e, x, y)
+    {
+        if(this.isMouseDown)
+        {
+            this.x = x;
+            this.y = y;
+        }
+    },
+
+    mouseDownEvent : function(e, x, y)
+    {
+        this.x = x;
+        this.y = y;
+        this.isMouseDown = true;
+    },
+
+    mouseUpEvent : function(e, x, y)
+    {
+        this.isMouseDown = false;
+    },
+
+    resizeEvent : function()
+    {
+        var gl = this.context;
+        if(gl)
+        {
+            gl.viewport(200, 0, this.canvas.width - 200, this.canvas.height);
+
+            if(this.distortionPrograms != null)
+            {
+                this.render();
+            }
+        }
+    },
+
+    applyTransform : function()
+    {
+        this.parseData();
+        this.isOrigin = false;
+        this.renderDistortion();
+    }
+});
+
+var div = WGE.CE('div');
+document.body.appendChild(div);
+div.setAttribute('style', "width: 100%; height:100%;");
+var gui = new MyGUI(div);
+
+
+document.body.setAttribute("onresize", "gui.onresize(event);");
+document.body.setAttribute("onload", "gui.setup();gui.render();");
+
+</script>
+
+<div style="position:absolute;left:10px;top:10px;width:170px;height:auto;">
+<div style="width:100%;height:220px;background-color:#f00" id="totalSprites">
+工具操作说明:<br><br>
+点击下方的菜单可以看到变形前后的图像。<br><br>
+在下方输入框输入变形配置数据， 然后点击应用改变， 可以得到改变之后的效果.
+</div>
+<input type="button" value="变形前图像" style="width:100px" onclick="gui.isOrigin=true; gui.render()"><br>
+<input type="button" value="变形后图像" style="width:100px" onclick="gui.isOrigin=false; gui.render()"><br>
+<input type="button" value="应用改变" style="width:100px" onclick="gui.applyTransform();"><br>
+
+<textarea style="width:170px;height:200px;" id="distortionConfig">
+{
+"type" : "bloatWrinkle",
+"target" : "95",
+"intensity" : -0.7,
+"radius" : 1.0
+},
+
+{
+"type" : "bloatWrinkle",
+"target" : "96",
+"intensity" : -0.7,
+"radius" : 1.0
+},
+
+{
+"type" : "forward",
+"start" : "5",
+"end" : "75",
+"intensity" : 0.2,
+"radius" : 0.8
+},
+
+{
+"type" : "forward",
+"start" : "13",
+"end" : "81",
+"intensity" : 0.2,
+"radius" : 0.8
+},
+
+{
+"type" : "bloatWrinkle2",
+"target" : "97",
+"intensity" : 0.3,
+"outerRadius" : [1.0, 1.6],
+"innerRadius" : [0.5, 0.8]
+}
+</textarea>
+
+</div>
+
+<script type="text/javascript">
+
+faceInternalData = new Float32Array(
+[
+314.331, 1119.09,
+321.065, 1228.74,
+337.42, 1337.04,
+360.32, 1444.23,
+390.847, 1550.88,
+439.005, 1650.53,
+506.051, 1738.58,
+587.129, 1814.55,
+682.661, 1876.9,
+803.075, 1891.95,
+926.368, 1873.34,
+1022.05, 1812.39,
+1102.66, 1737.33,
+1169.56, 1650.9,
+1218.13, 1552.78,
+1249.29, 1447.15,
+1271.98, 1340.47,
+1286.92, 1233.09,
+1290.71, 1124.42,
+399.15, 1003.7,
+443.477, 949.894,
+508.024, 928.111,
+580.9, 928.624,
+650.218, 941.71,
+721.079, 997.749,
+635.607, 995.292,
+573.482, 985.541,
+513.157, 981.639,
+454.944, 986.665,
+899.86, 988.632,
+970.39, 938.19,
+1037.18, 928.074,
+1105.98, 930.605,
+1165.87, 953.965,
+1205.93, 1006.33,
+1153.65, 992.135,
+1098.97, 985.501,
+1041.7, 985.536,
+981.644, 991.339,
+481.829, 1111.29,
+506.105, 1088.02,
+537.454, 1073.76,
+577.152, 1068.48,
+616.265, 1079.06,
+648.304, 1099.96,
+673.915, 1132.29,
+641.941, 1139.2,
+607.751, 1144.24,
+570.205, 1147.47,
+535.366, 1141.09,
+506.118, 1129.23,
+940.622, 1134.87,
+965.24, 1102.12,
+997.099, 1080.07,
+1037.5, 1068.54,
+1076.33, 1074.05,
+1107.23, 1088.93,
+1130.79, 1114.06,
+1108.38, 1131.12,
+1079.95, 1142.98,
+1044.34, 1149.77,
+1007.68, 1146.59,
+973.416, 1141.71,
+730.921, 1136.72,
+737.874, 1228.34,
+705.192, 1319.7,
+678.911, 1400.69,
+715.705, 1428.17,
+779.018, 1443.26,
+831.201, 1443.62,
+894.494, 1428.98,
+932.122, 1402.17,
+903.37, 1321.01,
+870.729, 1230.09,
+877.725, 1139.43,
+640.184, 1610.49,
+693.977, 1568.87,
+758.29, 1540.04,
+803.587, 1552.55,
+848.164, 1540.34,
+916.091, 1569.61,
+975.193, 1609.67,
+931.604, 1655.78,
+876.464, 1691.37,
+803.785, 1705.43,
+733.308, 1690.81,
+681.477, 1655.4,
+664.627, 1611.13,
+722.685, 1608.07,
+803.232, 1612.2,
+887.362, 1608.45,
+949.385, 1610.43,
+887.649, 1612.03,
+803.044, 1617.29,
+722.605, 1611.42,
+576.702, 1105.36,
+1036.49, 1106.74,
+804.323, 1138.08,
+803.756, 1294.83,
+803.477, 1372.04,
+805.538, 1450.98,
+69.7577, 992.606,
+79.8588, 1157.09,
+104.391, 1319.54,
+138.742, 1480.32,
+184.531, 1640.3,
+256.769, 1789.78,
+357.338, 1921.85,
+478.955, 2035.8,
+622.253, 2129.33,
+802.874, 2151.9,
+987.814, 2123.99,
+1131.33, 2032.56,
+1252.25, 1919.97,
+1352.6, 1790.33,
+1425.45, 1643.14,
+1472.2, 1484.71,
+1506.23, 1324.68,
+1528.64, 1163.61,
+1534.33, 1000.61,
+527.61, 597.444,
+1103.92, 591.108,
+349.928, 838.68,
+1269.51, 841.441,
+805.169, 904.107,
+537.647, 1282.69,
+1071.35, 1285.28,
+534.879, 1475.79,
+1075.13, 1477.47,
+803.138, 1614.75
+]);
+
+</script>
+
+<div style="display:none">
+<img src="../../res/face2.jpg" id="test0">
+</div>
+
+</body>
+</html>
+
