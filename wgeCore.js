@@ -144,7 +144,7 @@ WGE.Class = function()
     wge.prototype = {};
     for (var i = 0; i < arguments.length; i++)
     {
-    	var a = arguments[i]
+    	var a = arguments[i];
     	if (a.prototype)
     	{
     		WGE.extend(wge.prototype, a.prototype);
@@ -186,14 +186,14 @@ WGE.requestTextByURL = function(url, callback)
 	if(async)
 	{
 		xmlHttp.onreadystatechange = function()	{
-			if(xmlHttp.readyState == 4)
+			if(xmlHttp.readyState === 4)
 			{
 				callback(xmlHttp.responseText, xmlHttp);
 			}
 		};
 	}
 	xmlHttp.send();
-	return xmlHttp.responseText;
+	return xmlHttp.status === 200 ? xmlHttp.responseText : null;
 };
 
 WGE.CE = function(name)
@@ -394,8 +394,6 @@ if(!window.cancelAnimationFrame)
 		clearTimeout(reqID);
 	}
 }
-
-
 
 //这函数没别的用, 就追踪一下使用情况@_@ 无视吧。 你在使用时可以删掉。
 WGE.WYSAIDTrackingCode = function()
