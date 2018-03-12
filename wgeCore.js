@@ -193,7 +193,7 @@ WGE.requestTextByURL = function(url, callback)
 		};
 	}
 	xmlHttp.send();
-	return xmlHttp.status === 200 ? xmlHttp.responseText : null;
+	return xmlHttp.status === 200 || xmlHttp.status === 304 ? xmlHttp.responseText : null;
 };
 
 WGE.CE = function(name)
