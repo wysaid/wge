@@ -59,6 +59,7 @@ uniform float radius;
 uniform vec2 imageSteps;
 uniform vec2 keyPoint;
 uniform vec2 keyPoint2;
+uniform mat2 dirMat;
 
 void main()
 {
@@ -105,7 +106,7 @@ void main()
         float percent;
         
         //点在直线上的投影不在范围内
-        if(projVec.x < v2Min.x || projVec.x > v2Min.x || projVec.y < v2Min.y || projVec.y > v2Max.y)
+        if(projVec.x < v2Min.x || projVec.x > v2Max.x || projVec.y < v2Min.y || projVec.y > v2Max.y)
         {
             //判断是否在离端点radius范围内
             float dis2 = length(realPosition - keyPoint);
@@ -127,7 +128,7 @@ void main()
         
         percent = smoothstep(0.0, 1.0, percent) * intensity;
         
-        offset += (keyPoint - keyPoint2) * imageSteps * percent;
+        offset += dirMat * (keyPoint - keyPoint2) * imageSteps * percent;
     }
 
     gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
@@ -240,6 +241,9 @@ var DistortionWrapper_Forward = WGE.Class(DistortionWrapper, {
         this.start = start;
         this.end = end;
         this.radius = radius;
+
+        var m = WGE.mat2Identity();
+        this.distortionProgram.sendUniformMat2("dirMat", false, m.data);
     },
 
     update : function(context, data, len)
@@ -257,6 +261,23 @@ var DistortionWrapper_Forward = WGE.Class(DistortionWrapper, {
         program.sendUniform1f("radius", this.radius * len);
 
         context.drawArrays(context.TRIANGLE_FAN, 0, 4);
+    }
+
+
+});
+
+var DistortionWrapper_Left = WGE.Class(DistortionWrapper_Forward, {
+
+    start : -1,
+    end : -1,
+    radius : 0.0,
+
+    initialize : function(context, start, end, radius)
+    {
+        DistortionWrapper_Forward.initialize.call(this, context, start, end, radius);
+
+        var m = WGE.mat2Rotation(-Math.PI * 0.5);
+        this.distortionProgram.sendUniformMat2("dirMat", false, m.data);
     }
 
 
@@ -303,7 +324,12 @@ var MyGUI = WGE.Class(WGE.GUIInterface,
                 wrapper = new DistortionWrapper_Forward(this.context, d.start, d.end, d.radius);
                 wrapper.setIntensity(d.intensity);
             }
-            else if(d.type = "bloatWrinkle")
+            else if(d.type == "left")
+            {
+                wrapper = new DistortionWrapper_Left(this.context, d.start, d.end, d.radius);
+                wrapper.setIntensity(d.intensity);
+            }
+            else if(d.type == "bloatWrinkle")
             {
                 wrapper = new DistortionWrapper_BloatWrinkle(this.context, d.target, d.radius);
                 wrapper.setIntensity(d.intensity);
@@ -556,6 +582,14 @@ document.body.setAttribute("onload", "gui.setup();gui.render();");
 "target" : "105",
 "intensity" : -1.0,
 "radius" : 0.7
+},
+
+{
+"type" : "left",
+"start" : "104",
+"end" : "105",
+"intensity" : -0.25,
+"radius" : 1.0
 }
 </textarea>
 

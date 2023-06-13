@@ -71,6 +71,7 @@ void main()
     if(length(dis / innerRadius.xy) < 1.0)
     {
         offset = intensity * pos * imageSteps;
+        gl_FragColor.b = 1.0;
     }
     else if(length(dis / outerRadius.xy) < 1.0)
     {
@@ -88,13 +89,15 @@ void main()
 
         float fac = 1.0 - (r - sRadius) / (eRadius - sRadius);
         offset = intensity * pos * imageSteps * fac * fac;
+        gl_FragColor.b = fac;
     }
     else
     {
         offset = vec2(0.0);
+        gl_FragColor.b = 0.0;
     }
 
-    gl_FragColor = texture2D(inputImageTexture, textureCoordinate + offset);
+    gl_FragColor.rga = texture2D(inputImageTexture, textureCoordinate + offset).rga;
 }
 </script>
 
